@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="includes\simulation\pbf_kernels.cuh" />
+    <CudaCompile Include="src\simulation\position_based_fluid_simulator.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\common\src\glad.c" />
+    <ClCompile Include="src\helper.cpp" />
+    <ClCompile Include="src\input.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\rendering\renderer.cpp" />
+    <ClCompile Include="src\rendering\shader.cpp" />
+    <ClCompile Include="src\static_vertices.cpp" />
+    <ClCompile Include="src\rendering\camera.cpp" />
+    <ClCompile Include="src\simulation\position_based_fluid_simulator.cpp" />
+    <ClCompile Include="src\simulation\particle_system.cpp" />
+    <ClCompile Include="src\simulation\simulation_parameters.cpp" />
+    <ClCompile Include="src\simulation\particles_cube.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\common\nanovg\src\fontstash.h" />
+    <ClInclude Include="..\common\nanovg\src\stb_image.h" />
+    <ClInclude Include="..\common\nanovg\src\stb_truetype.h" />
+    <ClInclude Include="includes\rendering\camera.h" />
+    <ClInclude Include="includes\helper.h" />
+    <ClInclude Include="includes\input.h" />
+    <ClInclude Include="includes\rendering\renderer.h" />
+    <ClInclude Include="includes\rendering\shader.h" />
+    <ClInclude Include="includes\simulation\position_based_fluid_simulator.h" />
+    <ClInclude Include="includes\simulation\particle_system.h" />
+    <ClInclude Include="includes\simulation\simulation_parameters.h" />
+    <ClInclude Include="includes\simulation\particles_cube.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\boundary.frag" />
+    <None Include="shaders\boundary.vert" />
+  </ItemGroup>
+</Project>
