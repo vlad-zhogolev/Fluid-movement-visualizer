@@ -369,14 +369,14 @@ void ApplyXSPHViscosity(
     unsigned int* cellEnds,
     int3 gridDimension,
     int particleNumber,
-    float c_XSPH, 
+    float c_XSPH,
     float h,
     Func1 positionToCellCoorinatesConverter,
     Func2 cellCoordinatesToCellIdConverter,
     Poly6 poly6)
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
-    
+
     if (index >= particleNumber)
     {
         return;
@@ -402,9 +402,9 @@ void ApplyXSPHViscosity(
                 for (int j = cellStarts[cellId]; j < cellEnds[cellId]; ++j)
                 {
                     float3 positionDifference = positions[index] - positions[j];
-
                     float3 velocityDifference = velocities[j] - velocities[index];
-                    accumulatedVelocity += velocityDifference * poly6(norm2(positionDifference));
+                    float averageDensityInverse = 2.f / (densities[index] + densities[j]);
+                    accumulatedVelocity += velocityDifference * averageDensityInverse * poly6(norm2(positionDifference));
                 }
             }
         }

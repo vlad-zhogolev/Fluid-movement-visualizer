@@ -19,8 +19,8 @@ SimulationParameters& SimulationParameters::getInstance()
     guiParamsInstance.deltaQ = 0.3 * guiParamsInstance.kernelRadius;
     guiParamsInstance.correctionCoefficient = 0.001f;
     guiParamsInstance.correctionPower = 4;
-    guiParamsInstance.c_XSPH = 0.0001f;
-    guiParamsInstance.vorticityEpsilon = 0.001;
+    guiParamsInstance.c_XSPH = 1.f;
+    guiParamsInstance.vorticityEpsilon = 0.0001f;
     guiParamsInstance.substepsNumber = 4;
 
     return guiParamsInstance;
