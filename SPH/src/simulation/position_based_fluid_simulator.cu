@@ -98,7 +98,7 @@ public:
             return 0;
         }
         float difference = m_kernelRadius2 - squaredDistance;
-        return m_coefficient * difference * difference * difference;
+        return 1.f / 8.f * m_coefficient * difference * difference * difference;
     }
 
 private:
@@ -122,8 +122,8 @@ public:
         {
             return float3{};
         }
-        float difference = m_kernelRadius - vectorLength;
-        return m_coefficient * difference * difference / vectorLength * vector;
+        float difference = m_kernelRadius - vectorLength;   
+        return 1.f / 8.f * m_coefficient * difference * difference / vectorLength * vector;
     }
 
 private:
