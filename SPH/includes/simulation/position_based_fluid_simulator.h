@@ -48,9 +48,10 @@ private:
     float m_k_corr;
     float m_n_corr;
     float m_c_XSPH;
+    int m_viscosityIterations;
     float m_vorticityEpsilon;
     float m_coef_corr;
-    int m_niter;
+    int m_substepsNumber;
     int m_particlesNumber;
 
     unsigned int* m_dIid;
@@ -61,6 +62,6 @@ private:
     float3 m_lowerBoundary;
     int3 m_gridDimension;
 
-    int m_blockSize = 128;
+    int m_blockSize = 512;
 };
 

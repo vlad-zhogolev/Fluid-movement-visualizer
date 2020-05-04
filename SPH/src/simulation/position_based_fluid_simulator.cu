@@ -98,7 +98,7 @@ public:
             return 0;
         }
         float difference = m_kernelRadius2 - squaredDistance;
-        return 1.f / 8.f * m_coefficient * difference * difference * difference;
+        return m_coefficient * difference * difference * difference;
     }
 
 private:
@@ -123,7 +123,7 @@ public:
             return float3{};
         }
         float difference = m_kernelRadius - vectorLength;   
-        return 1.f / 8.f * m_coefficient * difference * difference / vectorLength * vector;
+        return m_coefficient * difference * difference / vectorLength * vector;
     }
 
 private:
@@ -190,9 +190,9 @@ void PositionBasedFluidSimulator::ApplyForcesAndPredictPositions()
 
 void PositionBasedFluidSimulator::BuildUniformGrid()
 {
-    thrust::device_ptr<float3> d_pos(m_dPositions);
-    thrust::device_ptr<float3> d_npos(m_dNewPositions);
-    thrust::device_ptr<unsigned int> d_gridId(m_dCellIds);
+    thrust::device_ptr<float3> positions(m_dPositions);
+    thrust::device_ptr<float3> newPositions(m_dNewPositions);
+    thrust::device_ptr<unsigned int> cellIds(m_dCellIds);
     
     float3 diff = m_upperBoundary - m_lowerBoundary;
     m_gridDimension = make_int3(
@@ -201,16 +201,19 @@ void PositionBasedFluidSimulator::BuildUniformGrid()
         static_cast<int>(ceilf(diff.z / m_h)));
 
     thrust::transform(
-        d_npos, d_npos + m_particlesNumber, d_gridId, PositionToCellIdConverter(m_lowerBoundary, m_gridDimension, m_h));
+        newPositions,
+        newPositions + m_particlesNumber,
+        cellIds,
+        PositionToCellIdConverter(m_lowerBoundary, m_gridDimension, m_h));
 
-    thrust::device_ptr<float3> d_vel(m_dVelocities);
-    thrust::device_ptr<float3> d_nvel(m_dNewVelocities);
+    thrust::device_ptr<float3> velocities(m_dVelocities);
+    thrust::device_ptr<float3> newVelocitites(m_dNewVelocities);
     thrust::device_ptr<unsigned int> d_iid(m_dIid);
 
     thrust::sort_by_key(
-        d_gridId,
-        d_gridId + m_particlesNumber,
-        thrust::make_zip_iterator(thrust::make_tuple(d_pos, d_vel, d_npos, d_nvel, d_iid)));
+        cellIds,
+        cellIds + m_particlesNumber,
+        thrust::make_zip_iterator(thrust::make_tuple(positions, velocities, newPositions, newVelocitites, d_iid)));
 
     const int gridSize = ceilDiv(m_particlesNumber, m_blockSize);
     const int sharedMemorySize = sizeof(unsigned int) * (m_blockSize + 1);
@@ -227,7 +230,7 @@ void PositionBasedFluidSimulator::BuildUniformGrid()
 
 void PositionBasedFluidSimulator::CorrectPosition() 
 {
-    for (int i = 0; i < m_niter; ++i)
+    for (int i = 0; i < m_substepsNumber; ++i)
     {
         const int gridSize = ceilDiv(m_particlesNumber, m_blockSize);
         CalculateLambda <<<gridSize, m_blockSize>>>(
@@ -298,6 +301,9 @@ void PositionBasedFluidSimulator::UpdateVelocity()
 void PositionBasedFluidSimulator::CorrectVelocity() {
     
     const int gridSize = ceilDiv(m_particlesNumber, m_blockSize);
+    const PositionToCellCoorinatesConverter positionToCellCoorinatesConverter(
+        m_lowerBoundary, m_gridDimension, m_h);
+    const CellCoordinatesToCellIdConverter cellCoordinatesToCellIdConverter(m_gridDimension);
 
     CalculateVorticity<<<gridSize, m_blockSize>>>(
         m_dCellStarts,
@@ -308,8 +314,8 @@ void PositionBasedFluidSimulator::CorrectVelocity() {
         m_dCurl,
         m_particlesNumber,
         m_h,
-        PositionToCellCoorinatesConverter(m_lowerBoundary, m_gridDimension, m_h),
-        CellCoordinatesToCellIdConverter(m_gridDimension),
+        positionToCellCoorinatesConverter,
+        cellCoordinatesToCellIdConverter,
         SpikyGradientKernel(m_h));
     
     ApplyVorticityConfinement<<<gridSize, m_blockSize>>> (
@@ -323,24 +329,55 @@ void PositionBasedFluidSimulator::CorrectVelocity() {
         m_h,
         m_vorticityEpsilon,
         m_deltaTime,
-        PositionToCellCoorinatesConverter(m_lowerBoundary, m_gridDimension, m_h),
-        CellCoordinatesToCellIdConverter(m_gridDimension),
+        positionToCellCoorinatesConverter,
+        cellCoordinatesToCellIdConverter,
         SpikyGradientKernel(m_h));
 
-    ApplyXSPHViscosity<<<gridSize, m_blockSize>>>(
-        m_dPositions,
-        m_dVelocities,
-        m_dDensities,
-        m_dNewVelocities,
-        m_dCellStarts,
-        m_dCellEnds,
-        m_gridDimension,
-        m_particlesNumber,
-        m_c_XSPH,
-        m_h, 
-        PositionToCellCoorinatesConverter(m_lowerBoundary, m_gridDimension, m_h),
-        CellCoordinatesToCellIdConverter(m_gridDimension),
-        Poly6Kernel(m_h));
+    if (m_c_XSPH > 0.5)
+    {
+        bool writeToNewVelocities = true;
+        for (int i = 0; i < m_viscosityIterations; ++i)
+        {
+            ApplyXSPHViscosity<<<gridSize, m_blockSize>>>(
+                m_dPositions,
+                writeToNewVelocities ? m_dVelocities : m_dNewVelocities,
+                m_dDensities,
+                writeToNewVelocities ? m_dNewVelocities : m_dVelocities,
+                m_dCellStarts,
+                m_dCellEnds,
+                m_gridDimension,
+                m_particlesNumber,
+                m_c_XSPH / m_viscosityIterations,
+                m_h,
+                positionToCellCoorinatesConverter,
+                cellCoordinatesToCellIdConverter,
+                Poly6Kernel(m_h));
+            writeToNewVelocities = !writeToNewVelocities;
+        }
+        if (!writeToNewVelocities)
+        {
+            std::swap(m_dVelocities, m_dNewVelocities);
+        }
+    }
+    else
+    {
+        ApplyXSPHViscosity<<<gridSize, m_blockSize>>>(
+            m_dPositions,
+            m_dVelocities,
+            m_dDensities,
+            m_dNewVelocities,
+            m_dCellStarts,
+            m_dCellEnds,
+            m_gridDimension,
+            m_particlesNumber,
+            m_c_XSPH,
+            m_h,
+            positionToCellCoorinatesConverter,
+            cellCoordinatesToCellIdConverter,
+            Poly6Kernel(m_h));
+    }
+
+    
 
     //thrust::device_ptr<float3> newVelocities(m_dNewVelocities), velocities(m_dTemporaryPositions);
     //thrust::copy_n(velocities, m_particlesNumber, newVelocities);

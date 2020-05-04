@@ -125,11 +125,12 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 	m_formHelper->addVariable("Kernel radius", params.kernelRadius)->setSpinnable(true);
 	m_formHelper->addVariable("Delta time", params.deltaTime)->setSpinnable(true);
 	m_formHelper->addVariable("Lambda epsilon", params.relaxationParameter)->setSpinnable(true);
-	// m_formHelper->addVariable("deltaQ", params.deltaQ)->setSpinnable(true);
-	// m_formHelper->addVariable("correctionCoefficient", params.correctionCoefficient)->setSpinnable(true);
-	// m_formHelper->addVariable("correctionPower", params.correctionPower)->setSpinnable(true);
-	// m_formHelper->addVariable("XSPH coef", params.c_XSPH)->setSpinnable(true);
-    // m_formHelper->addVariable("Vorticity epsilon", params.vorticityEpsilon)->setSpinnable(true);
+	m_formHelper->addVariable("deltaQ", params.deltaQ)->setSpinnable(true);
+	m_formHelper->addVariable("correctionCoefficient", params.correctionCoefficient)->setSpinnable(true);
+	m_formHelper->addVariable("correctionPower", params.correctionPower)->setSpinnable(true);
+	m_formHelper->addVariable("XSPH coef", params.c_XSPH)->setSpinnable(true);
+    m_formHelper->addVariable("Viscosity iterations", params.viscosityIterations)->setSpinnable(true);
+    m_formHelper->addVariable("Vorticity epsilon", params.vorticityEpsilon)->setSpinnable(true);
     // m_formHelper->addVariable("Boundary movement speed", params.boundaryMovementSpeed)->setSpinnable(true);
 	// m_formHelper->addVariable("Highlight #", m_input->hlIndex)->setSpinnable(true);
 

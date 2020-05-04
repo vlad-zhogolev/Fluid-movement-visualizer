@@ -93,8 +93,9 @@ void PositionBasedFluidSimulator::UpdateParameters()
     m_k_corr = params.correctionCoefficient;
     m_n_corr = params.correctionPower;
     m_c_XSPH = params.c_XSPH;
+    m_viscosityIterations = params.viscosityIterations;
     m_vorticityEpsilon = params.vorticityEpsilon;
-    m_niter = params.substepsNumber;
+    m_substepsNumber = params.substepsNumber;
 }
 
 PositionBasedFluidSimulator::~PositionBasedFluidSimulator()

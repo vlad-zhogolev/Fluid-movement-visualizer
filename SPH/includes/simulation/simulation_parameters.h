@@ -15,6 +15,7 @@ public:
     float correctionCoefficient;
     float correctionPower;
     float c_XSPH;
+    int viscosityIterations;
     float vorticityEpsilon;
 
     // Renderer
