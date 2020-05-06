@@ -230,6 +230,7 @@ void PositionBasedFluidSimulator::BuildUniformGrid()
 
 void PositionBasedFluidSimulator::CorrectPosition() 
 {
+    bool writeToNewPositions = false;
     for (int i = 0; i < m_substepsNumber; ++i)
     {
         const int gridSize = ceilDiv(m_particlesNumber, m_blockSize);
@@ -252,8 +253,8 @@ void PositionBasedFluidSimulator::CorrectPosition()
         m_coef_corr = -m_k_corr / powf(Poly6Kernel(m_h)(m_delta_q*m_delta_q), m_n_corr);
 
         CalculateNewPositions <<<gridSize, m_blockSize>>>(
-            m_dNewPositions,
-            m_dTemporaryPositions,
+            writeToNewPositions ? m_dTemporaryPositions : m_dNewPositions,
+            writeToNewPositions ? m_dNewPositions : m_dTemporaryPositions,
             m_dCellStarts,
             m_dCellEnds,
             m_gridDimension,
@@ -269,9 +270,11 @@ void PositionBasedFluidSimulator::CorrectPosition()
             m_lowerBoundary,
             Poly6Kernel(m_h),
             SpikyGradientKernel(m_h));
-
-        thrust::device_ptr<float3> d_npos(m_dNewPositions), d_tpos(m_dTemporaryPositions);
-        thrust::copy_n(d_tpos, m_particlesNumber, d_npos);
+        writeToNewPositions = !writeToNewPositions;
+    }
+    if (writeToNewPositions)
+    {
+        std::swap(m_dTemporaryPositions, m_dNewPositions);
     }
     // thrust::transform(
     //     thrust::make_zip_iterator(thrust::make_tuple(m_dNewPositions, m_dTemporaryPositions)),
@@ -354,7 +357,7 @@ void PositionBasedFluidSimulator::CorrectVelocity() {
                 Poly6Kernel(m_h));
             writeToNewVelocities = !writeToNewVelocities;
         }
-        if (!writeToNewVelocities)
+        if (writeToNewVelocities)
         {
             std::swap(m_dVelocities, m_dNewVelocities);
         }
