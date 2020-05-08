@@ -113,6 +113,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\common\nanovg\src\stb_image.h" />
     <ClInclude Include="..\common\nanovg\src\stb_truetype.h" />
     <ClInclude Include="includes\rendering\camera.h" />
+    <ClInclude Include="includes\rendering\smooth_renderer.h" />
     <ClInclude Include="includes\simulation\simulation_parameters.h" />
     <ClInclude Include="includes\helper.h" />
     <ClInclude Include="includes\input.h" />
@@ -130,6 +131,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ClCompile Include="..\common\src\glad.c" />
     <ClCompile Include="src\rendering\camera.cpp" />
+    <ClCompile Include="src\rendering\smooth_renderer.cpp" />
     <ClCompile Include="src\simulation\particles_cube.cpp" />
     <ClCompile Include="src\simulation\particle_system.cpp" />
     <ClCompile Include="src\simulation\simulation_parameters.cpp" />
@@ -143,7 +145,11 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\boundary.frag" />
-    <None Include="shaders\boundary.vert" />
+    <None Include="shaders\boundary.vert">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="shaders\smooth_renderer\render_texture.frag" />
+    <None Include="shaders\smooth_renderer\render_texture.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

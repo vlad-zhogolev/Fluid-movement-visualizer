@@ -156,7 +156,6 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 	};
 	d_sky_texture = loadCubemap(sky_faces);
 	
-
 	glGenVertexArrays(1, &d_vao);
 
     glGenVertexArrays(1, &d_bbox_vao);
@@ -174,6 +173,8 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 	glBindVertexArray(d_sky_vao);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+
+    m_smoothRenderer = std::make_unique<rendering::SmoothRenderer>(m_width, m_height, m_camera);
 }
 
 void Renderer::__window_size_callback(GLFWwindow* window, int width, int height) {
@@ -287,8 +288,9 @@ void Renderer::__render() {
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glDepthMask(GL_TRUE);
 	}
-
-	if (m_particle_shader->loaded())
+    
+    const bool smoothFluid = true;
+	if (m_particle_shader->loaded() && !smoothFluid)
     {
 		m_particle_shader->use();
 		m_camera->use(Shader::now());
@@ -299,6 +301,10 @@ void Renderer::__render() {
 		glBindVertexArray(d_vao);
 		glDrawArrays(GL_POINTS, 0, m_nparticle);
 	}
+    else if (smoothFluid)
+    {
+        m_smoothRenderer->render(d_vao, m_nparticle);
+    }
 
 	if (m_box_shader->loaded())
     {

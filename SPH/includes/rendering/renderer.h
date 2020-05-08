@@ -2,6 +2,7 @@
 
 #include <rendering/camera.h>
 #include <rendering/shader.h>
+#include <rendering/smooth_renderer.h>
 #include <input.h>
 #include <helper.h>
 #include <simulation/simulation_parameters.h>>
@@ -88,5 +89,7 @@ private:
 	Shader* m_sky_shader = nullptr;
     unsigned int d_sky_vao;
     unsigned int d_sky_vbo;
+
+    std::unique_ptr<rendering::SmoothRenderer> m_smoothRenderer = nullptr;
 };
 
