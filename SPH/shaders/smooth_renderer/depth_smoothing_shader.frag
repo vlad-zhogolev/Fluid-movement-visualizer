@@ -1,16 +1,14 @@
 #version 330 core
 
-// uniform int filterRadius;
-// uniform float blurScale;
-// uniform float blurDepthFalloff;
+uniform int filterRadius;
+uniform float blurScale;
+uniform float blurDepthFalloff;
 
-int filterRadius = 10;
-float blurScale = 6.f;
-float blurDepthFalloff = 0.1f;
+// int filterRadius = 10;
+// float blurScale = 0.2f;
+// float blurDepthFalloff = 10.f;
 
 uniform sampler2D sourceDepthTexture;
-
-in vec2 TexCoords;
 
 out vec4 FragColor;
 
@@ -20,7 +18,8 @@ float GetDepth(int x, int y)
     //return GetDepth(ivec2(x, y));
 }
 
-//TODO: think if can make this better: https://dsp.stackexchange.com/questions/36962/why-does-the-separable-filter-reduce-the-cost-of-computing-the-operator
+// TODO: think if can make this better (more efficient).
+// See: https://dsp.stackexchange.com/questions/36962/why-does-the-separable-filter-reduce-the-cost-of-computing-the-operator
 float BilateralFilter(int x, int y)
 {
 	float sum = 0;
@@ -33,7 +32,8 @@ float BilateralFilter(int x, int y)
         {
 			float sample = GetDepth(x + xOffset, y + yOffset);
             
-            // Separable filter is product of two 1D filters: http://www.cemyuksel.com/research/papers/narrowrangefilter.pdf
+            // Separable filter is product of two 1D filters.
+            // See: http://www.cemyuksel.com/research/papers/narrowrangefilter.pdf
 			float w = exp(-(xOffset * xOffset + yOffset * yOffset) * blurScale * blurScale);
 
 			float r2 = (sample - depth) * blurDepthFalloff;
@@ -43,11 +43,11 @@ float BilateralFilter(int x, int y)
 			wsum += w * g;
 		}
     }
-
 	if (wsum > 0) 
     {
         sum /= wsum;
     }
+
 	return sum;
 }
 

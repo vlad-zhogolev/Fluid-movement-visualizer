@@ -4,7 +4,6 @@ uniform mat4 proj;
 uniform float particleRadius;
 
 in vec4 viewPosition;
-in vec4 projectedPosition;
 
 out vec4 FragColor;
 
@@ -22,5 +21,5 @@ void main()
     vec4 pixelPosition = vec4(viewPosition.xyz + viewSpaceSphereNormal * particleRadius, 1);
     vec4 clipSpacePosition = proj * pixelPosition;
     gl_FragDepth = clipSpacePosition.z / clipSpacePosition.w;
-    FragColor.r = -pixelPosition.z;
+    FragColor.r = -pixelPosition.z;  // Store linear depth in texture
 }

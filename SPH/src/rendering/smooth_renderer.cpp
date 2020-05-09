@@ -110,15 +110,14 @@ SmoothRenderer::SmoothRenderer(int windowWidth, int windowHeight, Camera* camera
 void SmoothRenderer::render(GLuint particlesVAO, int particlesNumber)
 {
     renderDepthTexture(particlesVAO, particlesNumber);
-
     smoothDepthTexture();
 
     // Configure
     m_textureRenderShader->use();
     m_textureRenderShader->setUnif("sourceTexture", 0);
     glActiveTexture(GL_TEXTURE0);
-    //glBindTexture(GL_TEXTURE_2D, m_isFirstDepthTextureSource ? m_depthTexture2 : m_depthTexture1);
-    glBindTexture(GL_TEXTURE_2D, m_depthTexture2);
+    glBindTexture(GL_TEXTURE_2D, m_isFirstDepthTextureSource ? m_depthTexture2 : m_depthTexture1);
+    //glBindTexture(GL_TEXTURE_2D, m_depthTexture2);
 
     // Draw
     renderScreenQuad();
@@ -130,30 +129,30 @@ void SmoothRenderer::render(GLuint particlesVAO, int particlesNumber)
 void SmoothRenderer::renderDepthTexture(GLuint particlesVAO, int particlesNumber)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
-    glDisable(GL_BLEND);
 
-    GLfloat inf[] = { 100.f };
-    glClearTexImage(m_depthTexture1, 0, GL_RED, GL_FLOAT, inf);
-    //glClearTexImage(m_depthTexture2, 0, GL_RED, GL_FLOAT, inf);
+    GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, drawBuffer);
 
-    GLenum bufs[] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, bufs);
+    // Clear linear depth texture
+    GLfloat largeDepth = 1000.f;
+    glClearBufferfv(GL_COLOR, 0, &largeDepth);
+    // Clear z-buffer for m_FBO
+    glClear(GL_DEPTH_BUFFER_BIT);
 
     m_depthShader->use();
     m_camera->use(Shader::now());
 
-    ProjectionInfo i = m_camera->getProjectionInfo();
+    ProjectionInfo projectionInfo = m_camera->getProjectionInfo();
     m_depthShader->setUnif("windowHeight", m_windowHeight);
-    m_depthShader->setUnif("projectionTop", i.t);
-    m_depthShader->setUnif("projectionNear", i.n);
+    m_depthShader->setUnif("projectionTop", projectionInfo.t);
+    m_depthShader->setUnif("projectionNear", projectionInfo.n);
     m_depthShader->setUnif("particleRadius", 0.04f); // TODO: find out how to set this parameter (maybe from UI or implicitly?)
 
     glEnable(GL_DEPTH_TEST);
-    // glDisable(GL_BLEND);
-    glBindVertexArray(particlesVAO);
+    glDisable(GL_BLEND);
 
     // Draw
-    glClear(GL_DEPTH_BUFFER_BIT);
+    glBindVertexArray(particlesVAO);
     glDrawArrays(GL_POINTS, 0, particlesNumber);
 
     // Cleanup
@@ -169,33 +168,38 @@ void SmoothRenderer::smoothDepthTexture()
     m_depthSmoothingShader->use();
     m_camera->use(Shader::now());
 
-    // m_depthSmoothingShader->setUnif("filterRadius", 10);
-    // m_depthSmoothingShader->setUnif("blurScale", 6.f);
-    // m_depthSmoothingShader->setUnif("blurDepthFalloff", 0.1f);
+    m_depthSmoothingShader->setUnif("filterRadius", 10);
+    m_depthSmoothingShader->setUnif("blurScale", 0.2f);
+    m_depthSmoothingShader->setUnif("blurDepthFalloff", 10.f);
 
     m_depthSmoothingShader->setUnif("sourceDepthTexture", 0);
     glActiveTexture(GL_TEXTURE0);
+    // TODO: move texture binding here (to glActiveTexture)
 
     m_isFirstDepthTextureSource = false;
-    for (int i = 0; i < 10; ++i)
+    const int smoothingIterations = 3; // TODO: add UI parameter
+    for (int i = 0; i < smoothingIterations; ++i)
     {
         m_isFirstDepthTextureSource = !m_isFirstDepthTextureSource;
         if (m_isFirstDepthTextureSource)
         {
             glBindTexture(GL_TEXTURE_2D, m_depthTexture1);
-            GLenum bufs[] = { GL_COLOR_ATTACHMENT1 };
-            glDrawBuffers(1, bufs);
+            GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT1 };
+            glDrawBuffers(1, drawBuffer);
         }
         else
         {
             glBindTexture(GL_TEXTURE_2D, m_depthTexture2);
-            GLenum bufs[] = { GL_COLOR_ATTACHMENT0 };
-            glDrawBuffers(1, bufs);
+            GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0 };
+            glDrawBuffers(1, drawBuffer);
         }
-        // Draw
+
         glDisable(GL_BLEND);
         glDisable(GL_DEPTH_TEST);
+        
+        // Draw (smooth depth)
         renderScreenQuad();
+
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
     }
