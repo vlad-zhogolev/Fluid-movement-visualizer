@@ -1,7 +1,7 @@
 # version 330 core
 
 uniform mat4 proj;
-uniform float r;
+uniform float particleRadius;
 
 in vec4 viewPosition;
 in vec4 projectedPosition;
@@ -19,7 +19,8 @@ void main()
     }
     viewSpaceSphereNormal.z = sqrt(1 - r2);
 
-    vec4 pixelPosition = vec4(viewPosition.xyz + viewSpaceSphereNormal * r, 1);
+    vec4 pixelPosition = vec4(viewPosition.xyz + viewSpaceSphereNormal * particleRadius, 1);
     vec4 clipSpacePosition = proj * pixelPosition;
     gl_FragDepth = clipSpacePosition.z / clipSpacePosition.w;
+    FragColor.r = -pixelPosition.z;
 }

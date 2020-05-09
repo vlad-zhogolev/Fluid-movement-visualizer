@@ -39,5 +39,7 @@
     <None Include="shaders\boundary.vert" />
     <None Include="shaders\smooth_renderer\render_texture.frag" />
     <None Include="shaders\smooth_renderer\render_texture.vert" />
+    <None Include="shaders\smooth_renderer\depth_smoothing_shader.frag" />
+    <None Include="shaders\smooth_renderer\depth_smoothing_shader.vert" />
   </ItemGroup>
 </Project>
