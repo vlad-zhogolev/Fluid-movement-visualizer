@@ -70,6 +70,10 @@ SmoothRenderer::SmoothRenderer(int windowWidth, int windowHeight, Camera* camera
         Path(shadersFolderPath + "/depth_smoothing_shader.vert"),
         Path(shadersFolderPath + "/depth_smoothing_shader.frag"));
 
+    m_normalsExtractionShader = std::make_unique<Shader>(
+        Path(shadersFolderPath + "/extract_normals_from_depth.vert"),
+        Path(shadersFolderPath + "/extract_normals_from_depth.frag"));
+
     // Create and setup framebuffer textures
     // Texture for default depth, neccessary for all framebuffers
     glGenTextures(1, &m_defaultDepthTexture);
@@ -78,15 +82,24 @@ SmoothRenderer::SmoothRenderer(int windowWidth, int windowHeight, Camera* camera
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+    // Texture for linear depth in view-space and further smoothing. Used for initial depth extraction.
     glGenTextures(1, &m_depthTexture1);
     glBindTexture(GL_TEXTURE_2D, m_depthTexture1);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, m_windowWidth, m_windowHeight, 0, GL_RED, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+    // Texture for linear depth in view-space and further smoothing.
     glGenTextures(1, &m_depthTexture2);
     glBindTexture(GL_TEXTURE_2D, m_depthTexture2);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, m_windowWidth, m_windowHeight, 0, GL_RED, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // Texture for fluid surface normals extracted from depth.
+    glGenTextures(1, &m_normalsTexture);
+    glBindTexture(GL_TEXTURE_2D, m_normalsTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, m_windowWidth, m_windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -96,6 +109,7 @@ SmoothRenderer::SmoothRenderer(int windowWidth, int windowHeight, Camera* camera
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_defaultDepthTexture, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_depthTexture1, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_depthTexture2, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_normalsTexture, 0);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
@@ -107,17 +121,19 @@ SmoothRenderer::SmoothRenderer(int windowWidth, int windowHeight, Camera* camera
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void SmoothRenderer::render(GLuint particlesVAO, int particlesNumber)
+void SmoothRenderer::Render(GLuint particlesVAO, int particlesNumber)
 {
-    renderDepthTexture(particlesVAO, particlesNumber);
-    smoothDepthTexture();
+    RenderDepthTexture(particlesVAO, particlesNumber);
+    SmoothDepthTexture();
+    ExtractNormalsFromDepth();
 
     // Configure
     m_textureRenderShader->use();
     m_textureRenderShader->setUnif("sourceTexture", 0);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_isFirstDepthTextureSource ? m_depthTexture2 : m_depthTexture1);
-    //glBindTexture(GL_TEXTURE_2D, m_depthTexture2);
+    //glBindTexture(GL_TEXTURE_2D, m_depthTexture1);
+    //glBindTexture(GL_TEXTURE_2D, m_isFirstDepthTextureSource ? m_depthTexture2 : m_depthTexture1);
+    glBindTexture(GL_TEXTURE_2D, m_normalsTexture);
 
     // Draw
     renderScreenQuad();
@@ -126,11 +142,11 @@ void SmoothRenderer::render(GLuint particlesVAO, int particlesNumber)
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void SmoothRenderer::renderDepthTexture(GLuint particlesVAO, int particlesNumber)
+void SmoothRenderer::RenderDepthTexture(GLuint particlesVAO, int particlesNumber)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
 
-    GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0 };
+    GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0 }; // m_depthTexture1
     glDrawBuffers(1, drawBuffer);
 
     // Clear linear depth texture
@@ -161,7 +177,7 @@ void SmoothRenderer::renderDepthTexture(GLuint particlesVAO, int particlesNumber
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void SmoothRenderer::smoothDepthTexture()
+void SmoothRenderer::SmoothDepthTexture()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
 
@@ -184,13 +200,13 @@ void SmoothRenderer::smoothDepthTexture()
         if (m_isFirstDepthTextureSource)
         {
             glBindTexture(GL_TEXTURE_2D, m_depthTexture1);
-            GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT1 };
+            GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT1 }; // m_depthTexture2
             glDrawBuffers(1, drawBuffer);
         }
         else
         {
             glBindTexture(GL_TEXTURE_2D, m_depthTexture2);
-            GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0 };
+            GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0 }; // m_depthTexture1
             glDrawBuffers(1, drawBuffer);
         }
 
@@ -205,6 +221,45 @@ void SmoothRenderer::smoothDepthTexture()
     }
 
     // Cleanup
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void SmoothRenderer::ExtractNormalsFromDepth()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
+
+    m_normalsExtractionShader->use();
+
+    ProjectionInfo projectionInfo = m_camera->getProjectionInfo();
+    m_normalsExtractionShader->setUnif("f_x", projectionInfo.n / projectionInfo.r);
+    m_normalsExtractionShader->setUnif("f_y", projectionInfo.n / projectionInfo.t);
+    m_normalsExtractionShader->setUnif("windowWidth", static_cast<float>(m_windowWidth));
+    m_normalsExtractionShader->setUnif("windowHeight", static_cast<float>(m_windowHeight));
+    m_normalsExtractionShader->setUnif("depthTexture", 0);
+
+    GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT2 }; // m_normalsTexture
+    glDrawBuffers(1, drawBuffers);
+
+    glActiveTexture(GL_TEXTURE0);
+    if (m_isFirstDepthTextureSource)
+    {
+        glBindTexture(GL_TEXTURE_2D, m_depthTexture2);
+    }
+    else
+    {
+        glBindTexture(GL_TEXTURE_2D, m_depthTexture1);
+    }
+
+    glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+
+    // Draw (extract normals from depth)
+    renderScreenQuad();
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

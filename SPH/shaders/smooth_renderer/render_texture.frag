@@ -8,12 +8,11 @@ uniform sampler2D sourceTexture;
 
 void main()
 {
-    float z = texture(sourceTexture, TexCoords).x;
+    vec3 color = texture(sourceTexture, TexCoords).rgb;
 
-	if (z > 50) discard;
-
-	float color = exp(z)/(exp(z)+1);
-	color = (color - 0.5) * 2;
-
-    FragColor = vec4(color, color, color, 1.0);
+	//if (z > 50) discard;
+    //
+	//float color = exp(z)/(exp(z)+1);
+	//color = (color - 0.5) * 2;
+    FragColor = vec4(color, 1.0);
 } 

@@ -303,7 +303,7 @@ void Renderer::__render() {
 	}
     else if (smoothFluid)
     {
-        m_smoothRenderer->render(d_vao, m_nparticle);
+        m_smoothRenderer->Render(d_vao, m_nparticle);
     }
 
 	if (m_box_shader->loaded())

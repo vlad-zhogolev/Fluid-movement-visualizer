@@ -149,7 +149,11 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="shaders\smooth_renderer\depth_smoothing_shader.frag" />
-    <None Include="shaders\smooth_renderer\depth_smoothing_shader.vert" />
+    <None Include="shaders\smooth_renderer\depth_smoothing_shader.vert">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="shaders\smooth_renderer\extract_normals_from_depth.frag" />
+    <None Include="shaders\smooth_renderer\extract_normals_from_depth.vert" />
     <None Include="shaders\smooth_renderer\render_texture.frag" />
     <None Include="shaders\smooth_renderer\render_texture.vert" />
   </ItemGroup>
