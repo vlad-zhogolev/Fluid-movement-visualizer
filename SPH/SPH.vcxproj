@@ -148,6 +148,8 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <None Include="shaders\boundary.vert">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
+    <None Include="shaders\smooth_renderer\depth_shader.frag" />
+    <None Include="shaders\smooth_renderer\depth_shader.vert" />
     <None Include="shaders\smooth_renderer\depth_smoothing_shader.frag" />
     <None Include="shaders\smooth_renderer\depth_smoothing_shader.vert">
       <FileType>Document</FileType>
@@ -156,6 +158,8 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <None Include="shaders\smooth_renderer\extract_normals_from_depth.vert" />
     <None Include="shaders\smooth_renderer\render_texture.frag" />
     <None Include="shaders\smooth_renderer\render_texture.vert" />
+    <None Include="shaders\smooth_renderer\thickness_shader.frag" />
+    <None Include="shaders\smooth_renderer\thickness_shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

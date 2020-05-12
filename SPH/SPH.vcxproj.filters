@@ -43,5 +43,9 @@
     <None Include="shaders\smooth_renderer\extract_normals_from_depth.frag" />
     <None Include="shaders\smooth_renderer\depth_smoothing_shader.vert" />
     <None Include="shaders\smooth_renderer\extract_normals_from_depth.vert" />
+    <None Include="shaders\smooth_renderer\depth_shader.frag" />
+    <None Include="shaders\smooth_renderer\depth_shader.vert" />
+    <None Include="shaders\smooth_renderer\thickness_shader.frag" />
+    <None Include="shaders\smooth_renderer\thickness_shader.vert" />
   </ItemGroup>
 </Project>
