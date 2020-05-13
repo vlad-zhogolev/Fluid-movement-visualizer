@@ -47,5 +47,7 @@
     <None Include="shaders\smooth_renderer\depth_shader.vert" />
     <None Include="shaders\smooth_renderer\thickness_shader.frag" />
     <None Include="shaders\smooth_renderer\thickness_shader.vert" />
+    <None Include="shaders\smooth_renderer\combined_rendering.frag" />
+    <None Include="shaders\smooth_renderer\combined_rendering.vert" />
   </ItemGroup>
 </Project>

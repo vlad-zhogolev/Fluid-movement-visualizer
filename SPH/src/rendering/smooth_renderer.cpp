@@ -51,10 +51,11 @@ void renderScreenQuad()
 
 namespace rendering {
 
-SmoothRenderer::SmoothRenderer(int windowWidth, int windowHeight, Camera* camera)
+SmoothRenderer::SmoothRenderer(int windowWidth, int windowHeight, Camera* camera, GLuint skyboxTexture)
     : m_windowWidth(windowWidth)
     , m_windowHeight(windowHeight)
     , m_camera(camera)
+    , m_skyboxTexture(skyboxTexture)
 {
     // Compile and load shaders
     const std::string shadersFolderPath = "shaders/smooth_renderer";
@@ -77,6 +78,10 @@ SmoothRenderer::SmoothRenderer(int windowWidth, int windowHeight, Camera* camera
     m_thicknessShader = std::make_unique<Shader>(
         Path(shadersFolderPath + "/thickness_shader.vert"),
         Path(shadersFolderPath + "/thickness_shader.frag"));
+
+    m_combinedRenderingShader = std::make_unique<Shader>(
+        Path(shadersFolderPath + "/combined_rendering.vert"),
+        Path(shadersFolderPath + "/combined_rendering.frag"));
 
     // Create and setup framebuffer textures
     // Texture for default depth, neccessary for all framebuffers
@@ -135,26 +140,26 @@ SmoothRenderer::SmoothRenderer(int windowWidth, int windowHeight, Camera* camera
 
 void SmoothRenderer::Render(GLuint particlesVAO, int particlesNumber)
 {
-    //RenderDepthTexture(particlesVAO, particlesNumber);
+    RenderDepthTexture(particlesVAO, particlesNumber);
+    SmoothDepthTexture();
+    ExtractNormalsFromDepth();
     RenderThicknessTexture(particlesVAO, particlesNumber);
-    //SmoothDepthTexture();
-    //ExtractNormalsFromDepth();
-    
+    RenderFluid();
 
-    // Configure
-    m_textureRenderShader->use();
-    m_textureRenderShader->setUnif("sourceTexture", 0);
-    glActiveTexture(GL_TEXTURE0);
-    //glBindTexture(GL_TEXTURE_2D, m_depthTexture1);
-    //glBindTexture(GL_TEXTURE_2D, m_isFirstDepthTextureSource ? m_depthTexture2 : m_depthTexture1);
-    //glBindTexture(GL_TEXTURE_2D, m_normalsTexture);
-    glBindTexture(GL_TEXTURE_2D, m_thicknessTexture);
-
-    // Draw
-    renderScreenQuad();
+    //// Configure
+    //m_textureRenderShader->use();
+    //m_textureRenderShader->setUnif("sourceTexture", 0);
+    //glActiveTexture(GL_TEXTURE0);
+    ////glBindTexture(GL_TEXTURE_2D, m_depthTexture1);
+    ////glBindTexture(GL_TEXTURE_2D, m_isFirstDepthTextureSource ? m_depthTexture2 : m_depthTexture1);
+    ////glBindTexture(GL_TEXTURE_2D, m_normalsTexture);
+    //glBindTexture(GL_TEXTURE_2D, m_thicknessTexture);
+    //
+    //// Draw
+    //renderScreenQuad();
 
     // Cleanup
-    glBindTexture(GL_TEXTURE_2D, 0);
+    //glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void SmoothRenderer::RenderDepthTexture(GLuint particlesVAO, int particlesNumber)
@@ -290,7 +295,7 @@ void SmoothRenderer::RenderThicknessTexture(GLuint particlesVAO, int particlesNu
     // Clear linear depth texture
     GLfloat zero = 0.f;
     glClearBufferfv(GL_COLOR, 0, &zero);    // Clear z-buffer for m_FBO
-    glClear(GL_DEPTH_BUFFER_BIT);
+    //glClear(GL_DEPTH_BUFFER_BIT);
 
     m_thicknessShader->use();
     m_camera->use(Shader::now());
@@ -301,8 +306,10 @@ void SmoothRenderer::RenderThicknessTexture(GLuint particlesVAO, int particlesNu
     m_thicknessShader->setUnif("projectionNear", projectionInfo.n);
     m_thicknessShader->setUnif("particleRadius", m_particleRadius);
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
+    //glEnable(GL_DEPTH_TEST);
+    //glDepthMask(GL_FALSE);
+    
+    glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
 
@@ -313,9 +320,82 @@ void SmoothRenderer::RenderThicknessTexture(GLuint particlesVAO, int particlesNu
     // Cleanup
     glBindVertexArray(0);
     glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE);
+    //glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void SmoothRenderer::RenderFluid()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // Will render to default framebuffer
+    
+    m_combinedRenderingShader->use();
+    m_camera->use(Shader::now());
+    
+    m_combinedRenderingShader->setUnif("change", SimulationParameters::getInstance().change);
+
+    ProjectionInfo projectionInfo = m_camera->getProjectionInfo();
+    m_combinedRenderingShader->setUnif("inverseProjectionXX",  projectionInfo.projectionXX);
+    m_combinedRenderingShader->setUnif("inverseProjectionYY",  projectionInfo.projectionYY);
+    m_combinedRenderingShader->setUnif("projectionZZ", projectionInfo.projectionZZ);
+    m_combinedRenderingShader->setUnif("projectionZW", projectionInfo.projectionZW);
+
+    m_combinedRenderingShader->setUnif("inverseView", m_camera->getInverseView());
+
+    float baseReflectance = GetBaseReflectance();
+    m_combinedRenderingShader->setUnif("f_0", baseReflectance);
+    m_combinedRenderingShader->setUnif("fluidRefractionIndex", m_fluidRefractionIndex);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, GetSmoothingTargetDepthTexture());
+    m_combinedRenderingShader->setUnif("depthTexture", 0);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, m_normalsTexture);
+    m_combinedRenderingShader->setUnif("normalsTexture", 1);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, m_thicknessTexture);
+    m_combinedRenderingShader->setUnif("thicknessTexture", 2);
+
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyboxTexture);
+    m_combinedRenderingShader->setUnif("skyboxTexture", 3);
+
+    // glClear(GL_COLOR_BUFFER_BIT);
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ZERO);
+
+    renderScreenQuad();
+
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+
+    for (int i = 3; i >= 0; --i)
+    {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+}
+
+float SmoothRenderer::GetBaseReflectance()
+{
+    float tmp = (m_fluidRefractionIndex - 1) / (m_fluidRefractionIndex + 1);
+    float baseReflectance = tmp * tmp;
+    return baseReflectance;
+}
+
+
+GLuint SmoothRenderer::GetSmoothingSourceDepthTexture()
+{
+    return m_isFirstDepthTextureSource ? m_depthTexture1 : m_depthTexture2;
+}
+
+GLuint SmoothRenderer::GetSmoothingTargetDepthTexture()
+{
+    return m_isFirstDepthTextureSource ? m_depthTexture2 : m_depthTexture1;
 }
 
 } // namespace rendering

@@ -7,6 +7,11 @@ struct ProjectionInfo {
 	float l, r;
 	float t, b;
 	float n, f;
+
+    float projectionXX;
+    float projectionYY;
+    float projectionZZ;
+    float projectionZW;
 };
 
 class Camera

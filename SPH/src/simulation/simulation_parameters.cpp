@@ -23,6 +23,7 @@ SimulationParameters& SimulationParameters::getInstance()
     guiParamsInstance.viscosityIterations = 4;
     guiParamsInstance.vorticityEpsilon = 0.0001f;
     guiParamsInstance.substepsNumber = 4;
+    guiParamsInstance.change = true;
 
     return guiParamsInstance;
 }

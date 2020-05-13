@@ -107,6 +107,12 @@ ProjectionInfo Camera::getProjectionInfo() const
 	i.b = -i.t;
 	i.r = aspect * i.t;
 	i.l = -i.r;
+
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(fov), aspect, 0.1f, 100.f);
+    i.projectionXX = projectionMatrix[0][0];
+    i.projectionYY = projectionMatrix[1][1];
+    i.projectionZZ = projectionMatrix[2][2];
+    i.projectionZW = projectionMatrix[3][2];
 	return i;
 }
 

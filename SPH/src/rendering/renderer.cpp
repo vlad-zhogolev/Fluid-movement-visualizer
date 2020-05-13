@@ -118,7 +118,7 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     // }
 
 	
-
+    m_formHelper->addVariable("Change", params.change);
 	m_formHelper->addVariable("Substeps number", params.substepsNumber)->setSpinnable(true);
 	m_formHelper->addVariable("Rest density", params.restDensity)->setSpinnable(true);
 	m_formHelper->addVariable("Gravity acceleration", params.g)->setSpinnable(true);
@@ -174,7 +174,7 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-    m_smoothRenderer = std::make_unique<rendering::SmoothRenderer>(m_width, m_height, m_camera);
+    m_smoothRenderer = std::make_unique<rendering::SmoothRenderer>(m_width, m_height, m_camera, d_sky_texture);
 }
 
 void Renderer::__window_size_callback(GLFWwindow* window, int width, int height) {

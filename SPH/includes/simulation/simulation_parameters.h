@@ -18,6 +18,8 @@ public:
     int viscosityIterations;
     float vorticityEpsilon;
 
+    bool change;
+
     // Renderer
     int fps;
     
