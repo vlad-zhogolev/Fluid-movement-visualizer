@@ -113,6 +113,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\common\nanovg\src\stb_image.h" />
     <ClInclude Include="..\common\nanovg\src\stb_truetype.h" />
     <ClInclude Include="includes\rendering\camera.h" />
+    <ClInclude Include="includes\rendering\scroll_form_helper.h" />
     <ClInclude Include="includes\rendering\smooth_renderer.h" />
     <ClInclude Include="includes\simulation\simulation_parameters.h" />
     <ClInclude Include="includes\helper.h" />

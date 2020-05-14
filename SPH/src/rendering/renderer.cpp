@@ -1,4 +1,5 @@
 #include <rendering/renderer.h>
+#include <rendering/scroll_form_helper.h>
 #include <input.h>
 
 #include <cstdlib>
@@ -83,39 +84,65 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 
     m_formHelper->addGroup("Fluid parameters");
 
-    // m_scrollPanel = std::make_unique<nanogui::VScrollPanel>(m_nanoguiWindow.get());
+    // m_scrollPanel = new nanogui::VScrollPanel(m_nanoguiWindow);
     // m_scrollPanel->setFixedSize(nanogui::Vector2i{ 200,200 });
-    // m_formHelper->addWidget("", m_scrollPanel.get());
+    // m_formHelper->addWidget("", m_scrollPanel);
 
-    int width = 30, height = 30;
-    //nanogui::Window *window = new nanogui::Window(m_nanoguiScreen.get(), "All Icons");
-    //window->setPosition({ 0, 0 });
-    //window->setFixedSize({ width, height });
+    // {
+    // int width = 30, height = 30;
+    // nanogui::Window *window = new nanogui::Window(m_nanoguiScreen, "All Icons");
+    // window->setPosition({ 0, 0 });
+    // window->setFixedSize({ 200, 200 });
+    // window->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 2, 8));
+    // 
+    // //nanogui::AdvancedGridLayout* mLayout = new nanogui::AdvancedGridLayout({ 10, 0, 10, 0 }, {});
+    // //mLayout->setMargin(10);
+    // //mLayout->setColStretch(2, 1);
+    // //window->setLayout(mLayout);
+    // 
+    // 
+    // // attach a vertical scroll panel
+    // auto vscroll = new nanogui::VScrollPanel(window);
+    // vscroll->setFixedSize({ 200, 200 });
+    // 
+    // // vscroll should only have *ONE* child. this is what `wrapper` is for
+    // auto wrapper = new nanogui::Widget(vscroll);
+    // wrapper->setFixedSize({ 200, 200 });
+    // //wrapper->setLayout(new nanogui::GridLayout());// defaults: 2 columns
+    // auto* wrapperLayout = new nanogui::AdvancedGridLayout({ 10, 0, 10, 0 });
+    // wrapperLayout->setMargin(10);
+    // wrapperLayout->setColStretch(2, 1);
+    // wrapper->setLayout(wrapperLayout);
+    // }
 
-    //// attach a vertical scroll panel
-    //auto vscroll = new nanogui::VScrollPanel(window);
-    //vscroll->setFixedSize({ width, height });
+    nanogui::ScrollFormHelper* scrollHelper = new nanogui::ScrollFormHelper(m_nanoguiScreen);
+    scrollHelper->addWindow(Eigen::Vector2i(initialCoordinate, initialCoordinate),
+        "Simulation controls and parameters");
+    for (int i = 0; i < 10; ++i)
+    {
+        scrollHelper->addVariable("Change", params.change);
+    }
 
-    //// vscroll should only have *ONE* child. this is what `wrapper` is for
-    //auto wrapper = new nanogui::Widget(vscroll);
-    //wrapper->setFixedSize({ width, height });
-    //wrapper->setLayout(new nanogui::GridLayout());// defaults: 2 columns
+    // wrapperLayout->appendRow(0);
+    // auto *label = new nanogui::Label(wrapper, "A label");
+    // wrapperLayout->setAnchor(label, nanogui::AdvancedGridLayout::Anchor(0, 0, 1, 1, nanogui::Alignment::Middle, nanogui::Alignment::Middle));
 
-    //auto testButton = new nanogui::Button(wrapper);     
-    //testButton->setIconPosition(nanogui::Button::IconPosition::Left);
-    //testButton->setFixedWidth(width/2);
+
+    // auto testButton = new nanogui::Button(wrapper);     
+    // testButton->setIconPosition(nanogui::Button::IconPosition::Left);
+    // testButton->setFixedWidth(width);
 
     // m_widget = new nanogui::Widget(m_scrollPanel.get());
     // m_widget->setFixedSize({ 30, 30 });
     // m_widget->setLayout(new nanogui::GridLayout(nanogui::Orientation::Horizontal, 1));// defaults: 2 columns
     // 
-    // nanogui::Button* testButton = nullptr;
-    // for (int i = 0; i < 20; ++i)
-    // {
-    //     testButton = new nanogui::Button(m_widget);
-    //     testButton->setIconPosition(nanogui::Button::IconPosition::Left);
-    //     testButton->setFixedWidth(m_nanoguiWindow->size()[0] / 2);
-    // }
+    //nanogui::Button* testButton = nullptr;
+    //for (int i = 0; i < 20; ++i)
+    //{
+    //    testButton = new nanogui::Button(wrapper);
+    //    testButton->setIconPosition(nanogui::Button::IconPosition::Left);
+    //    testButton->setFixedWidth(m_nanoguiWindow->size()[0] / 2);
+    //}
 
 	
     m_formHelper->addVariable("Change", params.change);
