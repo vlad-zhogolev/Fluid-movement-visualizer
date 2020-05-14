@@ -15,6 +15,8 @@ public:
 
     void Render(GLuint particlesVAO, int particlesNumber);
 
+    void HandleWindowResolutionChange(int newWindowWidth, int newWindowHeight);
+
 private:
 
     void RenderDepthTexture(GLuint particlesVAO, int particlesNumber);
@@ -27,6 +29,10 @@ private:
 
     GLuint GetSmoothingSourceDepthTexture();
     GLuint GetSmoothingTargetDepthTexture();
+
+    
+    void GenerateFramebufferAndTextures();
+    void ConfigureFramebuffer();
 
 private:
     int m_windowWidth;

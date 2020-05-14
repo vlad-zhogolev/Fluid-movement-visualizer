@@ -83,59 +83,8 @@ SmoothRenderer::SmoothRenderer(int windowWidth, int windowHeight, Camera* camera
         Path(shadersFolderPath + "/combined_rendering.vert"),
         Path(shadersFolderPath + "/combined_rendering.frag"));
 
-    // Create and setup framebuffer textures
-    // Texture for default depth, neccessary for all framebuffers
-    glGenTextures(1, &m_defaultDepthTexture);
-    glBindTexture(GL_TEXTURE_2D, m_defaultDepthTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_windowWidth, m_windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    // Texture for linear depth in view-space and further smoothing. Used for initial depth extraction.
-    glGenTextures(1, &m_depthTexture1);
-    glBindTexture(GL_TEXTURE_2D, m_depthTexture1);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, m_windowWidth, m_windowHeight, 0, GL_RED, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    // Texture for linear depth in view-space and further smoothing.
-    glGenTextures(1, &m_depthTexture2);
-    glBindTexture(GL_TEXTURE_2D, m_depthTexture2);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, m_windowWidth, m_windowHeight, 0, GL_RED, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    // Texture for fluid surface normals extracted from depth.
-    glGenTextures(1, &m_normalsTexture);
-    glBindTexture(GL_TEXTURE_2D, m_normalsTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, m_windowWidth, m_windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    // Texture for fluid thickness
-    glGenTextures(1, &m_thicknessTexture);
-    glBindTexture(GL_TEXTURE_2D, m_thicknessTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, m_windowWidth, m_windowHeight, 0, GL_RED, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    // Create and setup framebuffer
-    glGenFramebuffers(1, &m_FBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_defaultDepthTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_depthTexture1, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_depthTexture2, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_normalsTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_thicknessTexture, 0);
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    {
-        std::cout << "Framebuffer not complete!" << std::endl;
-    }
-
-    // Cleanup
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    GenerateFramebufferAndTextures();
+    ConfigureFramebuffer();
 }
 
 void SmoothRenderer::Render(GLuint particlesVAO, int particlesNumber)
@@ -396,6 +345,74 @@ GLuint SmoothRenderer::GetSmoothingSourceDepthTexture()
 GLuint SmoothRenderer::GetSmoothingTargetDepthTexture()
 {
     return m_isFirstDepthTextureSource ? m_depthTexture2 : m_depthTexture1;
+}
+
+void SmoothRenderer::HandleWindowResolutionChange(int newWindowWidth, int newWindowHeight)
+{
+    m_windowWidth = newWindowWidth;
+    m_windowHeight = newWindowHeight;
+    ConfigureFramebuffer();
+}
+
+void SmoothRenderer::GenerateFramebufferAndTextures()
+{
+    glGenTextures(1, &m_defaultDepthTexture);
+    glGenTextures(1, &m_depthTexture1);
+    glGenTextures(1, &m_depthTexture2);
+    glGenTextures(1, &m_normalsTexture);
+    glGenTextures(1, &m_thicknessTexture);
+    glGenFramebuffers(1, &m_FBO);
+}
+
+void SmoothRenderer::ConfigureFramebuffer()
+{
+    // Create and setup framebuffer textures
+    // Texture for default depth, neccessary for all framebuffers
+    glBindTexture(GL_TEXTURE_2D, m_defaultDepthTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_windowWidth, m_windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // Texture for linear depth in view-space and further smoothing. Used for initial depth extraction.
+    glBindTexture(GL_TEXTURE_2D, m_depthTexture1);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, m_windowWidth, m_windowHeight, 0, GL_RED, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // Texture for linear depth in view-space and further smoothing.
+    glBindTexture(GL_TEXTURE_2D, m_depthTexture2);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, m_windowWidth, m_windowHeight, 0, GL_RED, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // Texture for fluid surface normals extracted from depth.
+    glBindTexture(GL_TEXTURE_2D, m_normalsTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, m_windowWidth, m_windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // Texture for fluid thickness
+    glBindTexture(GL_TEXTURE_2D, m_thicknessTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, m_windowWidth, m_windowHeight, 0, GL_RED, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // Create and setup framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_defaultDepthTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_depthTexture1, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_depthTexture2, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_normalsTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_thicknessTexture, 0);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        std::cout << "Framebuffer not complete!" << std::endl;
+    }
+
+    // Cleanup
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 } // namespace rendering

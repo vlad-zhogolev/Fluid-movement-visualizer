@@ -183,6 +183,7 @@ void Renderer::__window_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 	m_camera->setAspect((float)width / height);
 	m_nanoguiScreen->resizeCallbackEvent(width, height);
+    m_smoothRenderer->HandleWindowResolutionChange(width, height);
 }
 
 void Renderer::__mouse_button_callback(GLFWwindow *w, int button, int action, int mods) {
