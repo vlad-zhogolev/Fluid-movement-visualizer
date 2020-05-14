@@ -167,18 +167,9 @@ void SmoothRenderer::SmoothDepthTexture()
     for (int i = 0; i < smoothingIterations; ++i)
     {
         m_isFirstDepthTextureSource = !m_isFirstDepthTextureSource;
-        if (m_isFirstDepthTextureSource)
-        {
-            glBindTexture(GL_TEXTURE_2D, m_depthTexture1);
-            GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT1 }; // m_depthTexture2
-            glDrawBuffers(1, drawBuffer);
-        }
-        else
-        {
-            glBindTexture(GL_TEXTURE_2D, m_depthTexture2);
-            GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0 }; // m_depthTexture1
-            glDrawBuffers(1, drawBuffer);
-        }
+        glBindTexture(GL_TEXTURE_2D, GetSmoothingSourceDepthTexture());
+        GLenum drawBuffer = GetSmoothingTargetColorAttachment();
+        glDrawBuffers(1, &drawBuffer);
 
         glDisable(GL_BLEND);
         glDisable(GL_DEPTH_TEST);
@@ -212,14 +203,8 @@ void SmoothRenderer::ExtractNormalsFromDepth()
     glDrawBuffers(1, drawBuffers);
 
     glActiveTexture(GL_TEXTURE0);
-    if (m_isFirstDepthTextureSource)
-    {
-        glBindTexture(GL_TEXTURE_2D, m_depthTexture2);
-    }
-    else
-    {
-        glBindTexture(GL_TEXTURE_2D, m_depthTexture1);
-    }
+    GLuint depthTexture = GetSmoothingTargetDepthTexture();
+    glBindTexture(GL_TEXTURE_2D, depthTexture);
 
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
@@ -243,7 +228,7 @@ void SmoothRenderer::RenderThicknessTexture(GLuint particlesVAO, int particlesNu
 
     // Clear linear depth texture
     GLfloat zero = 0.f;
-    glClearBufferfv(GL_COLOR, 0, &zero);    // Clear z-buffer for m_FBO
+    glClearBufferfv(GL_COLOR, 0, &zero); // Clear z-buffer for m_FBO
     //glClear(GL_DEPTH_BUFFER_BIT);
 
     m_thicknessShader->use();
@@ -284,6 +269,7 @@ void SmoothRenderer::RenderFluid()
     m_combinedRenderingShader->setUnif("change", SimulationParameters::getInstance().change);
 
     ProjectionInfo projectionInfo = m_camera->getProjectionInfo();
+    // Set projection matrix elements
     m_combinedRenderingShader->setUnif("inverseProjectionXX",  projectionInfo.projectionXX);
     m_combinedRenderingShader->setUnif("inverseProjectionYY",  projectionInfo.projectionYY);
     m_combinedRenderingShader->setUnif("projectionZZ", projectionInfo.projectionZZ);
@@ -345,6 +331,11 @@ GLuint SmoothRenderer::GetSmoothingSourceDepthTexture()
 GLuint SmoothRenderer::GetSmoothingTargetDepthTexture()
 {
     return m_isFirstDepthTextureSource ? m_depthTexture2 : m_depthTexture1;
+}
+
+GLuint SmoothRenderer::GetSmoothingTargetColorAttachment()
+{
+    return m_isFirstDepthTextureSource ? GL_COLOR_ATTACHMENT1 : GL_COLOR_ATTACHMENT0;
 }
 
 void SmoothRenderer::HandleWindowResolutionChange(int newWindowWidth, int newWindowHeight)

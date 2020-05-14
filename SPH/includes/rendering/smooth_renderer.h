@@ -29,7 +29,7 @@ private:
 
     GLuint GetSmoothingSourceDepthTexture();
     GLuint GetSmoothingTargetDepthTexture();
-
+    GLuint GetSmoothingTargetColorAttachment();
     
     void GenerateFramebufferAndTextures();
     void ConfigureFramebuffer();
@@ -40,8 +40,8 @@ private:
     Camera* m_camera = nullptr;
     GLuint m_skyboxTexture;
 
-    float m_fluidRefractionIndex = 1.333f; // water refraction index
-    float m_particleRadius = 0.06f; // TODO: find out how to set this parameter (maybe from UI or implicitly?)
+    float m_fluidRefractionIndex = 1.333f; // water refraction index, TODO: move to UI
+    float m_particleRadius = 0.06f; // TODO: move to UI
 
     // Framebuffer and it's components
     GLuint m_FBO;
