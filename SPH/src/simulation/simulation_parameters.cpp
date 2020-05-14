@@ -14,14 +14,14 @@ SimulationParameters& SimulationParameters::getInstance()
     guiParamsInstance.g = 9.8f;
     guiParamsInstance.kernelRadius = 0.1f;
     guiParamsInstance.deltaTime = 0.016f;
-    guiParamsInstance.restDensity = 8000.f;
+    guiParamsInstance.restDensity = 1000.f;
     guiParamsInstance.relaxationParameter = 1000.f;
     guiParamsInstance.deltaQ = 0.3 * guiParamsInstance.kernelRadius;
-    guiParamsInstance.correctionCoefficient = 0.001f;
+    guiParamsInstance.correctionCoefficient = 0.0001f;
     guiParamsInstance.correctionPower = 4;
-    guiParamsInstance.c_XSPH = 1.f;
+    guiParamsInstance.c_XSPH = 0.1f;
     guiParamsInstance.viscosityIterations = 4;
-    guiParamsInstance.vorticityEpsilon = 0.0001f;
+    guiParamsInstance.vorticityEpsilon = 0.0002f;
     guiParamsInstance.substepsNumber = 4;
     guiParamsInstance.change = true;
 

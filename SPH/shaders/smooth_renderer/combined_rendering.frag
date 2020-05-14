@@ -91,7 +91,7 @@ vec4 CalculateColor()
     vec3 refractedDirection = refract(-directionToView, normal, airRefractionIndex / fluidRefractionIndex);
     vec3 refractedColor = GetSkyboxColor(refractedDirection);
 
-    vec3 fluidColor = normalize(vec3(116,204,244));
+    vec3 fluidColor = normalize(vec3(15,94,156));
     vec3 attenuation = max(exp(-vec3(0.3f) * thickness), 0.2f);
 	refractedColor = mix(fluidColor, refractedColor, attenuation);
 

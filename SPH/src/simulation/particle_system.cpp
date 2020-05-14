@@ -5,9 +5,9 @@
 
 ParticleSystem::ParticleSystem()
 {
-    m_upperBoundary = make_float3(2.f, 2.f, 4.f);
+    m_upperBoundary = make_float3(1.f, 1.f, 4.f);
     
-    m_lowerBoundary = make_float3(-2.f, -2.f, 0.f);
+    m_lowerBoundary = make_float3(-1.f, -1.f, 0.f);
     //m_lowerBoundary = make_float3(0.f, 0.f, 0.f);
 
     m_simulator = new PositionBasedFluidSimulator(m_upperBoundary, m_lowerBoundary);
@@ -16,9 +16,10 @@ ParticleSystem::ParticleSystem()
     float dd = 1.f / 20;
     float d1 = dd * 30, d2 = dd * 30, d3 = dd * 30;
     const int particlesInDimension = 30;
+    const float upperBoundary = 0.75f;
     m_source = new ParticlesCube(
-        make_float3(1.8f, 1.8f, 3.8f), // upper boundary
-        make_float3(1.8f - d1, 1.8f - d2, 3.8f - d3), // lower boundary
+        make_float3(upperBoundary, upperBoundary, 3.8f), // upper boundary
+        make_float3(upperBoundary - d1, upperBoundary - d2, 3.8f - d3), // lower boundary
         make_int3(particlesInDimension)); // particles number by dimensions
     m_particlesNumber = particlesInDimension * particlesInDimension * particlesInDimension;
 
