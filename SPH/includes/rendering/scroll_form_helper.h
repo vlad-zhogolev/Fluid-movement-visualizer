@@ -18,18 +18,23 @@ public:
     {
         assert(mScreen);
         mWindow = new Window(mScreen, title);
-        mScroll = new nanogui::VScrollPanel(mWindow);
-        mScroll->setFixedSize({ 200, 200 });
-        mWrapper = new nanogui::Widget(mScroll);
 
+        mScroll = new nanogui::VScrollPanel(mWindow);
+        //mScroll->setFixedSize({ 200, 300 });
+         mScroll->setFixedHeight(360);
+        // mScroll->setWidth(200);
+        mScroll->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 2, 8));
+        mWrapper = new nanogui::Widget(mScroll);
 
         mLayout = new AdvancedGridLayout({ 10, 0, 10, 0 }, {});
         mLayout->setMargin(10);
         mLayout->setColStretch(2, 1);
-        mWindow->setPosition(pos);
         mWrapper->setLayout(mLayout);
-        mWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 2, 8));
-        mWindow->setFixedSize({ 200, 200 });
+
+        mWindow->setPosition(pos);
+        mWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 2, 8));
+        //mWindow->setFixedSize({ 200, 200 });
+        mWindow->setFixedHeight(400);
         mWindow->setVisible(true);
         return mWindow;
     }

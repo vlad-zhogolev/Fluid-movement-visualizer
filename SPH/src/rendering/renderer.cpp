@@ -118,7 +118,7 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     nanogui::ScrollFormHelper* scrollHelper = new nanogui::ScrollFormHelper(m_nanoguiScreen);
     scrollHelper->addWindow(Eigen::Vector2i(initialCoordinate, initialCoordinate),
         "Simulation controls and parameters");
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < 15; ++i)
     {
         scrollHelper->addVariable("Change", params.change);
     }
