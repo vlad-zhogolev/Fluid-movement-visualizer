@@ -1,6 +1,7 @@
 #include <GLFW/glfw3.h>
 
 #include <rendering/renderer.h>
+#include <rendering/rendering_parameters.h>
 #include <simulation/particle_system.h>
 #include <memory>
 
@@ -70,8 +71,8 @@ int main()
     Renderer renderer(std::move(windowPtr));
 
 	particleystem.InitializeParticles();
-    SimulationParameters &params = SimulationParameters::getInstance();
-    params.fps = 0;
+    RenderingParameters &renderingParameters = RenderingParameters::GetInstance();
+    renderingParameters.fps = 0;
     g_previousTime = glfwGetTime();
 	while (true)
     {
@@ -88,7 +89,7 @@ int main()
 
         if (currentTime - g_previousTime >= 1.0)
         {
-            params.fps = g_frameCount;
+            renderingParameters.fps = g_frameCount;
             g_frameCount = 0;
             g_previousTime = currentTime;
         }

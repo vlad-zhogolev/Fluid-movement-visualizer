@@ -18,6 +18,7 @@
     <ClCompile Include="src\simulation\simulation_parameters.cpp" />
     <ClCompile Include="src\simulation\particles_cube.cpp" />
     <ClCompile Include="src\rendering\smooth_renderer.cpp" />
+    <ClCompile Include="src\rendering\rendering_parameters.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\nanovg\src\fontstash.h" />
@@ -34,6 +35,7 @@
     <ClInclude Include="includes\simulation\particles_cube.h" />
     <ClInclude Include="includes\rendering\smooth_renderer.h" />
     <ClInclude Include="includes\rendering\scroll_form_helper.h" />
+    <ClInclude Include="includes\rendering\rendering_parameters.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\boundary.frag" />

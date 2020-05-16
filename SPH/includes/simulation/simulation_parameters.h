@@ -19,9 +19,6 @@ public:
     float vorticityEpsilon;
 
     bool change;
-
-    // Renderer
-    int fps;
     
     static SimulationParameters& getInstance();
 };

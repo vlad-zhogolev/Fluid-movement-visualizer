@@ -1,4 +1,5 @@
 #include <rendering/renderer.h>
+#include <rendering/rendering_parameters.h>
 #include <input.h>
 
 #include <cstdlib>
@@ -25,7 +26,8 @@ void Renderer::Init()
 
 void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 {
-    SimulationParameters &params = SimulationParameters::getInstance();
+    SimulationParameters& simulationParameters = SimulationParameters::getInstance();
+    RenderingParameters& renderingParameters = RenderingParameters::GetInstance();
 
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	glEnable(GL_DEPTH_TEST);
@@ -51,7 +53,7 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 
     m_formHelper->addGroup("Simulation indicators");
     m_formHelper->setFixedSize({ 80, 20 });
-    m_formHelper->addVariable("FPS", params.fps)->setEditable(false);
+    m_formHelper->addVariable("FPS", renderingParameters.fps)->setEditable(false);
     m_formHelper->addVariable("Current frame number", m_input->frameCount)->setEditable(false);
     m_formHelper->setFixedSize({ 0, 20 });
     m_formHelper->addGroup("Simulation controls");
@@ -197,19 +199,19 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 
     m_scrollFormHelper->addGroup("Fluid parameters");
 
-    m_scrollFormHelper->addVariable("Change", params.change);
-    m_scrollFormHelper->addVariable("Substeps number", params.substepsNumber)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("Rest density", params.restDensity)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("Gravity acceleration", params.g)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("Kernel radius", params.kernelRadius)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("Delta time", params.deltaTime)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("Lambda epsilon", params.relaxationParameter)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("deltaQ", params.deltaQ)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("correctionCoefficient", params.correctionCoefficient)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("correctionPower", params.correctionPower)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("XSPH coef", params.c_XSPH)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("Viscosity iterations", params.viscosityIterations)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("Vorticity epsilon", params.vorticityEpsilon)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Change", simulationParameters.change);
+    m_scrollFormHelper->addVariable("Substeps number", simulationParameters.substepsNumber)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Rest density", simulationParameters.restDensity)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Gravity acceleration", simulationParameters.g)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Kernel radius", simulationParameters.kernelRadius)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Delta time", simulationParameters.deltaTime)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Lambda epsilon", simulationParameters.relaxationParameter)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("deltaQ", simulationParameters.deltaQ)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("correctionCoefficient", simulationParameters.correctionCoefficient)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("correctionPower", simulationParameters.correctionPower)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("XSPH coef", simulationParameters.c_XSPH)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Viscosity iterations", simulationParameters.viscosityIterations)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Vorticity epsilon", simulationParameters.vorticityEpsilon)->setSpinnable(true);
 
     m_nanoguiScreen->performLayout();
 	m_nanoguiScreen->setVisible(true);
