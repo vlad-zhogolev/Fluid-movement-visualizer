@@ -44,44 +44,45 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 	glfwSwapBuffers(m_glfwWindow.get());
 
 	m_formHelper = new nanogui::FormHelper(m_nanoguiScreen);
-    const int initialCoordinate = 40;
+    const int initialCoordinate = 5;
 	m_nanoguiWindow = m_formHelper->addWindow(
         Eigen::Vector2i(initialCoordinate, initialCoordinate), 
         "Simulation controls and parameters");
 
-    // m_formHelper->addGroup("Simulation indicators");
-    // m_formHelper->addVariable("FPS", params.fps)->setEditable(false);
-    // m_formHelper->addVariable("Current frame number", m_input->frameCount)->setEditable(false);
+    m_formHelper->addGroup("Simulation indicators");
+    m_formHelper->setFixedSize({ 80, 20 });
+    m_formHelper->addVariable("FPS", params.fps)->setEditable(false);
+    m_formHelper->addVariable("Current frame number", m_input->frameCount)->setEditable(false);
+    m_formHelper->setFixedSize({ 0, 20 });
+    m_formHelper->addGroup("Simulation controls");
+    auto simulationControl = new nanogui::Widget(m_nanoguiWindow);
+    m_formHelper->addWidget("", simulationControl);
+    simulationControl->setLayout(
+        new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 2, 8));
+    
+    const int controlButtonSize = 30;
+    auto nextFrameButton = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_NEXT);
+    nextFrameButton->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
+    nextFrameButton->setFlags(nanogui::Button::NormalButton);
+    nextFrameButton->setCallback([this]() { m_input->nextFrame = true; });
+    
+    auto testRunOrStopButton = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_PLAY);
+    testRunOrStopButton->setFlags(nanogui::Button::ToggleButton);
+    testRunOrStopButton->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
+    testRunOrStopButton->setChangeCallback([this, testRunOrStopButton](bool isPressed) {
+        if (isPressed)
+        {
+            testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_STOP);
+            m_input->running = true;
+        }
+        else
+        {
+            testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
+            m_input->running = false;
+        }
+    });
 
-   // m_formHelper->addGroup("Simulation controls");
-   // auto simulationControl = new nanogui::Widget(m_nanoguiWindow);
-   // m_formHelper->addWidget("", simulationControl);
-   // simulationControl->setLayout(
-   //     new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 2, 8));
-   // 
-   // const int controlButtonSize = 30;
-   // auto nextFrameButton = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_NEXT);
-   // nextFrameButton->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
-   // nextFrameButton->setFlags(nanogui::Button::NormalButton);
-   // nextFrameButton->setCallback([this]() { m_input->nextFrame = true; });
-   // 
-   // auto testRunOrStopButton = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_PLAY);
-   // testRunOrStopButton->setFlags(nanogui::Button::ToggleButton);
-   // testRunOrStopButton->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
-   // testRunOrStopButton->setChangeCallback([this, testRunOrStopButton](bool isPressed) {
-   //     if (isPressed)
-   //     {
-   //         testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_STOP);
-   //         m_input->running = true;
-   //     }
-   //     else
-   //     {
-   //         testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
-   //         m_input->running = false;
-   //     }
-   // });
-
-    m_formHelper->addGroup("Fluid parameters");
+    
 
     // m_scrollPanel = new nanogui::VScrollPanel(m_nanoguiWindow);
     // m_scrollPanel->setFixedSize(nanogui::Vector2i{ 200,200 });
@@ -114,63 +115,6 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     // wrapper->setLayout(wrapperLayout);
     // }
 
-    m_scrollFormHelper = new nanogui::ScrollFormHelper(m_nanoguiScreen);
-    auto* scrollWindow = m_scrollFormHelper->addWindow(Eigen::Vector2i(initialCoordinate, initialCoordinate),
-        "Simulation controls and parameters");
-    // for (int i = 0; i < 15; ++i)
-    // {
-    //     m_scrollFormHelper->addVariable("Change", params.change);
-    // }
-
-    m_scrollFormHelper->addGroup("Simulation indicators");
-    m_scrollFormHelper->addVariable("FPS", params.fps)->setEditable(false);
-    m_scrollFormHelper->addVariable("Current frame number", m_input->frameCount)->setEditable(false);
-
-    m_scrollFormHelper->addGroup("Simulation controls");
-    auto simulationControl = new nanogui::Widget(m_scrollFormHelper->wrapper());
-    m_scrollFormHelper->addWidget("", simulationControl);
-    simulationControl->setLayout(
-        new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 2, 8));
-
-    const int controlButtonSize = 30;
-    auto nextFrameButtonScroll = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_NEXT);
-    nextFrameButtonScroll->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
-    nextFrameButtonScroll->setFlags(nanogui::Button::NormalButton);
-    nextFrameButtonScroll->setCallback([this]() { m_input->nextFrame = true; });
-
-    auto testRunOrStopButtonScroll = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_PLAY);
-    testRunOrStopButtonScroll->setFlags(nanogui::Button::ToggleButton);
-    testRunOrStopButtonScroll->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
-    testRunOrStopButtonScroll->setChangeCallback([this, testRunOrStopButtonScroll](bool isPressed) {
-        if (isPressed)
-        {
-            testRunOrStopButtonScroll->setIcon(ENTYPO_ICON_CONTROLLER_STOP);
-            m_input->running = true;
-        }
-        else
-        {
-            testRunOrStopButtonScroll->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
-            m_input->running = false;
-        }
-    });
-
-    m_scrollFormHelper->addGroup("Fluid parameters");
-
-    m_scrollFormHelper->addVariable("Change", params.change);
-    m_scrollFormHelper->addVariable("Substeps number", params.substepsNumber)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("Rest density", params.restDensity)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("Gravity acceleration", params.g)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("Kernel radius", params.kernelRadius)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("Delta time", params.deltaTime)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("Lambda epsilon", params.relaxationParameter)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("deltaQ", params.deltaQ)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("correctionCoefficient", params.correctionCoefficient)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("correctionPower", params.correctionPower)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("XSPH coef", params.c_XSPH)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("Viscosity iterations", params.viscosityIterations)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("Vorticity epsilon", params.vorticityEpsilon)->setSpinnable(true);
-
-
     // wrapperLayout->appendRow(0);
     // auto *label = new nanogui::Label(wrapper, "A label");
     // wrapperLayout->setAnchor(label, nanogui::AdvancedGridLayout::Anchor(0, 0, 1, 1, nanogui::Alignment::Middle, nanogui::Alignment::Middle));
@@ -192,26 +136,85 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     //    testButton->setFixedWidth(m_nanoguiWindow->size()[0] / 2);
     //}
 
-	
-    m_formHelper->addVariable("Change", params.change);
-	m_formHelper->addVariable("Substeps number", params.substepsNumber)->setSpinnable(true);
-	m_formHelper->addVariable("Rest density", params.restDensity)->setSpinnable(true);
-	m_formHelper->addVariable("Gravity acceleration", params.g)->setSpinnable(true);
-	m_formHelper->addVariable("Kernel radius", params.kernelRadius)->setSpinnable(true);
-	m_formHelper->addVariable("Delta time", params.deltaTime)->setSpinnable(true);
-	m_formHelper->addVariable("Lambda epsilon", params.relaxationParameter)->setSpinnable(true);
-	m_formHelper->addVariable("deltaQ", params.deltaQ)->setSpinnable(true);
-	m_formHelper->addVariable("correctionCoefficient", params.correctionCoefficient)->setSpinnable(true);
-	m_formHelper->addVariable("correctionPower", params.correctionPower)->setSpinnable(true);
-	m_formHelper->addVariable("XSPH coef", params.c_XSPH)->setSpinnable(true);
-    m_formHelper->addVariable("Viscosity iterations", params.viscosityIterations)->setSpinnable(true);
-    m_formHelper->addVariable("Vorticity epsilon", params.vorticityEpsilon)->setSpinnable(true);
+    // m_formHelper->addGroup("Fluid parameters");
+    // m_formHelper->addVariable("Change", params.change);
+	// m_formHelper->addVariable("Substeps number", params.substepsNumber)->setSpinnable(true);
+	// m_formHelper->addVariable("Rest density", params.restDensity)->setSpinnable(true);
+	// m_formHelper->addVariable("Gravity acceleration", params.g)->setSpinnable(true);
+	// m_formHelper->addVariable("Kernel radius", params.kernelRadius)->setSpinnable(true);
+	// m_formHelper->addVariable("Delta time", params.deltaTime)->setSpinnable(true);
+	// m_formHelper->addVariable("Lambda epsilon", params.relaxationParameter)->setSpinnable(true);
+	// m_formHelper->addVariable("deltaQ", params.deltaQ)->setSpinnable(true);
+	// m_formHelper->addVariable("correctionCoefficient", params.correctionCoefficient)->setSpinnable(true);
+	// m_formHelper->addVariable("correctionPower", params.correctionPower)->setSpinnable(true);
+	// m_formHelper->addVariable("XSPH coef", params.c_XSPH)->setSpinnable(true);
+    // m_formHelper->addVariable("Viscosity iterations", params.viscosityIterations)->setSpinnable(true);
+    // m_formHelper->addVariable("Vorticity epsilon", params.vorticityEpsilon)->setSpinnable(true);
     // m_formHelper->addVariable("Boundary movement speed", params.boundaryMovementSpeed)->setSpinnable(true);
 	// m_formHelper->addVariable("Highlight #", m_input->hlIndex)->setSpinnable(true);
+
+
+    m_scrollFormHelper = new nanogui::ScrollFormHelper(m_nanoguiScreen);
+    auto scrollWindowInitialCoordinates = Eigen::Vector2i(0, 0);
+    m_scrollWindow = m_scrollFormHelper->addWindow(
+        scrollWindowInitialCoordinates, "Simulation and rendering parameters");
+    // for (int i = 0; i < 15; ++i)
+    // {
+    //     m_scrollFormHelper->addVariable("Change", params.change);
+    // }
+
+    // m_scrollFormHelper->addGroup("Simulation indicators");
+    // m_scrollFormHelper->addVariable("FPS", params.fps)->setEditable(false);
+    // m_scrollFormHelper->addVariable("Current frame number", m_input->frameCount)->setEditable(false);
+
+    // m_scrollFormHelper->addGroup("Simulation controls");
+    // auto simulationControl = new nanogui::Widget(m_scrollFormHelper->wrapper());
+    // m_scrollFormHelper->addWidget("", simulationControl);
+    // simulationControl->setLayout(
+    //     new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 2, 8));
+    // 
+    // const int controlButtonSize = 30;
+    // auto nextFrameButtonScroll = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_NEXT);
+    // nextFrameButtonScroll->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
+    // nextFrameButtonScroll->setFlags(nanogui::Button::NormalButton);
+    // nextFrameButtonScroll->setCallback([this]() { m_input->nextFrame = true; });
+    // 
+    // auto testRunOrStopButtonScroll = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_PLAY);
+    // testRunOrStopButtonScroll->setFlags(nanogui::Button::ToggleButton);
+    // testRunOrStopButtonScroll->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
+    // testRunOrStopButtonScroll->setChangeCallback([this, testRunOrStopButtonScroll](bool isPressed) {
+    //     if (isPressed)
+    //     {
+    //         testRunOrStopButtonScroll->setIcon(ENTYPO_ICON_CONTROLLER_STOP);
+    //         m_input->running = true;
+    //     }
+    //     else
+    //     {
+    //         testRunOrStopButtonScroll->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
+    //         m_input->running = false;
+    //     }
+    // });
+
+    m_scrollFormHelper->addGroup("Fluid parameters");
+
+    m_scrollFormHelper->addVariable("Change", params.change);
+    m_scrollFormHelper->addVariable("Substeps number", params.substepsNumber)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Rest density", params.restDensity)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Gravity acceleration", params.g)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Kernel radius", params.kernelRadius)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Delta time", params.deltaTime)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Lambda epsilon", params.relaxationParameter)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("deltaQ", params.deltaQ)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("correctionCoefficient", params.correctionCoefficient)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("correctionPower", params.correctionPower)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("XSPH coef", params.c_XSPH)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Viscosity iterations", params.viscosityIterations)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Vorticity epsilon", params.vorticityEpsilon)->setSpinnable(true);
 
     m_nanoguiScreen->performLayout();
 	m_nanoguiScreen->setVisible(true);
 	
+    m_scrollWindow->setPosition({ 5, 2 * initialCoordinate + m_nanoguiWindow->height() });
 
 	__binding();
 
@@ -252,12 +255,41 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     m_smoothRenderer = std::make_unique<rendering::SmoothRenderer>(m_width, m_height, m_camera, d_sky_texture);
 }
 
-void Renderer::__window_size_callback(GLFWwindow* window, int width, int height) {
+void Renderer::__window_size_callback(GLFWwindow* window, int width, int height)
+{
+    const int minWidth = 800;
+    const int minHeight = 600;
+    width = std::max(width, minWidth);
+    height = std::max(height, minHeight);
+
+    const float widthChangeRatio = static_cast<float>(width) / m_width;
+    const float heightChangeRatio = static_cast<float>(height) / m_height;
+
+    nanogui::Vector2i oldPosition = m_nanoguiWindow->position();
+
 	m_width = width;
 	m_height = height;
 	glViewport(0, 0, width, height);
 	m_camera->setAspect((float)width / height);
 	m_nanoguiScreen->resizeCallbackEvent(width, height);
+
+    nanogui::Vector2i newPosition = { oldPosition[0] * widthChangeRatio, oldPosition[1] * heightChangeRatio };
+    const int margin = 0;
+
+    std::cout << "Window width: " << m_nanoguiWindow->width() << " height: " << m_nanoguiWindow->height() << std::endl;
+    std::cout << "Screen width: " << m_nanoguiScreen->width() << " height: " << m_nanoguiScreen->height() << std::endl;
+    std::cout << std::endl;
+
+    if (newPosition[0] + m_nanoguiWindow->width() > m_nanoguiScreen->width())
+    {
+        newPosition[0] = m_nanoguiScreen->width() - m_nanoguiWindow->width() - margin;
+    }
+    if (newPosition[1] + m_nanoguiWindow->height() > m_nanoguiScreen->height())
+    {
+        newPosition[1] = m_nanoguiScreen->height() - m_nanoguiWindow->height() - margin;
+    }
+    m_nanoguiWindow->setPosition(newPosition);
+
     m_smoothRenderer->HandleWindowResolutionChange(width, height);
 }
 
@@ -298,6 +330,7 @@ void Renderer::__key_callback(GLFWwindow *w, int key, int scancode, int action, 
 	if (key == GLFW_KEY_V && action == GLFW_RELEASE)
     {
 		m_nanoguiWindow->setVisible(!m_nanoguiWindow->visible());
+        m_scrollWindow->setVisible(!m_scrollWindow->visible());
 	}
     else if (key == GLFW_KEY_R && action == GLFW_RELEASE)
     {

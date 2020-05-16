@@ -79,8 +79,8 @@ private:
 	nanogui::Screen* m_nanoguiScreen = nullptr;
 	nanogui::FormHelper* m_formHelper = nullptr;
     nanogui::ScrollFormHelper* m_scrollFormHelper = nullptr;
+    nanogui::ref<nanogui::Window> m_scrollWindow;
 	nanogui::Window* m_nanoguiWindow = nullptr;
-    nanogui::VScrollPanel* m_scrollPanel = nullptr;
     nanogui::Widget* m_widget = nullptr;
 	std::function<void()> m_nextFrameBtnCb;
 
