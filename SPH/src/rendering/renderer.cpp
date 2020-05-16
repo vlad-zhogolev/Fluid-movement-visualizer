@@ -1,5 +1,4 @@
 #include <rendering/renderer.h>
-#include <rendering/scroll_form_helper.h>
 #include <input.h>
 
 #include <cstdlib>
@@ -50,37 +49,37 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
         Eigen::Vector2i(initialCoordinate, initialCoordinate), 
         "Simulation controls and parameters");
 
-    m_formHelper->addGroup("Simulation indicators");
-    m_formHelper->addVariable("FPS", params.fps)->setEditable(false);
-    m_formHelper->addVariable("Current frame number", m_input->frameCount)->setEditable(false);
+    // m_formHelper->addGroup("Simulation indicators");
+    // m_formHelper->addVariable("FPS", params.fps)->setEditable(false);
+    // m_formHelper->addVariable("Current frame number", m_input->frameCount)->setEditable(false);
 
-    m_formHelper->addGroup("Simulation controls");
-    auto simulationControl = new nanogui::Widget(m_nanoguiWindow);
-    m_formHelper->addWidget("", simulationControl);
-    simulationControl->setLayout(
-        new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 2, 8));
-
-    const int controlButtonSize = 30;
-    auto nextFrameButton = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_NEXT);
-    nextFrameButton->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
-    nextFrameButton->setFlags(nanogui::Button::NormalButton);
-    nextFrameButton->setCallback([this]() { m_input->nextFrame = true; });
-
-    auto testRunOrStopButton = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_PLAY);
-    testRunOrStopButton->setFlags(nanogui::Button::ToggleButton);
-    testRunOrStopButton->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
-    testRunOrStopButton->setChangeCallback([this, testRunOrStopButton](bool isPressed) {
-        if (isPressed)
-        {
-            testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_STOP);
-            m_input->running = true;
-        }
-        else
-        {
-            testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
-            m_input->running = false;
-        }
-    });
+   // m_formHelper->addGroup("Simulation controls");
+   // auto simulationControl = new nanogui::Widget(m_nanoguiWindow);
+   // m_formHelper->addWidget("", simulationControl);
+   // simulationControl->setLayout(
+   //     new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 2, 8));
+   // 
+   // const int controlButtonSize = 30;
+   // auto nextFrameButton = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_NEXT);
+   // nextFrameButton->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
+   // nextFrameButton->setFlags(nanogui::Button::NormalButton);
+   // nextFrameButton->setCallback([this]() { m_input->nextFrame = true; });
+   // 
+   // auto testRunOrStopButton = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_PLAY);
+   // testRunOrStopButton->setFlags(nanogui::Button::ToggleButton);
+   // testRunOrStopButton->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
+   // testRunOrStopButton->setChangeCallback([this, testRunOrStopButton](bool isPressed) {
+   //     if (isPressed)
+   //     {
+   //         testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_STOP);
+   //         m_input->running = true;
+   //     }
+   //     else
+   //     {
+   //         testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
+   //         m_input->running = false;
+   //     }
+   // });
 
     m_formHelper->addGroup("Fluid parameters");
 
@@ -115,13 +114,62 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     // wrapper->setLayout(wrapperLayout);
     // }
 
-    nanogui::ScrollFormHelper* scrollHelper = new nanogui::ScrollFormHelper(m_nanoguiScreen);
-    scrollHelper->addWindow(Eigen::Vector2i(initialCoordinate, initialCoordinate),
+    m_scrollFormHelper = new nanogui::ScrollFormHelper(m_nanoguiScreen);
+    auto* scrollWindow = m_scrollFormHelper->addWindow(Eigen::Vector2i(initialCoordinate, initialCoordinate),
         "Simulation controls and parameters");
-    for (int i = 0; i < 15; ++i)
-    {
-        scrollHelper->addVariable("Change", params.change);
-    }
+    // for (int i = 0; i < 15; ++i)
+    // {
+    //     m_scrollFormHelper->addVariable("Change", params.change);
+    // }
+
+    m_scrollFormHelper->addGroup("Simulation indicators");
+    m_scrollFormHelper->addVariable("FPS", params.fps)->setEditable(false);
+    m_scrollFormHelper->addVariable("Current frame number", m_input->frameCount)->setEditable(false);
+
+    m_scrollFormHelper->addGroup("Simulation controls");
+    auto simulationControl = new nanogui::Widget(m_scrollFormHelper->wrapper());
+    m_scrollFormHelper->addWidget("", simulationControl);
+    simulationControl->setLayout(
+        new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 2, 8));
+
+    const int controlButtonSize = 30;
+    auto nextFrameButtonScroll = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_NEXT);
+    nextFrameButtonScroll->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
+    nextFrameButtonScroll->setFlags(nanogui::Button::NormalButton);
+    nextFrameButtonScroll->setCallback([this]() { m_input->nextFrame = true; });
+
+    auto testRunOrStopButtonScroll = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_PLAY);
+    testRunOrStopButtonScroll->setFlags(nanogui::Button::ToggleButton);
+    testRunOrStopButtonScroll->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
+    testRunOrStopButtonScroll->setChangeCallback([this, testRunOrStopButtonScroll](bool isPressed) {
+        if (isPressed)
+        {
+            testRunOrStopButtonScroll->setIcon(ENTYPO_ICON_CONTROLLER_STOP);
+            m_input->running = true;
+        }
+        else
+        {
+            testRunOrStopButtonScroll->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
+            m_input->running = false;
+        }
+    });
+
+    m_scrollFormHelper->addGroup("Fluid parameters");
+
+    m_scrollFormHelper->addVariable("Change", params.change);
+    m_scrollFormHelper->addVariable("Substeps number", params.substepsNumber)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Rest density", params.restDensity)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Gravity acceleration", params.g)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Kernel radius", params.kernelRadius)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Delta time", params.deltaTime)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Lambda epsilon", params.relaxationParameter)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("deltaQ", params.deltaQ)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("correctionCoefficient", params.correctionCoefficient)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("correctionPower", params.correctionPower)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("XSPH coef", params.c_XSPH)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Viscosity iterations", params.viscosityIterations)->setSpinnable(true);
+    m_scrollFormHelper->addVariable("Vorticity epsilon", params.vorticityEpsilon)->setSpinnable(true);
+
 
     // wrapperLayout->appendRow(0);
     // auto *label = new nanogui::Label(wrapper, "A label");
@@ -392,8 +440,9 @@ void Renderer::render(unsigned int pos, unsigned int iid, int nparticle)
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(lines), lines);
 
 	m_formHelper->refresh();
+    m_scrollFormHelper->refresh();
 
-	if (!glfwWindowShouldClose(m_glfwWindow.get())) {
+    if (!glfwWindowShouldClose(m_glfwWindow.get())) {
 		glfwPollEvents();
 		__render();
 		m_nanoguiScreen->drawContents();

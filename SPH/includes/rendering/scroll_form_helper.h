@@ -132,6 +132,11 @@ public:
         return mWindow;
     }
 
+    Widget* wrapper()
+    {
+        return mWrapper;
+    }
+
     /// Set the active \ref Window instance.
     void setWindow(Window *window)
     {

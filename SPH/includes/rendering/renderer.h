@@ -3,6 +3,7 @@
 #include <rendering/camera.h>
 #include <rendering/shader.h>
 #include <rendering/smooth_renderer.h>
+#include <rendering/scroll_form_helper.h>
 #include <input.h>
 #include <helper.h>
 #include <simulation/simulation_parameters.h>>
@@ -77,6 +78,7 @@ private:
     // No need to manage these pointers, because nanogui does this.
 	nanogui::Screen* m_nanoguiScreen = nullptr;
 	nanogui::FormHelper* m_formHelper = nullptr;
+    nanogui::ScrollFormHelper* m_scrollFormHelper = nullptr;
 	nanogui::Window* m_nanoguiWindow = nullptr;
     nanogui::VScrollPanel* m_scrollPanel = nullptr;
     nanogui::Widget* m_widget = nullptr;
