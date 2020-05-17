@@ -25,6 +25,7 @@ public:
         : m_glfwWindow(std::move(glfwWindow))
         , m_input(&Input::getInstance())
     {
+        glfwSetWindowSizeLimits(m_glfwWindow.get(), 800, 600, GLFW_DONT_CARE, GLFW_DONT_CARE);
         Init();
     }
 

@@ -18,6 +18,7 @@ uniform sampler2D thicknessTexture;
 uniform samplerCube skyboxTexture;
 
 uniform vec3 fluidColor;
+uniform vec3 attenuationCoefficients;
 uniform bool change;
 
 out vec4 FragColor;
@@ -93,7 +94,8 @@ vec4 CalculateColor()
     vec3 refractedColor = GetSkyboxColor(refractedDirection);
 
     //vec3 fluidColor = vec3(15,94,156) / 256.f;
-    vec3 attenuation = max(exp(-vec3(0.3f) * thickness), 0.2f);
+    //vec3 attenuation = max(exp(-vec3(0.05f) * thickness), 0.2f);
+    vec3 attenuation = max(exp(-attenuationCoefficients * thickness), 0.2f);
 	refractedColor = mix(fluidColor, refractedColor, attenuation);
 
     float reflectedPart = FreshnelFunction(f_0, dot(normal, directionToView));

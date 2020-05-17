@@ -223,9 +223,9 @@ void SmoothRenderer::ExtractNormalsFromDepth()
 
 void SmoothRenderer::RenderThicknessTexture(GLuint particlesVAO, int particlesNumber)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_thicknessFBO);
 
-    GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT3 }; // m_thicknessTexture
+    GLenum drawBuffer[] = { GL_COLOR_ATTACHMENT0 }; // m_thicknessTexture
     glDrawBuffers(1, drawBuffer);
 
     // Clear linear depth texture
@@ -248,6 +248,7 @@ void SmoothRenderer::RenderThicknessTexture(GLuint particlesVAO, int particlesNu
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
+    glViewport(0, 0, m_windowWidth / 2, m_windowHeight / 2);
 
     // Draw
     glBindVertexArray(particlesVAO);
@@ -255,6 +256,7 @@ void SmoothRenderer::RenderThicknessTexture(GLuint particlesVAO, int particlesNu
 
     // Cleanup
     glBindVertexArray(0);
+    glViewport(0, 0, m_windowWidth, m_windowHeight);
     glDisable(GL_DEPTH_TEST);
     //glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
@@ -283,6 +285,7 @@ void SmoothRenderer::RenderFluid()
     m_combinedRenderingShader->setUnif("f_0", baseReflectance);
     m_combinedRenderingShader->setUnif("fluidRefractionIndex", m_fluidRefractionIndex);
     m_combinedRenderingShader->setUnif("fluidColor", m_fluidColor);
+    m_combinedRenderingShader->setUnif("attenuationCoefficients", m_attenuationCoefficients);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, GetSmoothingTargetDepthTexture());
@@ -350,12 +353,15 @@ void SmoothRenderer::HandleWindowResolutionChange(int newWindowWidth, int newWin
 
 void SmoothRenderer::GenerateFramebufferAndTextures()
 {
+    glGenFramebuffers(1, &m_FBO);
     glGenTextures(1, &m_defaultDepthTexture);
     glGenTextures(1, &m_depthTexture1);
     glGenTextures(1, &m_depthTexture2);
     glGenTextures(1, &m_normalsTexture);
+
+    glGenFramebuffers(1, &m_thicknessFBO);
+    glGenTextures(1, &m_thicknessDepthTexture);
     glGenTextures(1, &m_thicknessTexture);
-    glGenFramebuffers(1, &m_FBO);
 }
 
 void SmoothRenderer::ConfigureFramebuffer()
@@ -385,9 +391,14 @@ void SmoothRenderer::ConfigureFramebuffer()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+    glBindTexture(GL_TEXTURE_2D, m_thicknessDepthTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_windowWidth / 2, m_windowHeight / 2, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
     // Texture for fluid thickness
     glBindTexture(GL_TEXTURE_2D, m_thicknessTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, m_windowWidth, m_windowHeight, 0, GL_RED, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, m_windowWidth / 2, m_windowHeight / 2, 0, GL_RED, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -397,7 +408,10 @@ void SmoothRenderer::ConfigureFramebuffer()
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_depthTexture1, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_depthTexture2, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_normalsTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_thicknessTexture, 0);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, m_thicknessFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_thicknessDepthTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_thicknessTexture, 0);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
@@ -416,6 +430,7 @@ void SmoothRenderer::UpdateParameters()
     m_fluidRefractionIndex = renderingParameters.fluidRefractionIndex;
     m_particleRadius = renderingParameters.particleRadius;
     m_fluidColor = renderingParameters.fluidColor;
+    m_attenuationCoefficients = renderingParameters.attenuationCoefficients;
 }
 
 } // namespace rendering

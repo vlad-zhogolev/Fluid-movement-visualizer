@@ -17,6 +17,7 @@ RenderingParameters& RenderingParameters::GetInstance()
     instance.fluidRefractionIndex = 1.333f;
     instance.particleRadius = 0.06f;
     instance.fluidColor = glm::normalize(glm::vec3(15, 94, 156));
+    instance.attenuationCoefficients = glm::vec3(0.05f);
 
     return instance;
 }

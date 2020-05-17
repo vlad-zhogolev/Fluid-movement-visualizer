@@ -46,6 +46,7 @@ private:
     float m_fluidRefractionIndex = 1.333f; // water refraction index, TODO: move to UI
     float m_particleRadius = 0.06f; // TODO: move to UI
     glm::vec3 m_fluidColor;
+    glm::vec3 m_attenuationCoefficients;
 
     // Framebuffer and it's components
     GLuint m_FBO;
@@ -53,6 +54,9 @@ private:
     GLuint m_depthTexture1;
     GLuint m_depthTexture2;
     GLuint m_normalsTexture;
+
+    GLuint m_thicknessFBO;
+    GLuint m_thicknessDepthTexture;
     GLuint m_thicknessTexture;
 
     bool m_isFirstDepthTextureSource = true;

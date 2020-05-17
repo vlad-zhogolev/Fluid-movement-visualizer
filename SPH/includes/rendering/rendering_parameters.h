@@ -16,6 +16,7 @@ public:
     float particleRadius;
     
     glm::vec3 fluidColor;
+    glm::vec3 attenuationCoefficients;
 
     static RenderingParameters& GetInstance();
 };
