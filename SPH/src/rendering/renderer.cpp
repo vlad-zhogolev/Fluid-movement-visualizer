@@ -37,7 +37,7 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     // NanoGUI initializtion
 	m_nanoguiScreen =new nanogui::Screen();
 	m_nanoguiScreen->initialize(m_glfwWindow.get(), true);
-	m_nanoguiScreen->setSize(Eigen::Vector2i(800, 600));
+	m_nanoguiScreen->setSize(Eigen::Vector2i(1000, 750));
 
 	int width_, height_;
 	glfwGetFramebufferSize(m_glfwWindow.get(), &width_, &height_);
@@ -216,23 +216,40 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     m_scrollFormHelper->addVariable("Vorticity epsilon", simulationParameters.vorticityEpsilon)->setSpinnable(true);
 
     m_scrollFormHelper->addGroup("Rendering parameters");
-    auto* smoothingIterations = m_scrollFormHelper->addVariable("Smoothing iterations", renderingParameters.smoothStepsNumber);
-    smoothingIterations->setMinMaxValues(RenderingParameters::SMOOTH_STEPS_NUMBER_MIN, RenderingParameters::SMOOTH_STEPS_NUMBER_MAX);
-    auto* fluidRefractionIndex = m_scrollFormHelper->addVariable("Refraction index", renderingParameters.fluidRefractionIndex);
+    auto* smoothingIterations = m_scrollFormHelper->addVariable(
+        "Smoothing iterations", renderingParameters.smoothStepsNumber);
+    smoothingIterations->setMinMaxValues(
+        RenderingParameters::SMOOTH_STEPS_NUMBER_MIN, RenderingParameters::SMOOTH_STEPS_NUMBER_MAX);
+    auto* fluidRefractionIndex = m_scrollFormHelper->addVariable(
+        "Refraction index", renderingParameters.fluidRefractionIndex);
     auto* particleRadius = m_scrollFormHelper->addVariable("Particle radius", renderingParameters.particleRadius);
 
-    m_colorWheel = new nanogui::ColorWheel(m_scrollFormHelper->wrapper());
-    //auto colorWheel = new nanogui::ColorPicker(m_scrollFormHelper->wrapper());
-    m_scrollFormHelper->addWidget("Fluid color", m_colorWheel);
-    m_colorWheel->setColor(nanogui::Color(
+    auto* colorWheel = new nanogui::ColorWheel(m_scrollFormHelper->wrapper());
+    m_scrollFormHelper->addWidget("Fluid color", colorWheel);
+    colorWheel->setColor(nanogui::Color(
         renderingParameters.fluidColor.r, renderingParameters.fluidColor.g, renderingParameters.fluidColor.b, 1.0f));
-    m_colorWheel->setCallback([](const nanogui::Color& color) {
+    colorWheel->setCallback([](const nanogui::Color& color) {
         RenderingParameters& renderingParameters = RenderingParameters::GetInstance();
         renderingParameters.fluidColor.r = color.r();
         renderingParameters.fluidColor.g = color.g();
         renderingParameters.fluidColor.b = color.b();
-        std::cout << "Fluid color, r: " << renderingParameters.fluidColor.r << " g: " << renderingParameters.fluidColor.g << " b: " << renderingParameters.fluidColor.b << std::endl;
+        std::cout 
+            << "Fluid color,"
+            << " r: " << renderingParameters.fluidColor.r 
+            << " g: " << renderingParameters.fluidColor.g 
+            << " b: " << renderingParameters.fluidColor.b 
+            << std::endl;
     });
+
+    auto* attenuationRed = m_scrollFormHelper->addVariable("Attenuation, red", renderingParameters.attenuationCoefficients.r);
+    attenuationRed->setMinMaxValues(
+        RenderingParameters::ATTENUATION_COEFFICIENT_MIN, RenderingParameters::ATTENUATION_COEFFICIENT_MAX);
+    auto* attenuationGreen = m_scrollFormHelper->addVariable("Attenuation, green", renderingParameters.attenuationCoefficients.g);
+    attenuationGreen->setMinMaxValues(
+        RenderingParameters::ATTENUATION_COEFFICIENT_MIN, RenderingParameters::ATTENUATION_COEFFICIENT_MAX);
+    auto* attenuationBlue = m_scrollFormHelper->addVariable("Attenuation, blue", renderingParameters.attenuationCoefficients.b);
+    attenuationBlue->setMinMaxValues(
+        RenderingParameters::ATTENUATION_COEFFICIENT_MIN, RenderingParameters::ATTENUATION_COEFFICIENT_MAX);
 
     m_nanoguiScreen->performLayout();
 	m_nanoguiScreen->setVisible(true);

@@ -1,6 +1,9 @@
 #include <rendering/rendering_parameters.h>
 #include <glm/geometric.hpp>
 
+const float RenderingParameters::ATTENUATION_COEFFICIENT_MIN = 0.0f;
+const float RenderingParameters::ATTENUATION_COEFFICIENT_MAX = 1.0f;
+
 RenderingParameters& RenderingParameters::GetInstance()
 {
     static RenderingParameters instance;

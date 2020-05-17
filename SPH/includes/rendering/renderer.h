@@ -81,7 +81,6 @@ private:
 	nanogui::FormHelper* m_formHelper = nullptr;
     nanogui::ScrollFormHelper* m_scrollFormHelper = nullptr;
     nanogui::ref<nanogui::Window> m_scrollWindow;
-    nanogui::ref<nanogui::ColorWheel> m_colorWheel;
 	nanogui::Window* m_nanoguiWindow = nullptr;
     nanogui::Widget* m_widget = nullptr;
 	std::function<void()> m_nextFrameBtnCb;
