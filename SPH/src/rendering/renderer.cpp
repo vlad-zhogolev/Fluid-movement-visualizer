@@ -4,8 +4,9 @@
 
 #include <cstdlib>
 
-#include <GLFW\glfw3.h>
-#include <nanogui\nanogui.h>
+#include <GLFW/glfw3.h>
+#include <nanogui/nanogui.h>
+#include <nanogui/colorwheel.h>
 #include <glm/common.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #define STB_IMAGE_IMPLEMENTATION
@@ -56,6 +57,7 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     m_formHelper->addVariable("FPS", renderingParameters.fps)->setEditable(false);
     m_formHelper->addVariable("Current frame number", m_input->frameCount)->setEditable(false);
     m_formHelper->setFixedSize({ 0, 20 });
+
     m_formHelper->addGroup("Simulation controls");
     auto simulationControl = new nanogui::Widget(m_nanoguiWindow);
     m_formHelper->addWidget("", simulationControl);
@@ -213,6 +215,25 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     m_scrollFormHelper->addVariable("Viscosity iterations", simulationParameters.viscosityIterations)->setSpinnable(true);
     m_scrollFormHelper->addVariable("Vorticity epsilon", simulationParameters.vorticityEpsilon)->setSpinnable(true);
 
+    m_scrollFormHelper->addGroup("Rendering parameters");
+    auto* smoothingIterations = m_scrollFormHelper->addVariable("Smoothing iterations", renderingParameters.smoothStepsNumber);
+    smoothingIterations->setMinMaxValues(RenderingParameters::SMOOTH_STEPS_NUMBER_MIN, RenderingParameters::SMOOTH_STEPS_NUMBER_MAX);
+    auto* fluidRefractionIndex = m_scrollFormHelper->addVariable("Refraction index", renderingParameters.fluidRefractionIndex);
+    auto* particleRadius = m_scrollFormHelper->addVariable("Particle radius", renderingParameters.particleRadius);
+
+    m_colorWheel = new nanogui::ColorWheel(m_scrollFormHelper->wrapper());
+    //auto colorWheel = new nanogui::ColorPicker(m_scrollFormHelper->wrapper());
+    m_scrollFormHelper->addWidget("Fluid color", m_colorWheel);
+    m_colorWheel->setColor(nanogui::Color(
+        renderingParameters.fluidColor.r, renderingParameters.fluidColor.g, renderingParameters.fluidColor.b, 1.0f));
+    m_colorWheel->setCallback([](const nanogui::Color& color) {
+        RenderingParameters& renderingParameters = RenderingParameters::GetInstance();
+        renderingParameters.fluidColor.r = color.r();
+        renderingParameters.fluidColor.g = color.g();
+        renderingParameters.fluidColor.b = color.b();
+        std::cout << "Fluid color, r: " << renderingParameters.fluidColor.r << " g: " << renderingParameters.fluidColor.g << " b: " << renderingParameters.fluidColor.b << std::endl;
+    });
+
     m_nanoguiScreen->performLayout();
 	m_nanoguiScreen->setVisible(true);
 	
@@ -278,9 +299,9 @@ void Renderer::__window_size_callback(GLFWwindow* window, int width, int height)
     nanogui::Vector2i newPosition = { oldPosition[0] * widthChangeRatio, oldPosition[1] * heightChangeRatio };
     const int margin = 0;
 
-    std::cout << "Window width: " << m_nanoguiWindow->width() << " height: " << m_nanoguiWindow->height() << std::endl;
-    std::cout << "Screen width: " << m_nanoguiScreen->width() << " height: " << m_nanoguiScreen->height() << std::endl;
-    std::cout << std::endl;
+    // std::cout << "Window width: " << m_nanoguiWindow->width() << " height: " << m_nanoguiWindow->height() << std::endl;
+    // std::cout << "Screen width: " << m_nanoguiScreen->width() << " height: " << m_nanoguiScreen->height() << std::endl;
+    // std::cout << std::endl;
 
     if (newPosition[0] + m_nanoguiWindow->width() > m_nanoguiScreen->width())
     {
@@ -476,6 +497,8 @@ void Renderer::render(unsigned int pos, unsigned int iid, int nparticle)
 
 	m_formHelper->refresh();
     m_scrollFormHelper->refresh();
+
+
 
     if (!glfwWindowShouldClose(m_glfwWindow.get())) {
 		glfwPollEvents();

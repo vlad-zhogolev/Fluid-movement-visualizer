@@ -34,14 +34,18 @@ private:
     void GenerateFramebufferAndTextures();
     void ConfigureFramebuffer();
 
+    void UpdateParameters();
+
 private:
     int m_windowWidth;
     int m_windowHeight;
     Camera* m_camera = nullptr;
     GLuint m_skyboxTexture;
 
+    int m_smoothingIterations;
     float m_fluidRefractionIndex = 1.333f; // water refraction index, TODO: move to UI
     float m_particleRadius = 0.06f; // TODO: move to UI
+    glm::vec3 m_fluidColor;
 
     // Framebuffer and it's components
     GLuint m_FBO;

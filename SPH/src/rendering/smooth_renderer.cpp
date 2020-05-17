@@ -1,5 +1,6 @@
 #include <rendering/smooth_renderer.h>
 #include <rendering/camera.h>
+#include <rendering/rendering_parameters.h>
 #include <helper.h>
 #include <iostream>
 
@@ -89,6 +90,8 @@ SmoothRenderer::SmoothRenderer(int windowWidth, int windowHeight, Camera* camera
 
 void SmoothRenderer::Render(GLuint particlesVAO, int particlesNumber)
 {
+    UpdateParameters();
+
     RenderDepthTexture(particlesVAO, particlesNumber);
     SmoothDepthTexture();
     ExtractNormalsFromDepth();
@@ -163,8 +166,7 @@ void SmoothRenderer::SmoothDepthTexture()
     // TODO: move texture binding here (to glActiveTexture)
 
     m_isFirstDepthTextureSource = false;
-    const int smoothingIterations = 3; // TODO: add UI parameter
-    for (int i = 0; i < smoothingIterations; ++i)
+    for (int i = 0; i < m_smoothingIterations; ++i)
     {
         m_isFirstDepthTextureSource = !m_isFirstDepthTextureSource;
         glBindTexture(GL_TEXTURE_2D, GetSmoothingSourceDepthTexture());
@@ -280,6 +282,7 @@ void SmoothRenderer::RenderFluid()
     float baseReflectance = GetBaseReflectance();
     m_combinedRenderingShader->setUnif("f_0", baseReflectance);
     m_combinedRenderingShader->setUnif("fluidRefractionIndex", m_fluidRefractionIndex);
+    m_combinedRenderingShader->setUnif("fluidColor", m_fluidColor);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, GetSmoothingTargetDepthTexture());
@@ -404,6 +407,15 @@ void SmoothRenderer::ConfigureFramebuffer()
     // Cleanup
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void SmoothRenderer::UpdateParameters()
+{
+    auto& renderingParameters = RenderingParameters::GetInstance();
+    m_smoothingIterations = renderingParameters.smoothStepsNumber;
+    m_fluidRefractionIndex = renderingParameters.fluidRefractionIndex;
+    m_particleRadius = renderingParameters.particleRadius;
+    m_fluidColor = renderingParameters.fluidColor;
 }
 
 } // namespace rendering

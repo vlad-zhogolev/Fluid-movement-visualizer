@@ -17,6 +17,7 @@ uniform sampler2D normalsTexture;
 uniform sampler2D thicknessTexture;
 uniform samplerCube skyboxTexture;
 
+uniform vec3 fluidColor;
 uniform bool change;
 
 out vec4 FragColor;
@@ -91,7 +92,7 @@ vec4 CalculateColor()
     vec3 refractedDirection = refract(-directionToView, normal, airRefractionIndex / fluidRefractionIndex);
     vec3 refractedColor = GetSkyboxColor(refractedDirection);
 
-    vec3 fluidColor = normalize(vec3(15,94,156));
+    //vec3 fluidColor = vec3(15,94,156) / 256.f;
     vec3 attenuation = max(exp(-vec3(0.3f) * thickness), 0.2f);
 	refractedColor = mix(fluidColor, refractedColor, attenuation);
 
