@@ -81,7 +81,7 @@ void CalculateLambda(
     int3 gridDimension,
     const float3* positions,
     int particlesNumber,
-    float pho0,
+    float restDensityInverse,
     float lambdaEpsilon,
     float h,
     Func1 positionToCellCoorinatesConverter,
@@ -120,7 +120,7 @@ void CalculateLambda(
                     float3 positionDifference = positions[index] - positions[j];
                     float squaredPositionDifference = norm2(positionDifference);
                     densities[index] += poly6(squaredPositionDifference);
-                    float3 gradient = spiky(positionDifference) / pho0;
+                    float3 gradient = spiky(positionDifference) * restDensityInverse;
                     currentParticleGradient += gradient;
                     if (index != j)
                     {
@@ -131,8 +131,9 @@ void CalculateLambda(
         }
     }
 
-    squaredGradientsSum += norm2(currentParticleGradient); 
-    lambdas[index] = -(densities[index] / pho0 - 1.0f) / (squaredGradientsSum + lambdaEpsilon);
+    squaredGradientsSum += norm2(currentParticleGradient);
+    float constraint = densities[index] * restDensityInverse - 1.0f;
+    lambdas[index] = -constraint / (squaredGradientsSum + lambdaEpsilon);
 }
 
 template <typename Func1, typename Func2, typename Poly6, typename SpikyGradient>
@@ -145,7 +146,7 @@ void CalculateNewPositions(
     int3  gridDimension,
     const float* lambdas,
     int particlesNumber, 
-    float pho0,
+    float restDensityInverse,
     float h,
     float correctionCoefficient,
     float n_corr, 
@@ -194,7 +195,7 @@ void CalculateNewPositions(
         }
     }
 
-    deltaPosition = clamp(deltaPosition / pho0, -MAX_DP, MAX_DP);
+    deltaPosition = clamp(deltaPosition * restDensityInverse, -MAX_DP, MAX_DP);
     newPositions[i] = clamp(positions[i] + deltaPosition, lowerBoundary + LIM_EPS, upperBoundary - LIM_EPS);
     //deltaPositions[i] = clamp(deltaPosition, -MAX_DP, MAX_DP);
 }
