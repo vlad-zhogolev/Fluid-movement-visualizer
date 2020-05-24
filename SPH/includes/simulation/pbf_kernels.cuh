@@ -17,7 +17,7 @@ int GetGlobalThreadIndex_1D_1D()
 }
 
 __global__
-void ApplyForcesAndPredictPositions(
+void PredictPositions(
     const float3* positions,
     float3* velocities,
     float3* predictedPositions,

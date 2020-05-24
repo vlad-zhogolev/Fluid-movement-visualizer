@@ -127,11 +127,11 @@ private:
     float m_deltaTimeInverse;
 };
 
-void PositionBasedFluidSimulator::ApplyForcesAndPredictPositions()
+void PositionBasedFluidSimulator::PredictPositions()
 {
     const int gridSize = ceilDiv(m_particlesNumber, m_blockSize);
 
-    pbf::cuda::kernels::ApplyForcesAndPredictPositions<<<gridSize, m_blockSize>>>(
+    pbf::cuda::kernels::PredictPositions<<<gridSize, m_blockSize>>>(
         m_dPositions,
         m_dVelocities,
         m_dNewPositions, 

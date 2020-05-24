@@ -7,7 +7,7 @@ namespace cuda {
 namespace kernels {
 
 __global__
-void ApplyForcesAndPredictPositions(
+void PredictPositions(
     const float3* positions,
     float3* velocities,
     float3* predictedPositions,

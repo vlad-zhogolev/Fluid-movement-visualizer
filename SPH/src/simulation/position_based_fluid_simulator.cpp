@@ -62,7 +62,7 @@ void PositionBasedFluidSimulator::Step(
     UpdateSmoothingKernels();
 
     cudaDeviceSynchronize();
-    ApplyForcesAndPredictPositions();
+    PredictPositions();
     BuildUniformGrid();
     CorrectPosition();
     UpdateVelocity();

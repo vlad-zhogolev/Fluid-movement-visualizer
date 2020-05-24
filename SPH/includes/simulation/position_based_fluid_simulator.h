@@ -24,7 +24,7 @@ public:
     void UpdateParameters();
 
 private:
-    void ApplyForcesAndPredictPositions();
+    void PredictPositions();
     void BuildUniformGrid();
     void CorrectPosition();
     void UpdateVelocity();
