@@ -176,7 +176,7 @@ void PositionBasedFluidSimulator::BuildUniformGrid()
     cudaMemset(m_dCellStarts, 0, sizeof(m_dCellStarts[0]) * cellsNumber);
     cudaMemset(m_dCellEnds, 0, sizeof(m_dCellEnds[0]) * cellsNumber);
 
-    pbf::cuda::kernels::CalculateCellStartEnd<<<gridSize, m_blockSize, sharedMemorySize>>>(
+    pbf::cuda::kernels::FindCellStartEnd<<<gridSize, m_blockSize, sharedMemorySize>>>(
         m_dCellIds, m_dCellStarts, m_dCellEnds, m_particlesNumber);
 
     cudaDeviceSynchronize();

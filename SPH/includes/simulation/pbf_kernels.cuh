@@ -26,7 +26,7 @@ void PredictPositions(
     float   deltaTime);
 
 __global__
-void CalculateCellStartEnd(
+void FindCellStartEnd(
     unsigned int* cellIds,
     unsigned int* cellStarts,
     unsigned int* cellEnds,
