@@ -2,6 +2,12 @@
 #include <helper.h>
 #include <helper_math.h>
 
+namespace pbf {
+
+namespace cuda {
+
+namespace kernels {
+
 // 1D grid of 1D blocks
 __device__
 int getGlobalIdx_1D_1D()
@@ -10,7 +16,7 @@ int getGlobalIdx_1D_1D()
 }
 
 __global__
-void ApplyForcesAndPredictPositionsKernel(
+void ApplyForcesAndPredictPositions(
     const float3* positions,
     float3* velocities,
     float3* predictedPositions,
@@ -38,7 +44,7 @@ void CalculateCellStartEnd(
     extern __shared__ unsigned int sharedCellIds[];
 
     int index = blockIdx.x * blockDim.x + threadIdx.x;
-    
+
     if (index < particlesNumber)
     {
         sharedCellIds[threadIdx.x + 1] = cellIds[index];
@@ -97,7 +103,7 @@ void CalculateLambda(
     SpikyGradient spiky)
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
-    
+
     if (index >= particlesNumber)
     {
         return;
@@ -152,11 +158,11 @@ void CalculateNewPositions(
     const unsigned int* cellEnds,
     int3  gridDimension,
     const float* lambdas,
-    int particlesNumber, 
+    int particlesNumber,
     float restDensityInverse,
     float h,
     float correctionCoefficient,
-    float n_corr, 
+    float n_corr,
     Func1 positionToCellCoorinatesConverter,
     Func2 cellCoordinatesToCellIdConverter,
     float3 upperBoundary,
@@ -170,7 +176,7 @@ void CalculateNewPositions(
     {
         return;
     }
-    
+
     float3 deltaPosition{};
 
     for (int xOffset = -1; xOffset <= 1; ++xOffset)
@@ -419,3 +425,10 @@ void ApplyXSPHViscosity(
     }
     newVelocities[index] = velocities[index] + c_XSPH * accumulatedVelocity;
 }
+
+
+} // namespace kernels
+
+} // namespace cuda
+
+} // namespace pbf
