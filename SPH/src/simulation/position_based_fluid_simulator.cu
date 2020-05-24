@@ -21,7 +21,7 @@ public:
         , m_cellLengthInverse(1.0f / cellLength) {}
 
     __host__ __device__
-    int3 operator()(float3 position)
+    int3 operator()(float3 position) const
     {
         float3 localPosition = position - m_lowerBoundary;
         int3 cellIndices = make_int3(localPosition * m_cellLengthInverse);
@@ -43,14 +43,14 @@ public:
     CellCoordinatesToCellIdConverter(const int3 &gridDimension) : m_gridDimension(gridDimension) {}
 
     __host__ __device__
-    inline int operator()(int cellX, int cellY, int cellZ)
+    inline int operator()(int cellX, int cellY, int cellZ) const
     {
         int cellId = cellX * m_gridDimension.y * m_gridDimension.z + cellY * m_gridDimension.z + cellZ;
         return cellId;
     }
 
     __host__ __device__
-    inline int operator()(int3 cellCoordinates)
+    inline int operator()(int3 cellCoordinates) const
     {
         int cellId = operator()(cellCoordinates.x, cellCoordinates.y, cellCoordinates.z);
         return cellId;
@@ -69,7 +69,7 @@ public:
         , m_cellCoordinatesToCellIdConverter(gridDimension) {}
 
     __host__ __device__
-    int operator()(float3 position)
+    int operator()(float3 position) const
     {
         int3 cellIndices = m_positionToCellCoordinatesConverter(position);
         int cellId = m_cellCoordinatesToCellIdConverter(cellIndices.x, cellIndices.y, cellIndices.z);
@@ -91,7 +91,7 @@ public:
         , m_coefficient(315.f * powf(1.f / kernelRadius, 9) / (64.f * CUDART_PI_F)) {}
 
     __host__ __device__
-    float operator()(float squaredDistance)
+    float operator()(float squaredDistance) const
     {
         if (squaredDistance >= m_kernelRadius2)
         {
@@ -115,7 +115,7 @@ public:
         , m_coefficient(-45.f / (CUDART_PI_F * powf(kernelRadius, 6))) {}
 
     __host__ __device__
-    float3 operator()(float3 vector)
+    float3 operator()(float3 vector) const
     {
         float vectorLength = length(vector);
         if (vectorLength < KERNEL_EPS || vectorLength >= m_kernelRadius)
@@ -140,7 +140,7 @@ public:
         , m_lowerBoundary(lowerBoundary) {}
 
     __host__ __device__
-    float3 operator()(const thrust::tuple<float3, float3>& tuple)
+    float3 operator()(const thrust::tuple<float3, float3>& tuple) const
     {
         float3 position = thrust::get<0>(tuple);
         float3 deltaPosition = thrust::get<1>(tuple);
@@ -160,7 +160,7 @@ public:
     VelocityUpdater(float deltaTime) : m_deltaTimeInverse(1.f / deltaTime) {}
 
     __host__ __device__
-    float3 operator()(const thrust::tuple<float3, float3>& tuple)
+    float3 operator()(const thrust::tuple<float3, float3>& tuple) const
     {
         float3 pos = thrust::get<0>(tuple);
         float3 npos = thrust::get<1>(tuple);
@@ -230,6 +230,9 @@ void PositionBasedFluidSimulator::BuildUniformGrid()
 
 void PositionBasedFluidSimulator::CorrectPosition() 
 {
+    const Poly6Kernel poly6Kernel(m_h);
+    const SpikyGradientKernel spikyGradientKernel(m_h);
+
     bool writeToNewPositions = false;
     for (int i = 0; i < m_substepsNumber; ++i)
     {
@@ -247,10 +250,10 @@ void PositionBasedFluidSimulator::CorrectPosition()
             m_h,
             PositionToCellCoorinatesConverter(m_lowerBoundary, m_gridDimension, m_h),
             CellCoordinatesToCellIdConverter(m_gridDimension),
-            Poly6Kernel(m_h),
-            SpikyGradientKernel(m_h));
+            poly6Kernel,
+            spikyGradientKernel);
 
-        m_coef_corr = -m_k_corr / powf(Poly6Kernel(m_h)(m_delta_q*m_delta_q), m_n_corr);
+        m_coef_corr = -m_k_corr / powf(poly6Kernel(m_delta_q * m_delta_q), m_n_corr);
 
         pbf::cuda::kernels::CalculateNewPositions<<<gridSize, m_blockSize>>>(
             writeToNewPositions ? m_dTemporaryPositions : m_dNewPositions,
@@ -268,8 +271,8 @@ void PositionBasedFluidSimulator::CorrectPosition()
             CellCoordinatesToCellIdConverter(m_gridDimension),
             m_upperBoundary,
             m_lowerBoundary,
-            Poly6Kernel(m_h),
-            SpikyGradientKernel(m_h));
+            poly6Kernel,
+            spikyGradientKernel);
         writeToNewPositions = !writeToNewPositions;
     }
     if (writeToNewPositions)
@@ -304,6 +307,9 @@ void PositionBasedFluidSimulator::UpdateVelocity()
 void PositionBasedFluidSimulator::CorrectVelocity() {
     
     const int gridSize = ceilDiv(m_particlesNumber, m_blockSize);
+
+    const Poly6Kernel poly6Kernel(m_h);
+    const SpikyGradientKernel spikyGradientKernel(m_h);
     const PositionToCellCoorinatesConverter positionToCellCoorinatesConverter(
         m_lowerBoundary, m_gridDimension, m_h);
     const CellCoordinatesToCellIdConverter cellCoordinatesToCellIdConverter(m_gridDimension);
@@ -319,7 +325,7 @@ void PositionBasedFluidSimulator::CorrectVelocity() {
         m_h,
         positionToCellCoorinatesConverter,
         cellCoordinatesToCellIdConverter,
-        SpikyGradientKernel(m_h));
+        spikyGradientKernel);
     
     pbf::cuda::kernels::ApplyVorticityConfinement<<<gridSize, m_blockSize>>> (
         m_dCellStarts,
@@ -334,7 +340,7 @@ void PositionBasedFluidSimulator::CorrectVelocity() {
         m_deltaTime,
         positionToCellCoorinatesConverter,
         cellCoordinatesToCellIdConverter,
-        SpikyGradientKernel(m_h));
+        spikyGradientKernel);
 
     if (m_c_XSPH > 0.5)
     {
@@ -354,7 +360,7 @@ void PositionBasedFluidSimulator::CorrectVelocity() {
                 m_h,
                 positionToCellCoorinatesConverter,
                 cellCoordinatesToCellIdConverter,
-                Poly6Kernel(m_h));
+                poly6Kernel);
             writeToNewVelocities = !writeToNewVelocities;
         }
         if (writeToNewVelocities)
@@ -377,7 +383,7 @@ void PositionBasedFluidSimulator::CorrectVelocity() {
             m_h,
             positionToCellCoorinatesConverter,
             cellCoordinatesToCellIdConverter,
-            Poly6Kernel(m_h));
+            poly6Kernel);
     }
     cudaDeviceSynchronize();
 }
