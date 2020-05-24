@@ -264,14 +264,22 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 	m_particle_shader = new Shader(Path("shaders/particle.vert"), Path("shaders/particle.frag"));
     m_sky_shader = new Shader(Path("shaders/skybox.vert"), Path("shaders/skybox.frag"));
 
-	char *sky_faces[] = { 
-		"skybox/right.jpg",		
-		"skybox/left.jpg",		
-		"skybox/front.jpg",		
-		"skybox/back.jpg",		
-		"skybox/top.jpg",		
-		"skybox/bottom.jpg"		
-	};
+	// char *sky_faces[] = { 
+	// 	"skybox/right.jpg",		
+	// 	"skybox/left.jpg",		
+	// 	"skybox/front.jpg",		
+	// 	"skybox/back.jpg",		
+	// 	"skybox/top.jpg",		
+	// 	"skybox/bottom.jpg"		
+	// };
+    char *sky_faces[] = {
+        "skybox/checkerboard/checkerboard.jpg",
+        "skybox/checkerboard/checkerboard.jpg",
+        "skybox/checkerboard/checkerboard.jpg",
+        "skybox/checkerboard/checkerboard.jpg",
+        "skybox/checkerboard/checkerboard.jpg",
+        "skybox/checkerboard/checkerboard.jpg"
+    };
 	d_sky_texture = loadCubemap(sky_faces);
 	
 	glGenVertexArrays(1, &d_vao);
@@ -376,6 +384,18 @@ void Renderer::__key_callback(GLFWwindow *w, int key, int scancode, int action, 
     {
         Input::getInstance().running = !Input::getInstance().running;
     }
+    else if (key == GLFW_KEY_N && action == GLFW_RELEASE)
+    {
+        auto pos = m_camera->getPos();
+        auto front = m_camera->getFront();
+        auto up = m_camera->getUp();
+        std::cout << "camera pos: " << pos.x << " " << pos.y << " " << pos.z << std::endl;
+        std::cout << "camera front: " << front.x << " " << front.y << " " << front.z << std::endl;
+        std::cout << "camera pos: " << up.x << " " << up.y << " " << up.z << std::endl;
+        m_camera->setPos(glm::vec3(-0.789017, 1.1729, 0.948009));
+        m_camera->setFront(glm::vec3(0.536186, -0.802564, -0.35533));
+        m_camera->setUp(glm::vec3(0.191918, -0.287263, 0.938425));
+    }
     else
     {
         m_nanoguiScreen->keyCallbackEvent(key, scancode, action, mods);
@@ -455,7 +475,8 @@ void Renderer::__render() {
         m_smoothRenderer->Render(d_vao, m_nparticle);
     }
 
-	if (m_box_shader->loaded())
+	//if (m_box_shader->loaded())
+    if (false)
     {
 		m_box_shader->use();
 		m_camera->use(Shader::now());

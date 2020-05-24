@@ -182,7 +182,7 @@ void PositionBasedFluidSimulator::ApplyForcesAndPredictPositions()
         m_dVelocities,
         m_dNewPositions, 
         m_particlesNumber,
-        make_float3(0, m_gravity, -9.8f),
+        make_float3(0, 0, -m_gravity),
         m_deltaTime);
 
     cudaDeviceSynchronize();

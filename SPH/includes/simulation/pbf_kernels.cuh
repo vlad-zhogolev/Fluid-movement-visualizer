@@ -2,6 +2,13 @@
 #include <helper.h>
 #include <helper_math.h>
 
+// 1D grid of 1D blocks
+__device__
+int getGlobalIdx_1D_1D()
+{
+    return blockIdx.x * blockDim.x + threadIdx.x;
+}
+
 __global__
 void ApplyForcesAndPredictPositionsKernel(
     const float3* positions,

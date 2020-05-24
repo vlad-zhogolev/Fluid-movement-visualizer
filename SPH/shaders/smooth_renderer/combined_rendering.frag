@@ -2,6 +2,9 @@
 
 in vec2 ScreenCoordinates;
 
+uniform float far;
+uniform float near;
+
 uniform float inverseProjectionXX;
 uniform float inverseProjectionYY;
 uniform float projectionZZ;
@@ -24,6 +27,8 @@ uniform bool change;
 out vec4 FragColor;
 
 const float airRefractionIndex = 1.0f;
+
+const float DepthThreshold = 40;
 
 float ProjectDepth(float linearDepth)
 {
@@ -78,6 +83,46 @@ float FreshnelFunction(float f_0, float cosTheta)
     return f_0 + (1 - f_0) * pow(1 - cosTheta, 5);
 }
 
+float DiscardIfDepthGreaterThan(float depthThreshold)
+{
+    float linearDepth = texture(depthTexture, ScreenCoordinates).x;
+    if (linearDepth > depthThreshold) 
+    {
+        discard;
+    }
+    return linearDepth;
+}
+
+vec4 GetDepthColor()
+{
+    float linearDepth = DiscardIfDepthGreaterThan(DepthThreshold);
+
+    // See: https://learnopengl.com/Advanced-OpenGL/Depth-testing
+    float depth =  ((2.0f * far * near) / linearDepth - (far + near)) / (near - far);
+    float color = ConvertCoorinateDeviceToScreen(depth);
+    
+    return vec4(color, color, color, 1.0f);
+}
+
+vec4 GetThicknessColor()
+{
+    DiscardIfDepthGreaterThan(DepthThreshold);
+
+    float thickness = texture(thicknessTexture, ScreenCoordinates).x;
+    float color = thickness;
+
+    return vec4(color, color, color, 1.0f);
+}
+
+vec4 GetNormalColor()
+{
+    DiscardIfDepthGreaterThan(DepthThreshold);
+
+    vec3 normal = texture(normalsTexture, ScreenCoordinates).xyz;
+
+    return vec4(normal.x, normal.y, normal.z, 1.0f);
+}
+
 vec4 CalculateColor()
 {
 	vec3 viewFragmentCoordinates = GetViewSpaceFragmentCoordinates();
@@ -109,4 +154,7 @@ void main()
     gl_FragDepth = ConvertCoorinateDeviceToScreen(projectedDepth);
 
     FragColor = CalculateColor();
+    //FragColor = GetDepthColor();
+    //FragColor = GetThicknessColor();
+    //FragColor = GetNormalColor();
 }

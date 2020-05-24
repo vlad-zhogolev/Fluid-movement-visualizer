@@ -274,6 +274,9 @@ void SmoothRenderer::RenderFluid()
 
     ProjectionInfo projectionInfo = m_camera->getProjectionInfo();
     // Set projection matrix elements
+    m_combinedRenderingShader->setUnif("far", projectionInfo.f);
+    m_combinedRenderingShader->setUnif("near", projectionInfo.n);
+
     m_combinedRenderingShader->setUnif("inverseProjectionXX",  projectionInfo.projectionXX);
     m_combinedRenderingShader->setUnif("inverseProjectionYY",  projectionInfo.projectionYY);
     m_combinedRenderingShader->setUnif("projectionZZ", projectionInfo.projectionZZ);

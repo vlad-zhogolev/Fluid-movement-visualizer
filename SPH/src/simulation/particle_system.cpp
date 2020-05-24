@@ -62,6 +62,11 @@ void ParticleSystem::PerformSimulationStep()
     {
         return;
     }
+
+    //if (input.frameCount > 180 && !input.nextFrame)
+    //{
+    //    return;
+    //}
     input.nextFrame = false;
     ++input.frameCount;
 
