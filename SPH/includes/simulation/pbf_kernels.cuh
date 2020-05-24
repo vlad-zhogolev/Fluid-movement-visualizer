@@ -1,4 +1,5 @@
 #pragma once
+
 #include <helper.h>
 #include <helper_math.h>
 
@@ -8,9 +9,9 @@ namespace cuda {
 
 namespace kernels {
 
-// 1D grid of 1D blocks
 __device__
-int getGlobalIdx_1D_1D()
+__forceinline__
+int GetGlobalThreadIndex_1D_1D()
 {
     return blockIdx.x * blockDim.x + threadIdx.x;
 }
@@ -22,67 +23,14 @@ void ApplyForcesAndPredictPositions(
     float3* predictedPositions,
     int     particleNumber,
     float3  gravityAcceleration,
-    float   deltaTime)
-{
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
-    if (index >= particleNumber)
-    {
-        return;
-    }
-
-    velocities[index] += gravityAcceleration * deltaTime;
-    predictedPositions[index] = positions[index] + velocities[index] * deltaTime;
-}
+    float   deltaTime);
 
 __global__
 void CalculateCellStartEnd(
     unsigned int* cellIds,
     unsigned int* cellStarts,
     unsigned int* cellEnds,
-    int particlesNumber)
-{
-    extern __shared__ unsigned int sharedCellIds[];
-
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (index < particlesNumber)
-    {
-        sharedCellIds[threadIdx.x + 1] = cellIds[index];
-        // skip writing previous id for first particle (because there is no particle before it)
-        if (index > 0 && threadIdx.x == 0)
-        {
-            sharedCellIds[0] = cellIds[index - 1];
-        }
-    }
-
-    __syncthreads();
-
-    if (index < particlesNumber)
-    {
-        // If current particle has a different cell index to the previous
-        // particle then it must be the first particle in the cell,
-        // so store the index of this particle in the cell.
-        // As it isn't the first particle, it must also be the cell end of
-        // the previous particle's cell.
-
-        unsigned int currentCellId = sharedCellIds[threadIdx.x + 1];
-        unsigned int previousCellId = sharedCellIds[threadIdx.x];
-
-        if (index == 0 || currentCellId != previousCellId)
-        {
-            cellStarts[currentCellId] = index;
-            if (index != 0)
-            {
-                cellEnds[previousCellId] = index;
-            }
-        }
-
-        if (index == particlesNumber - 1)
-        {
-            cellEnds[currentCellId] = particlesNumber;
-        }
-    }
-}
+    int particlesNumber);
 
 template <typename Func1, typename Func2, typename Poly6, typename SpikyGradient>
 __global__
@@ -102,7 +50,7 @@ void CalculateLambda(
     Poly6 poly6,
     SpikyGradient spiky)
 {
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    int index = GetGlobalThreadIndex_1D_1D();
 
     if (index >= particlesNumber)
     {
@@ -170,7 +118,7 @@ void CalculateNewPositions(
     Poly6 poly6,
     SpikyGradient spiky)
 {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int i = GetGlobalThreadIndex_1D_1D();
 
     if (i >= particlesNumber)
     {
@@ -228,7 +176,7 @@ void CalculateVorticity(
     Func2 cellCoordinatesToCellIdConverter,
     SpikyGradient spikyGradient)
 {
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    int index = GetGlobalThreadIndex_1D_1D();
 
     if (index >= particleNumber)
     {
@@ -341,7 +289,7 @@ void ApplyVorticityConfinement(
     Func2 cellCoordinatesToCellIdConverter,
     SpikyGradient spikyGradient)
 {
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    int index = GetGlobalThreadIndex_1D_1D();
 
     if (index >= particleNumber)
     {
@@ -389,7 +337,7 @@ void ApplyXSPHViscosity(
     Func2 cellCoordinatesToCellIdConverter,
     Poly6 poly6)
 {
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    int index = GetGlobalThreadIndex_1D_1D();
 
     if (index >= particleNumber)
     {

@@ -177,7 +177,7 @@ void PositionBasedFluidSimulator::ApplyForcesAndPredictPositions()
 {
     const int gridSize = ceilDiv(m_particlesNumber, m_blockSize);
 
-    ApplyForcesAndPredictPositionsKernel<<<gridSize, m_blockSize>>>(
+    pbf::cuda::kernels::ApplyForcesAndPredictPositions<<<gridSize, m_blockSize>>>(
         m_dPositions,
         m_dVelocities,
         m_dNewPositions, 
@@ -222,7 +222,7 @@ void PositionBasedFluidSimulator::BuildUniformGrid()
     cudaMemset(m_dCellStarts, 0, sizeof(m_dCellStarts[0]) * cellsNumber);
     cudaMemset(m_dCellEnds, 0, sizeof(m_dCellEnds[0]) * cellsNumber);
 
-    CalculateCellStartEnd<<<gridSize, m_blockSize, sharedMemorySize>>>(
+    pbf::cuda::kernels::CalculateCellStartEnd<<<gridSize, m_blockSize, sharedMemorySize>>>(
         m_dCellIds, m_dCellStarts, m_dCellEnds, m_particlesNumber);
 
     cudaDeviceSynchronize();
@@ -234,7 +234,7 @@ void PositionBasedFluidSimulator::CorrectPosition()
     for (int i = 0; i < m_substepsNumber; ++i)
     {
         const int gridSize = ceilDiv(m_particlesNumber, m_blockSize);
-        CalculateLambda <<<gridSize, m_blockSize>>>(
+        pbf::cuda::kernels::CalculateLambda<<<gridSize, m_blockSize>>>(
             m_dLambdas,
             m_dDensities,
             m_dCellStarts,
@@ -252,7 +252,7 @@ void PositionBasedFluidSimulator::CorrectPosition()
 
         m_coef_corr = -m_k_corr / powf(Poly6Kernel(m_h)(m_delta_q*m_delta_q), m_n_corr);
 
-        CalculateNewPositions <<<gridSize, m_blockSize>>>(
+        pbf::cuda::kernels::CalculateNewPositions<<<gridSize, m_blockSize>>>(
             writeToNewPositions ? m_dTemporaryPositions : m_dNewPositions,
             writeToNewPositions ? m_dNewPositions : m_dTemporaryPositions,
             m_dCellStarts,
@@ -308,7 +308,7 @@ void PositionBasedFluidSimulator::CorrectVelocity() {
         m_lowerBoundary, m_gridDimension, m_h);
     const CellCoordinatesToCellIdConverter cellCoordinatesToCellIdConverter(m_gridDimension);
 
-    CalculateVorticity<<<gridSize, m_blockSize>>>(
+    pbf::cuda::kernels::CalculateVorticity<<<gridSize, m_blockSize>>>(
         m_dCellStarts,
         m_dCellEnds,
         m_gridDimension,
@@ -321,7 +321,7 @@ void PositionBasedFluidSimulator::CorrectVelocity() {
         cellCoordinatesToCellIdConverter,
         SpikyGradientKernel(m_h));
     
-    ApplyVorticityConfinement<<<gridSize, m_blockSize>>> (
+    pbf::cuda::kernels::ApplyVorticityConfinement<<<gridSize, m_blockSize>>> (
         m_dCellStarts,
         m_dCellEnds,
         m_gridDimension,
@@ -341,7 +341,7 @@ void PositionBasedFluidSimulator::CorrectVelocity() {
         bool writeToNewVelocities = true;
         for (int i = 0; i < m_viscosityIterations; ++i)
         {
-            ApplyXSPHViscosity<<<gridSize, m_blockSize>>>(
+            pbf::cuda::kernels::ApplyXSPHViscosity<<<gridSize, m_blockSize>>>(
                 m_dPositions,
                 writeToNewVelocities ? m_dVelocities : m_dNewVelocities,
                 m_dDensities,
@@ -364,7 +364,7 @@ void PositionBasedFluidSimulator::CorrectVelocity() {
     }
     else
     {
-        ApplyXSPHViscosity<<<gridSize, m_blockSize>>>(
+        pbf::cuda::kernels::ApplyXSPHViscosity<<<gridSize, m_blockSize>>>(
             m_dPositions,
             m_dVelocities,
             m_dDensities,
@@ -379,10 +379,5 @@ void PositionBasedFluidSimulator::CorrectVelocity() {
             cellCoordinatesToCellIdConverter,
             Poly6Kernel(m_h));
     }
-
-    
-
-    //thrust::device_ptr<float3> newVelocities(m_dNewVelocities), velocities(m_dTemporaryPositions);
-    //thrust::copy_n(velocities, m_particlesNumber, newVelocities);
     cudaDeviceSynchronize();
 }

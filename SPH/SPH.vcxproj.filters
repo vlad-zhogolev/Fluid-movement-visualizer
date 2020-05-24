@@ -3,6 +3,7 @@
   <ItemGroup>
     <CudaCompile Include="includes\simulation\pbf_kernels.cuh" />
     <CudaCompile Include="src\simulation\position_based_fluid_simulator.cu" />
+    <CudaCompile Include="src\simulation\pbf_kernels.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\src\glad.c" />
