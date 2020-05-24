@@ -1,7 +1,8 @@
 #pragma once
 
 #include <helper.h>
-#include <simulation/simulation_parameters.h>>
+#include <simulation/simulation_parameters.h>
+#include <simulation/pbf_smoothing_kernels.cuh>
 #include <math.h>
 #include <helper_cuda.h>
 
@@ -28,6 +29,8 @@ private:
     void CorrectPosition();
     void UpdateVelocity();
     void CorrectVelocity();
+
+    void UpdateSmoothingKernels();
 
 private:
     float3* m_dPositions;
@@ -61,6 +64,9 @@ private:
     float3 m_upperBoundary;
     float3 m_lowerBoundary;
     int3 m_gridDimension;
+
+    Poly6Kernel m_poly6Kernel = Poly6Kernel(1.f);
+    SpikyGradientKernel m_spikyGradientKernel = SpikyGradientKernel(1.f);
 
     int m_blockSize = 512;
 };

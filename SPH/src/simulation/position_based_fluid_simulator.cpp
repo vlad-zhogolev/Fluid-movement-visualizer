@@ -59,6 +59,7 @@ void PositionBasedFluidSimulator::Step(
     checkCudaErrors(cudaGraphicsResourceGetMappedPointer((void**)&m_dNewPositions, &size, newPositionsResource));
     checkCudaErrors(cudaGraphicsResourceGetMappedPointer((void**)&m_dNewVelocities, &size, newVelocitiesResource));
 
+    UpdateSmoothingKernels();
 
     cudaDeviceSynchronize();
     ApplyForcesAndPredictPositions();
@@ -107,4 +108,10 @@ PositionBasedFluidSimulator::~PositionBasedFluidSimulator()
     checkCudaErrors(cudaFree(m_dDensities));
     checkCudaErrors(cudaFree(m_dTemporaryPositions));
     checkCudaErrors(cudaFree(m_dCurl));
+}
+
+void PositionBasedFluidSimulator::UpdateSmoothingKernels()
+{
+    m_poly6Kernel = Poly6Kernel(m_h);
+    m_spikyGradientKernel = SpikyGradientKernel(m_h);
 }
