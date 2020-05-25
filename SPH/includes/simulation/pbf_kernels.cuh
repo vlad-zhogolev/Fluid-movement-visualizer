@@ -47,8 +47,8 @@ void CalculateLambda(
     float h,
     Func1 positionToCellCoorinatesConverter,
     Func2 cellCoordinatesToCellIdConverter,
-    Poly6 poly6,
-    SpikyGradient spiky)
+    Poly6 poly6Kernel,
+    SpikyGradient spikyGradientKernel)
 {
     int index = GetGlobalThreadIndex_1D_1D();
 
@@ -80,8 +80,8 @@ void CalculateLambda(
                 {
                     float3 positionDifference = positions[index] - positions[j];
                     float squaredPositionDifference = norm2(positionDifference);
-                    densities[index] += poly6(squaredPositionDifference);
-                    float3 gradient = spiky(positionDifference) * restDensityInverse;
+                    densities[index] += poly6Kernel(squaredPositionDifference);
+                    float3 gradient = spikyGradientKernel(positionDifference) * restDensityInverse;
                     currentParticleGradient += gradient;
                     if (index != j)
                     {
@@ -115,12 +115,12 @@ void CalculateNewPositions(
     Func2 cellCoordinatesToCellIdConverter,
     float3 upperBoundary,
     float3 lowerBoundary,
-    Poly6 poly6,
-    SpikyGradient spiky)
+    Poly6 poly6Kernel,
+    SpikyGradient spikyGradientKernel)
 {
-    int i = GetGlobalThreadIndex_1D_1D();
+    int index = GetGlobalThreadIndex_1D_1D();
 
-    if (i >= particlesNumber)
+    if (index >= particlesNumber)
     {
         return;
     }
@@ -133,7 +133,7 @@ void CalculateNewPositions(
         {
             for (int zOffset = -1; zOffset <= 1; ++zOffset)
             {
-                int3 cellCoordinates = positionToCellCoorinatesConverter(positions[i]);
+                int3 cellCoordinates = positionToCellCoorinatesConverter(positions[index]);
                 int x = cellCoordinates.x + xOffset;
                 int y = cellCoordinates.y + yOffset;
                 int z = cellCoordinates.z + zOffset;
@@ -144,20 +144,20 @@ void CalculateNewPositions(
                 int cellId = cellCoordinatesToCellIdConverter(x, y, z);
                 for (int j = cellStarts[cellId]; j < cellEnds[cellId]; ++j)
                 {
-                    if (i == j)
-                    {
-                        continue;
-                    }
-                    float3 p = positions[i] - positions[j];
-                    float corr = correctionCoefficient * powf(poly6(norm2(p)), n_corr);
-                    deltaPosition += (lambdas[i] + lambdas[j] + corr) * spiky(p);
+                    //if (index == j)
+                    //{
+                    //    continue;
+                    //}
+                    float3 positionDifference = positions[index] - positions[j];
+                    float lambdaCorr = correctionCoefficient * powf(poly6Kernel(norm2(positionDifference)), n_corr);
+                    deltaPosition += (lambdas[index] + lambdas[j] + lambdaCorr) * spikyGradientKernel(positionDifference);
                 }
             }
         }
     }
 
     deltaPosition = clamp(deltaPosition * restDensityInverse, -MAX_DP, MAX_DP);
-    newPositions[i] = clamp(positions[i] + deltaPosition, lowerBoundary + LIM_EPS, upperBoundary - LIM_EPS);
+    newPositions[index] = clamp(positions[index] + deltaPosition, lowerBoundary + LIM_EPS, upperBoundary - LIM_EPS);
     //deltaPositions[i] = clamp(deltaPosition, -MAX_DP, MAX_DP);
 }
 
@@ -204,24 +204,24 @@ void CalculateVorticity(
                 {
 
                     float3 positionDifference = positions[index] - positions[j];
-                    if (length(positionDifference) >= h || j == index)
-                    {
-                        continue;
-                        //return make_float3(0.0f, 0.0f, 0.0f);
-                    }
+                    //if (length(positionDifference) >= h || j == index)
+                    //{
+                    //    continue;
+                    //    //return make_float3(0.0f, 0.0f, 0.0f);
+                    //}
                     float3 gradient = spikyGradient(positionDifference);
-                    float3 velocityDifference = velocities[index] - velocities[j];
+                    float3 velocityDifference = velocities[j] - velocities[index];
                     curl[index] += cross(velocityDifference, gradient);
                 }
             }
         }
     }
-    curl[index] = -curl[index];
+    //curl[index] = -curl[index];
 }
 
 template<typename Func1, typename Func2, typename SpikyGradient>
 __device__
-float3 CalculateVorticityGradient(
+float3 CalculateEta(
     int index,
     float3* position,
     float3* curl,
@@ -296,7 +296,7 @@ void ApplyVorticityConfinement(
         return;
     }
 
-    float3 vorticityGradient = CalculateVorticityGradient(
+    float3 eta = CalculateEta(
         index,
         position,
         curl,
@@ -309,14 +309,14 @@ void ApplyVorticityConfinement(
         cellCoordinatesToCellIdConverter,
         spikyGradient);
 
-    float vorticityGradientLength = length(vorticityGradient);
-    float3 normalizedVorticityGradient{};
-    if (vorticityGradientLength > 1.0e-4f)  // TODO: define some parameter for this epsilon value
+    float etaLength = length(eta);
+    float3 normalizedEta{};
+    if (etaLength > 1.0e-4f)  // TODO: define some parameter for this epsilon value
     {
-        normalizedVorticityGradient = normalize(vorticityGradient);
+        normalizedEta = normalize(eta);
     }
 
-    float3 vorticityForce = vorticityEpsilon * cross(normalizedVorticityGradient, curl[index]);
+    float3 vorticityForce = vorticityEpsilon * cross(normalizedEta, curl[index]);
     newVelocity[index] += vorticityForce * deltaTime;
 }
 
@@ -331,11 +331,11 @@ void ApplyXSPHViscosity(
     unsigned int* cellEnds,
     int3 gridDimension,
     int particleNumber,
-    float c_XSPH,
+    float cXSPH,
     float h,
     Func1 positionToCellCoorinatesConverter,
     Func2 cellCoordinatesToCellIdConverter,
-    Poly6 poly6)
+    Poly6 poly6Kernel)
 {
     int index = GetGlobalThreadIndex_1D_1D();
 
@@ -366,12 +366,12 @@ void ApplyXSPHViscosity(
                     float3 positionDifference = positions[index] - positions[j];
                     float3 velocityDifference = velocities[j] - velocities[index];
                     float averageDensityInverse = 2.f / (densities[index] + densities[j]);
-                    accumulatedVelocity += velocityDifference * averageDensityInverse * poly6(norm2(positionDifference));
+                    accumulatedVelocity += velocityDifference * averageDensityInverse * poly6Kernel(norm2(positionDifference));
                 }
             }
         }
     }
-    newVelocities[index] = velocities[index] + c_XSPH * accumulatedVelocity;
+    newVelocities[index] = velocities[index] + cXSPH * accumulatedVelocity;
 }
 
 

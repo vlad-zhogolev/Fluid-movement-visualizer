@@ -18,8 +18,8 @@ void main()
     }
     viewSpaceSphereNormal.z = sqrt(1 - r2);
 
-    vec4 pixelPosition = vec4(viewPosition.xyz + viewSpaceSphereNormal * particleRadius, 1);
+    //vec4 pixelPosition = vec4(viewPosition.xyz + viewSpaceSphereNormal * particleRadius, 1);
     //FragColor.r = -pixelPosition.z;  // Store linear depth in texture
     // It's like having a directional light looking in z-axis;
-    FragColor.r = particleRadius * viewSpaceSphereNormal.z;
+    FragColor.r = 2 * particleRadius * viewSpaceSphereNormal.z;
 }

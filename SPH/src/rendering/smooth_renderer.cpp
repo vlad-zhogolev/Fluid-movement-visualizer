@@ -195,8 +195,8 @@ void SmoothRenderer::ExtractNormalsFromDepth()
     m_normalsExtractionShader->use();
 
     ProjectionInfo projectionInfo = m_camera->getProjectionInfo();
-    m_normalsExtractionShader->setUnif("f_x", projectionInfo.n / projectionInfo.r);
-    m_normalsExtractionShader->setUnif("f_y", projectionInfo.n / projectionInfo.t);
+    m_normalsExtractionShader->setUnif("Fx", projectionInfo.n / projectionInfo.r);
+    m_normalsExtractionShader->setUnif("Fy", projectionInfo.n / projectionInfo.t);
     m_normalsExtractionShader->setUnif("windowWidth", static_cast<float>(m_windowWidth));
     m_normalsExtractionShader->setUnif("windowHeight", static_cast<float>(m_windowHeight));
     m_normalsExtractionShader->setUnif("depthTexture", 0);

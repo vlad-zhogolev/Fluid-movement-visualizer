@@ -11,15 +11,15 @@ void main()
 {
     vec3 viewSpaceSphereNormal;
     viewSpaceSphereNormal.xy = 2 * gl_PointCoord.xy - 1;
-    float r2 = dot(viewSpaceSphereNormal.xy, viewSpaceSphereNormal.xy);
-    if (r2 > 1.0f)
+    float radius2 = dot(viewSpaceSphereNormal.xy, viewSpaceSphereNormal.xy);
+    if (radius2 > 1.0f)
     {
         discard;
     }
-    viewSpaceSphereNormal.z = sqrt(1 - r2);
+    viewSpaceSphereNormal.z = sqrt(1 - radius2);
 
-    vec4 pixelPosition = vec4(viewPosition.xyz + viewSpaceSphereNormal * particleRadius, 1);
-    vec4 clipSpacePosition = proj * pixelPosition;
-    gl_FragDepth = clipSpacePosition.z / clipSpacePosition.w;
-    FragColor.r = -pixelPosition.z;  // Store linear depth in texture
+    float linearDepth = viewPosition.z + viewSpaceSphereNormal.z * particleRadius;
+    FragColor.r = -linearDepth;
+    // vec4 surfacePosition = vec4(viewPosition.xyz + viewSpaceSphereNormal * particleRadius, 1);
+    // FragColor.r = -surfacePosition.z;  // Store linear depth in texture
 }

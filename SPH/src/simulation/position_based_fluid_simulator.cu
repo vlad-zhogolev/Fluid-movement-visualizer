@@ -136,7 +136,7 @@ void PositionBasedFluidSimulator::PredictPositions()
         m_dVelocities,
         m_dNewPositions, 
         m_particlesNumber,
-        make_float3(0, 0, -m_gravity),
+        make_float3(0, m_gravity, -9.8f),
         m_deltaTime);
 
     cudaDeviceSynchronize();
