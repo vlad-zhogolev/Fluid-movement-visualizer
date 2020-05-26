@@ -125,26 +125,26 @@ vec4 GetNormalColor()
 
 vec4 CalculateColor()
 {
-	vec3 viewFragmentCoordinates = GetViewSpaceFragmentCoordinates();
+    vec3 viewFragmentCoordinates = GetViewSpaceFragmentCoordinates();
     vec3 directionToView = normalize(-viewFragmentCoordinates);
     vec3 normal = texture(normalsTexture, ScreenCoordinates).xyz;
-
+    
     // Find reflected color from skybox
-	vec3 reflectedDirection = reflect(-directionToView, normal);
+    vec3 reflectedDirection = reflect(-directionToView, normal);
     vec3 reflectedColor = GetSkyboxColor(reflectedDirection);
-
+    
     // Find refracted color from skybox
-	float thickness = texture(thicknessTexture, ScreenCoordinates).x;
     vec3 refractedDirection = refract(-directionToView, normal, airRefractionIndex / fluidRefractionIndex);
     vec3 refractedColor = GetSkyboxColor(refractedDirection);
-
+    
     //vec3 fluidColor = vec3(15,94,156) / 256.f;
     //vec3 attenuation = max(exp(-vec3(0.05f) * thickness), 0.2f);
+    float thickness = texture(thicknessTexture, ScreenCoordinates).x;
     vec3 attenuation = max(exp(-attenuationCoefficients * thickness), 0.2f);
-	refractedColor = mix(fluidColor, refractedColor, attenuation);
-
+    refractedColor = mix(fluidColor, refractedColor, attenuation);
+    
     float reflectedPart = FreshnelFunction(f_0, dot(normal, directionToView));
-	return vec4(mix(refractedColor, reflectedColor, reflectedPart), 1);
+    return vec4(mix(refractedColor, reflectedColor, reflectedPart), 1);
 }
 
 void main()
