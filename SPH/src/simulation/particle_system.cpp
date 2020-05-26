@@ -2,6 +2,7 @@
 #include <simulation/particles_cube.h>
 #include <simulation/simulation_parameters.h>
 #include <glm/common.hpp>
+#include <cuda_gl_interop.h>
 
 ParticleSystem::ParticleSystem()
 {
@@ -48,6 +49,12 @@ ParticleSystem::ParticleSystem()
     glBindBuffer(GL_ARRAY_BUFFER, m_particleIndices);
     glBufferData(GL_ARRAY_BUFFER,  MAX_PARTICLE_NUM * sizeof(unsigned int), nullptr, GL_STATIC_DRAW);
     checkGLErr();
+
+    checkCudaErrors(cudaGraphicsGLRegisterBuffer(&m_positionsResource1, m_positions1, cudaGraphicsMapFlagsNone));
+    checkCudaErrors(cudaGraphicsGLRegisterBuffer(&m_positionsResource2, m_positions2, cudaGraphicsMapFlagsNone));
+    checkCudaErrors(cudaGraphicsGLRegisterBuffer(&m_velocitiesResource1, m_velocities1, cudaGraphicsMapFlagsNone));
+    checkCudaErrors(cudaGraphicsGLRegisterBuffer(&m_velocitiesResource2, m_velocities2, cudaGraphicsMapFlagsNone));
+    checkCudaErrors(cudaGraphicsGLRegisterBuffer(&m_indicesResource, m_particleIndices, cudaGraphicsMapFlagsNone));
 }
 
 void ParticleSystem::InitializeParticles() 
@@ -74,11 +81,11 @@ void ParticleSystem::PerformSimulationStep()
 
     if (m_isSecondParticlesUsedForRendering)
     {
-        m_simulator->Step(m_positions2, m_positions1, m_velocities2, m_velocities1, m_particleIndices, m_particlesNumber);
+        m_simulator->Step(m_positionsResource2, m_positionsResource1, m_velocitiesResource2, m_velocitiesResource1, m_indicesResource, m_particlesNumber);
     }
     else
     {
-        m_simulator->Step(m_positions1, m_positions2, m_velocities1, m_velocities2, m_particleIndices, m_particlesNumber);
+        m_simulator->Step(m_positionsResource1, m_positionsResource2,  m_velocitiesResource1, m_velocitiesResource2,  m_indicesResource, m_particlesNumber);
     }
     m_isSecondParticlesUsedForRendering = !m_isSecondParticlesUsedForRendering;
 }
@@ -97,6 +104,12 @@ GLuint ParticleSystem::GetPositionsForRenderingHandle() const
 
 ParticleSystem::~ParticleSystem()
 {
+    checkCudaErrors(cudaGraphicsUnregisterResource(m_positionsResource1));
+    checkCudaErrors(cudaGraphicsUnregisterResource(m_positionsResource2));
+    checkCudaErrors(cudaGraphicsUnregisterResource(m_velocitiesResource1));
+    checkCudaErrors(cudaGraphicsUnregisterResource(m_velocitiesResource2));
+    checkCudaErrors(cudaGraphicsUnregisterResource(m_indicesResource));
+
     if (m_simulator)
     {
         delete m_simulator;

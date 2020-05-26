@@ -26,6 +26,13 @@ private:
     GLuint m_velocities1;
     GLuint m_velocities2;
     GLuint m_particleIndices;
+
+    struct cudaGraphicsResource* m_positionsResource1;
+    struct cudaGraphicsResource* m_positionsResource2;
+    struct cudaGraphicsResource* m_velocitiesResource1;
+    struct cudaGraphicsResource* m_velocitiesResource2;
+    struct cudaGraphicsResource* m_indicesResource;
+
     int m_particlesNumber;
     bool m_isSecondParticlesUsedForRendering = false;
 

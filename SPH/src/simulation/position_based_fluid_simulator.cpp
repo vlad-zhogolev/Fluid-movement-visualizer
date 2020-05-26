@@ -24,27 +24,14 @@ PositionBasedFluidSimulator::PositionBasedFluidSimulator(float3 upperBoundary, f
 }
 
 void PositionBasedFluidSimulator::Step(
-    unsigned int positions,
-    unsigned int newPositions,
-    unsigned int velocities,
-    unsigned int newVelocities,
-    unsigned int indices,
+    cudaGraphicsResource* positionsResource,
+    cudaGraphicsResource* newPositionsResource,
+    cudaGraphicsResource* velocitiesResource,
+    cudaGraphicsResource* newVelocitiesResource,
+    cudaGraphicsResource* indicesResource,
     int particlesNumber)
 {
     m_particlesNumber = particlesNumber;
-
-    struct cudaGraphicsResource* positionsResource;
-    struct cudaGraphicsResource* newPositionsResource;
-    struct cudaGraphicsResource* velocitiesResource;
-    struct cudaGraphicsResource* newVelocitiesResource;
-    struct cudaGraphicsResource* indicesResource;
-
-    checkCudaErrors(cudaGraphicsGLRegisterBuffer(&positionsResource, positions, cudaGraphicsMapFlagsNone));
-    checkCudaErrors(cudaGraphicsGLRegisterBuffer(&newPositionsResource, newPositions, cudaGraphicsMapFlagsNone));
-    checkCudaErrors(cudaGraphicsGLRegisterBuffer(&velocitiesResource, velocities, cudaGraphicsMapFlagsNone));
-    checkCudaErrors(cudaGraphicsGLRegisterBuffer(&newVelocitiesResource, newVelocities, cudaGraphicsMapFlagsNone));
-    checkCudaErrors(cudaGraphicsGLRegisterBuffer(&indicesResource, indices, cudaGraphicsMapFlagsNone));
-
 
     checkCudaErrors(cudaGraphicsMapResources(1, &positionsResource, 0));
     checkCudaErrors(cudaGraphicsMapResources(1, &newPositionsResource, 0));
@@ -68,18 +55,11 @@ void PositionBasedFluidSimulator::Step(
     UpdateVelocity();
     CorrectVelocity();
 
-
     checkCudaErrors(cudaGraphicsUnmapResources(1, &positionsResource, 0));
     checkCudaErrors(cudaGraphicsUnmapResources(1, &newPositionsResource, 0));
     checkCudaErrors(cudaGraphicsUnmapResources(1, &velocitiesResource, 0));
     checkCudaErrors(cudaGraphicsUnmapResources(1, &newVelocitiesResource, 0));
     checkCudaErrors(cudaGraphicsUnmapResources(1, &indicesResource, 0));
-
-    checkCudaErrors(cudaGraphicsUnregisterResource(positionsResource));
-    checkCudaErrors(cudaGraphicsUnregisterResource(newPositionsResource));
-    checkCudaErrors(cudaGraphicsUnregisterResource(velocitiesResource));
-    checkCudaErrors(cudaGraphicsUnregisterResource(newVelocitiesResource));
-    checkCudaErrors(cudaGraphicsUnregisterResource(indicesResource));
 }
 
 void PositionBasedFluidSimulator::UpdateParameters()
