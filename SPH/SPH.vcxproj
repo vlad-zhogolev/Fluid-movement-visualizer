@@ -116,7 +116,12 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="includes\rendering\rendering_parameters.h" />
     <ClInclude Include="includes\rendering\scroll_form_helper.h" />
     <ClInclude Include="includes\rendering\smooth_renderer.h" />
-    <CudaCompile Include="includes\simulation\pbf_smoothing_kernels.cuh" />
+    <CudaCompile Include="includes\simulation\pbf_smoothing_kernels.cuh">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </CudaCompile>
+    <ClInclude Include="includes\simulation\converters.cuh">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="includes\simulation\simulation_parameters.h" />
     <ClInclude Include="includes\helper.h" />
     <ClInclude Include="includes\input.h" />

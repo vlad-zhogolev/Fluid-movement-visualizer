@@ -38,6 +38,7 @@
     <ClInclude Include="includes\rendering\smooth_renderer.h" />
     <ClInclude Include="includes\rendering\scroll_form_helper.h" />
     <ClInclude Include="includes\rendering\rendering_parameters.h" />
+    <ClInclude Include="includes\simulation\converters.cuh" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\boundary.frag" />
