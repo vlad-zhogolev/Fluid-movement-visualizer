@@ -3,7 +3,6 @@
 #include <helper.h>
 #include <simulation/simulation_parameters.h>
 #include <simulation/pbf_smoothing_kernels.cuh>
-#include <math.h>
 #include <helper_cuda.h>
 
 class PositionBasedFluidSimulator
