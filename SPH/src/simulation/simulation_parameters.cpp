@@ -25,6 +25,7 @@ SimulationParameters& SimulationParameters::GetInstance()
     instance.vorticityEpsilon = 0.0002f;
     instance.substepsNumber = 4;
     instance.change = true;
+    instance.fluidStartPosition = make_float3(0.0f, 0.0f, 2.5f);
     SetDomainSize(SimulationDomainSize::Small);
     instance.m_command = SimulationCommand::Unknown;
 
@@ -129,6 +130,12 @@ void SimulationParameters::AdjustDomainToSize()
         {
             upperXY *= 2.0f;
             lowerXY *= 2.0f;
+        }
+        break;
+        case SimulationDomainSize::Stretched:
+        {
+            upperXY.y *= 1.5f;
+            lowerXY.y *= 1.5f;
         }
         break;
     }

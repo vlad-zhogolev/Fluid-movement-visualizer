@@ -81,7 +81,7 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     domainSelector->setLayout(
         new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 2, 8));
     m_formHelper->addWidget("Domain", domainSelector);
-    auto domainComboBox = new nanogui::ComboBox(domainSelector, { "Small", "Medium", "Large" });
+    auto domainComboBox = new nanogui::ComboBox(domainSelector, { "Small", "Medium", "Large", "Stretched" });
 
     nextFrameButton->setCallback([this, domainComboBox]() {
         //m_input->nextFrame = true;
@@ -120,8 +120,16 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
             size = SimulationDomainSize::Medium;
         else if (index == 2)
             size = SimulationDomainSize::Large;
+        else if (index == 3)
+            size = SimulationDomainSize::Stretched;
+
         m_simulationParams->SetDomainSize(size);
     });
+    
+    auto starPositionX = m_formHelper->addVariable("Start position, x", simulationParameters.fluidStartPosition.x);
+    auto starPositionY = m_formHelper->addVariable("Start position, y", simulationParameters.fluidStartPosition.y);
+    auto starPositionZ = m_formHelper->addVariable("Start position, z", simulationParameters.fluidStartPosition.z);
+    auto fluidSize = m_formHelper->addVariable("Fluid size", simulationParameters.size);
 
     // m_scrollPanel = new nanogui::VScrollPanel(m_nanoguiWindow);
     // m_scrollPanel->setFixedSize(nanogui::Vector2i{ 200,200 });
@@ -294,9 +302,9 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 
     float aspect = (float) width_ / height_;
 	m_camera = std::make_shared<Camera>(cam_pos, cam_focus, aspect);
-	m_box_shader = std::make_unique<Shader>(Path("shaders/boundary.vert"), Path("shaders/boundary.frag"));
-	m_particle_shader = std::make_unique<Shader>(Path("shaders/particle.vert"), Path("shaders/particle.frag"));
-    m_sky_shader = std::make_unique<Shader>(Path("shaders/skybox.vert"), Path("shaders/skybox.frag"));
+	m_boundaryShader = std::make_unique<Shader>(Path("shaders/boundary.vert"), Path("shaders/boundary.frag"));
+	m_particlesShader = std::make_unique<Shader>(Path("shaders/particle.vert"), Path("shaders/particle.frag"));
+    m_skyboxShader = std::make_unique<Shader>(Path("shaders/skybox.vert"), Path("shaders/skybox.frag"));
 
 	// char *sky_faces[] = { 
 	// 	"skybox/right.jpg",		
@@ -314,7 +322,7 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
         "skybox/checkerboard/checkerboard.jpg",
         "skybox/checkerboard/checkerboard.jpg"
     };
-	d_sky_texture = loadCubemap(sky_faces);
+	m_skyboxTexture = loadCubemap(sky_faces);
 	
 	glGenVertexArrays(1, &d_vao);
 
@@ -326,15 +334,15 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	
-    glGenVertexArrays(1, &d_sky_vao);
-	glGenBuffers(1, &d_sky_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, d_sky_vbo);
+    glGenVertexArrays(1, &m_skyboxVAO);
+	glGenBuffers(1, &m_skyboxVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_skyboxVBO);
 	glBufferData(GL_ARRAY_BUFFER, 6 * 2 * 3 * 3 * sizeof(float), SKYBOX_VERTICES, GL_STATIC_DRAW);
-	glBindVertexArray(d_sky_vao);
+	glBindVertexArray(m_skyboxVAO);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-    m_smoothRenderer = std::make_unique<rendering::SmoothRenderer>(m_width, m_height, m_camera, d_sky_texture);
+    m_smoothRenderer = std::make_unique<rendering::SmoothRenderer>(m_width, m_height, m_camera, m_skyboxTexture);
 }
 
 void Renderer::__window_size_callback(GLFWwindow* window, int width, int height)
@@ -481,26 +489,26 @@ void Renderer::__render() {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (m_sky_shader->loaded())
+	if (m_skyboxShader->loaded())
     {
 		glDepthMask(GL_FALSE);
-		m_sky_shader->use();
+		m_skyboxShader->use();
 		m_camera->use(Shader::now(), true);
-		glBindVertexArray(d_sky_vao);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, d_sky_texture);
+		glBindVertexArray(m_skyboxVAO);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyboxTexture);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glDepthMask(GL_TRUE);
 	}
     
     const bool smoothFluid = true;
-	if (m_particle_shader->loaded() && !smoothFluid)
+	if (m_particlesShader->loaded() && !smoothFluid)
     {
-		m_particle_shader->use();
+		m_particlesShader->use();
 		m_camera->use(Shader::now());
-		m_particle_shader->setUnif("color", glm::vec4(1.f, 0.f, 0.f, .1f));
-		m_particle_shader->setUnif("pointRadius", SimulationParameters::GetInstance().kernelRadius);
-		m_particle_shader->setUnif("pointScale", 500.f);
-		m_particle_shader->setUnif("hlIndex", m_input->hlIndex);
+		m_particlesShader->setUnif("color", glm::vec4(1.f, 0.f, 0.f, .1f));
+		m_particlesShader->setUnif("pointRadius", SimulationParameters::GetInstance().kernelRadius);
+		m_particlesShader->setUnif("pointScale", 500.f);
+		m_particlesShader->setUnif("hlIndex", m_input->hlIndex);
 		glBindVertexArray(d_vao);
 		glDrawArrays(GL_POINTS, 0, m_nparticle);
 	}
@@ -509,13 +517,13 @@ void Renderer::__render() {
         m_smoothRenderer->Render(d_vao, m_nparticle);
     }
 
-	if (m_box_shader->loaded())
+	if (m_boundaryShader->loaded())
     //if (false)
     {
-		m_box_shader->use();
+		m_boundaryShader->use();
 		m_camera->use(Shader::now());
 		glBindVertexArray(d_bbox_vao);
-		m_box_shader->setUnif("color", glm::vec4(1.f, 1.f, 1.f, 1.f));
+		m_boundaryShader->setUnif("color", glm::vec4(1.f, 1.f, 1.f, 1.f));
 		glDrawArrays(GL_LINES, 0, 12 * 2);
 	}
 }

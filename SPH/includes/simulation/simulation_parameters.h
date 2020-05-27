@@ -12,7 +12,8 @@ enum class SimulationDomainSize
 {
     Small,
     Medium,
-    Large
+    Large,
+    Stretched
 };
 
 enum class SimulationCommand
@@ -43,6 +44,8 @@ public:
     float vorticityEpsilon;
 
     bool change;
+    float3 fluidStartPosition;
+    float size;
     
     static SimulationParameters& GetInstance();
     static SimulationParameters* GetInstancePtr();
@@ -64,6 +67,8 @@ private:
     SimulationDomain m_domain;
     SimulationDomainSize m_domainSize;
     SimulationCommand m_command;
+
+
 
     float m_upperBoundary;
     float m_lowerBoundary;

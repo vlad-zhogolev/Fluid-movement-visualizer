@@ -67,10 +67,9 @@ private:
 
 	std::shared_ptr<Camera> m_camera = nullptr;
 
-	std::unique_ptr<Shader> m_box_shader = nullptr;
-	std::unique_ptr<Shader> m_particle_shader = nullptr;
-    std::unique_ptr<Shader> m_sky_shader = nullptr;
-
+	std::unique_ptr<Shader> m_boundaryShader = nullptr;
+	std::unique_ptr<Shader> m_particlesShader = nullptr;
+    std::unique_ptr<Shader> m_skyboxShader = nullptr;
 
     std::unique_ptr<GLFWwindow> m_glfwWindow;
 
@@ -86,11 +85,10 @@ private:
 
 	int frameCount = 0;
     
-
 	// Skybox
-	unsigned int d_sky_texture;
-    unsigned int d_sky_vao;
-    unsigned int d_sky_vbo;
+	unsigned int m_skyboxTexture;
+    unsigned int m_skyboxVAO;
+    unsigned int m_skyboxVBO;
 
     std::unique_ptr<rendering::SmoothRenderer> m_smoothRenderer = nullptr;
     SimulationParameters* m_simulationParams = SimulationParameters::GetInstancePtr();
