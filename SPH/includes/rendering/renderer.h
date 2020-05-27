@@ -14,9 +14,6 @@
 #include <functional>
 #include <memory>
 
-#define WINDOW_WIDTH 1600
-#define WINDOW_HEIGHT 1200
-
 class Renderer
 {
 public:
@@ -95,5 +92,6 @@ private:
     unsigned int d_sky_vbo;
 
     std::unique_ptr<rendering::SmoothRenderer> m_smoothRenderer = nullptr;
+    SimulationParameters* m_simulationParams = SimulationParameters::GetInstancePtr();
 };
 

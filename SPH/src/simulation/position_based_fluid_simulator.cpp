@@ -64,7 +64,7 @@ void PositionBasedFluidSimulator::Step(
 
 void PositionBasedFluidSimulator::UpdateParameters()
 {
-    const SimulationParameters& params = SimulationParameters::getInstance();
+    const SimulationParameters& params = SimulationParameters::GetInstance();
     m_deltaTime = params.deltaTime;
     m_gravity = params.g;
     m_h = params.kernelRadius;

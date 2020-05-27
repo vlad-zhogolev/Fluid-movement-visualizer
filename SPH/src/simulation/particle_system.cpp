@@ -65,27 +65,47 @@ void ParticleSystem::InitializeParticles()
 void ParticleSystem::PerformSimulationStep() 
 {
     auto& input = Input::getInstance();
-    if (!(input.running || input.nextFrame))
+    //if (!(input.running || input.nextFrame))
+    //{
+    //    return;
+    //}
+    auto command = m_simulationParams->GetCommand();
+    if (command == SimulationCommand::Restart)
+    {
+        InitializeParticles();
+        input.frameCount = 0;
+        m_isSecondParticlesUsedForRendering = false;
+        return;
+    }
+    if (command != SimulationCommand::StepOneFrame &&
+        command != SimulationCommand::Run)
     {
         return;
+    }
+    if (command == SimulationCommand::StepOneFrame)
+    {
+        m_simulationParams->SetCommand(SimulationCommand::Unknown);
     }
 
     //if (input.frameCount > 180 && !input.nextFrame)
     //{
     //    return;
     //}
-    input.nextFrame = false;
+    //input.nextFrame = false;
+    
     ++input.frameCount;
 
     m_simulator->UpdateParameters();
 
     if (m_isSecondParticlesUsedForRendering)
     {
-        m_simulator->Step(m_positionsResource2, m_positionsResource1, m_velocitiesResource2, m_velocitiesResource1, m_indicesResource, m_particlesNumber);
+        m_simulator->Step(m_positionsResource2, m_positionsResource1,
+            m_velocitiesResource2, m_velocitiesResource1, m_indicesResource, m_particlesNumber);
     }
     else
     {
-        m_simulator->Step(m_positionsResource1, m_positionsResource2,  m_velocitiesResource1, m_velocitiesResource2,  m_indicesResource, m_particlesNumber);
+        m_simulator->Step(m_positionsResource1, m_positionsResource2,
+            m_velocitiesResource1, m_velocitiesResource2,  m_indicesResource, m_particlesNumber);
     }
     m_isSecondParticlesUsedForRendering = !m_isSecondParticlesUsedForRendering;
 }

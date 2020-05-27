@@ -270,7 +270,7 @@ void SmoothRenderer::RenderFluid()
     m_combinedRenderingShader->use();
     m_camera->use(Shader::now());
     
-    m_combinedRenderingShader->setUnif("change", SimulationParameters::getInstance().change);
+    m_combinedRenderingShader->setUnif("change", SimulationParameters::GetInstance().change);
 
     ProjectionInfo projectionInfo = m_camera->getProjectionInfo();
     // Set projection matrix elements

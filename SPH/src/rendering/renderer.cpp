@@ -7,6 +7,8 @@
 #include <GLFW/glfw3.h>
 #include <nanogui/nanogui.h>
 #include <nanogui/colorwheel.h>
+#include <nanogui/combobox.h>
+
 #include <glm/common.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #define STB_IMAGE_IMPLEMENTATION
@@ -27,10 +29,9 @@ void Renderer::Init()
 
 void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 {
-    SimulationParameters& simulationParameters = SimulationParameters::getInstance();
+    SimulationParameters& simulationParameters = SimulationParameters::GetInstance();
     RenderingParameters& renderingParameters = RenderingParameters::GetInstance();
 
-	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
@@ -50,14 +51,14 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     const int initialCoordinate = 5;
 	m_nanoguiWindow = m_formHelper->addWindow(
         Eigen::Vector2i(initialCoordinate, initialCoordinate), 
-        "Simulation controls and parameters");
+        "Simulation controls and parameters");   
 
     m_formHelper->addGroup("Simulation indicators");
     m_formHelper->setFixedSize({ 80, 20 });
     m_formHelper->addVariable("FPS", renderingParameters.fps)->setEditable(false);
     m_formHelper->addVariable("Current frame number", m_input->frameCount)->setEditable(false);
     m_formHelper->setFixedSize({ 0, 20 });
-
+    
     m_formHelper->addGroup("Simulation controls");
     auto simulationControl = new nanogui::Widget(m_nanoguiWindow);
     m_formHelper->addWidget("", simulationControl);
@@ -68,7 +69,10 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     auto nextFrameButton = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_NEXT);
     nextFrameButton->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
     nextFrameButton->setFlags(nanogui::Button::NormalButton);
-    nextFrameButton->setCallback([this]() { m_input->nextFrame = true; });
+    nextFrameButton->setCallback([this]() { 
+        m_input->nextFrame = true;
+        m_simulationParams->SetCommand(SimulationCommand::StepOneFrame);
+    });
     
     auto testRunOrStopButton = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_PLAY);
     testRunOrStopButton->setFlags(nanogui::Button::ToggleButton);
@@ -78,15 +82,27 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
         {
             testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_STOP);
             m_input->running = true;
+            m_simulationParams->SetCommand(SimulationCommand::Run);
         }
         else
         {
             testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
             m_input->running = false;
+            m_simulationParams->SetCommand(SimulationCommand::Pause);
         }
     });
 
-    
+    auto restartButton = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CCW);
+    restartButton->setFlags(nanogui::Button::NormalButton);
+    restartButton->setCallback([this]() {
+        m_simulationParams->SetCommand(SimulationCommand::Restart);
+    });
+
+    auto domainSelector = new nanogui::Widget(m_nanoguiWindow);
+    domainSelector->setLayout(
+        new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 2, 8));
+    m_formHelper->addWidget("Domain", domainSelector);
+    auto domainComboBox = new nanogui::ComboBox(domainSelector, { "Small", "Medium", "Large" });
 
     // m_scrollPanel = new nanogui::VScrollPanel(m_nanoguiWindow);
     // m_scrollPanel->setFixedSize(nanogui::Vector2i{ 200,200 });
@@ -250,7 +266,6 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     auto* attenuationBlue = m_scrollFormHelper->addVariable("Attenuation, blue", renderingParameters.attenuationCoefficients.b);
     attenuationBlue->setMinMaxValues(
         RenderingParameters::ATTENUATION_COEFFICIENT_MIN, RenderingParameters::ATTENUATION_COEFFICIENT_MAX);
-
     m_nanoguiScreen->performLayout();
 	m_nanoguiScreen->setVisible(true);
 	
@@ -464,7 +479,7 @@ void Renderer::__render() {
 		m_particle_shader->use();
 		m_camera->use(Shader::now());
 		m_particle_shader->setUnif("color", glm::vec4(1.f, 0.f, 0.f, .1f));
-		m_particle_shader->setUnif("pointRadius", SimulationParameters::getInstance().kernelRadius);
+		m_particle_shader->setUnif("pointRadius", SimulationParameters::GetInstance().kernelRadius);
 		m_particle_shader->setUnif("pointScale", 500.f);
 		m_particle_shader->setUnif("hlIndex", m_input->hlIndex);
 		glBindVertexArray(d_vao);

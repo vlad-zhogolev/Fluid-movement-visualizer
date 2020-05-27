@@ -41,5 +41,7 @@ private:
 
     float3 m_upperBoundary;
     float3 m_lowerBoundary;
+
+    SimulationParameters* m_simulationParams = SimulationParameters::GetInstancePtr();
 };
 

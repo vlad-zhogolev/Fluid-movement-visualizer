@@ -1,5 +1,22 @@
 #pragma once
 
+
+enum class SimulationDomain
+{
+    Small,
+    Medium,
+    Large
+};
+
+enum class SimulationCommand
+{
+    Unknown,
+    StepOneFrame,
+    Run,
+    Pause,
+    Restart
+};
+
 class SimulationParameters
 {
 public:
@@ -19,6 +36,12 @@ public:
     float vorticityEpsilon;
 
     bool change;
+
+    SimulationDomain simulationDomain;
+    SimulationCommand m_command;
     
-    static SimulationParameters& getInstance();
+    static SimulationParameters& GetInstance();
+    static SimulationParameters* GetInstancePtr();
+    static void SetCommand(SimulationCommand command);
+    static SimulationCommand GetCommand();
 };
