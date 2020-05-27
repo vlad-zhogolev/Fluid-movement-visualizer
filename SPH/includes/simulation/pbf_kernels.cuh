@@ -2,6 +2,7 @@
 
 #include <helper.h>
 #include <helper_math.h>
+#include <simulation/pbf_smoothing_kernels.cuh>
 
 namespace pbf {
 
@@ -32,7 +33,7 @@ void FindCellStartEnd(
     unsigned int* cellEnds,
     int particlesNumber);
 
-template <typename Func1, typename Func2, typename Poly6, typename SpikyGradient>
+template <typename Func1, typename Func2>
 __global__
 void CalculateLambda(
     float* lambdas,
@@ -47,8 +48,8 @@ void CalculateLambda(
     float h,
     Func1 positionToCellCoorinatesConverter,
     Func2 cellCoordinatesToCellIdConverter,
-    Poly6 poly6Kernel,
-    SpikyGradient spikyGradientKernel)
+    Poly6Kernel poly6Kernel,
+    SpikyGradientKernel spikyGradientKernel)
 {
     int index = GetGlobalThreadIndex_1D_1D();
 
@@ -97,7 +98,7 @@ void CalculateLambda(
     lambdas[index] = -constraint / (squaredGradientsSum + lambdaEpsilon);
 }
 
-template <typename Func1, typename Func2, typename Poly6, typename SpikyGradient>
+template <typename Func1, typename Func2>
 __global__
 void CalculateNewPositions(
     const float3* positions,
@@ -115,8 +116,8 @@ void CalculateNewPositions(
     Func2 cellCoordinatesToCellIdConverter,
     float3 upperBoundary,
     float3 lowerBoundary,
-    Poly6 poly6Kernel,
-    SpikyGradient spikyGradientKernel)
+    Poly6Kernel poly6Kernel,
+    SpikyGradientKernel spikyGradientKernel)
 {
     int index = GetGlobalThreadIndex_1D_1D();
 
@@ -161,7 +162,7 @@ void CalculateNewPositions(
     //deltaPositions[i] = clamp(deltaPosition, -MAX_DP, MAX_DP);
 }
 
-template<typename Func1, typename Func2, typename SpikyGradient>
+template<typename Func1, typename Func2>
 __global__
 void CalculateVorticity(
     const unsigned int* cellStarts,
@@ -174,7 +175,7 @@ void CalculateVorticity(
     float h,
     Func1 positionToCellCoorinatesConverter,
     Func2 cellCoordinatesToCellIdConverter,
-    SpikyGradient spikyGradient)
+    SpikyGradientKernel spikyGradient)
 {
     int index = GetGlobalThreadIndex_1D_1D();
 
@@ -219,7 +220,7 @@ void CalculateVorticity(
     //curl[index] = -curl[index];
 }
 
-template<typename Func1, typename Func2, typename SpikyGradient>
+template<typename Func1, typename Func2>
 __device__
 float3 CalculateEta(
     int index,
@@ -232,7 +233,7 @@ float3 CalculateEta(
     float h,
     Func1 positionToCellCoorinatesConverter,
     Func2 cellCoordinatesToCellIdConverter,
-    SpikyGradient spikyGradient)
+    SpikyGradientKernel spikyGradient)
 {
     float3 vorticityGradient{};
 
@@ -272,7 +273,7 @@ float3 CalculateEta(
     return vorticityGradient;
 }
 
-template <typename Func1, typename Func2, typename SpikyGradient>
+template <typename Func1, typename Func2>
 __global__
 void ApplyVorticityConfinement(
     unsigned int* cellStarts,
@@ -287,7 +288,7 @@ void ApplyVorticityConfinement(
     float deltaTime,
     Func1 positionToCellCoorinatesConverter,
     Func2 cellCoordinatesToCellIdConverter,
-    SpikyGradient spikyGradient)
+    SpikyGradientKernel spikyGradient)
 {
     int index = GetGlobalThreadIndex_1D_1D();
 
@@ -320,7 +321,7 @@ void ApplyVorticityConfinement(
     newVelocity[index] += vorticityForce * deltaTime;
 }
 
-template <typename Func1, typename Func2, typename Poly6>
+template <typename Func1, typename Func2>
 __global__
 void ApplyXSPHViscosity(
     const float3* positions,
@@ -335,7 +336,7 @@ void ApplyXSPHViscosity(
     float h,
     Func1 positionToCellCoorinatesConverter,
     Func2 cellCoordinatesToCellIdConverter,
-    Poly6 poly6Kernel)
+    Poly6Kernel poly6Kernel)
 {
     int index = GetGlobalThreadIndex_1D_1D();
 
@@ -373,7 +374,6 @@ void ApplyXSPHViscosity(
     }
     newVelocities[index] = velocities[index] + cXSPH * accumulatedVelocity;
 }
-
 
 } // namespace kernels
 
