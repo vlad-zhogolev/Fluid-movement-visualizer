@@ -77,6 +77,8 @@ void PositionBasedFluidSimulator::UpdateParameters()
     m_viscosityIterations = params.viscosityIterations;
     m_vorticityEpsilon = params.vorticityEpsilon;
     m_substepsNumber = params.substepsNumber;
+    m_upperBoundary = params.GetUpperBoundary();
+    m_lowerBoundary = params.GetLowerBoundary();
 }
 
 PositionBasedFluidSimulator::~PositionBasedFluidSimulator()

@@ -31,11 +31,11 @@ public:
 		const glm::vec3 &cam_focus, 
 		float3 ulim, float3 llim, 
 		std::function<void()> nextCb) 
-		: m_ulim(ulim), m_llim(llim), m_nextFrameBtnCb(nextCb) { init(cam_pos, cam_focus); };
+		: m_upperBoundary(ulim), m_lowerBoundary(llim), m_nextFrameBtnCb(nextCb) { init(cam_pos, cam_focus); };
 	~Renderer();
 
 	void render(unsigned int pos, unsigned int iid, int m_nparticle);
-	void setLim(const float3 &ulim, const float3 &llim);
+	void SetBoundaries(const float3 &ulim, const float3 &llim);
 
 	Input *m_input;
 
@@ -62,13 +62,15 @@ private:
     unsigned int d_bbox_vbo;
     unsigned int d_pos;
     unsigned int d_iid;
-    float3 m_llim;
-    float3 m_ulim;
+    float3 m_lowerBoundary;
+    float3 m_upperBoundary;
 
-	Camera *m_camera = nullptr;
+	std::shared_ptr<Camera> m_camera = nullptr;
 
-	Shader *m_box_shader = nullptr;
-	Shader *m_particle_shader = nullptr;
+	std::unique_ptr<Shader> m_box_shader = nullptr;
+	std::unique_ptr<Shader> m_particle_shader = nullptr;
+    std::unique_ptr<Shader> m_sky_shader = nullptr;
+
 
     std::unique_ptr<GLFWwindow> m_glfwWindow;
 
@@ -87,7 +89,6 @@ private:
 
 	// Skybox
 	unsigned int d_sky_texture;
-	Shader* m_sky_shader = nullptr;
     unsigned int d_sky_vao;
     unsigned int d_sky_vbo;
 

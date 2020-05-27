@@ -11,7 +11,7 @@ namespace rendering {
 class SmoothRenderer
 {
 public:
-    explicit SmoothRenderer(int windowWidth, int windowHeight, Camera* camera, GLuint skyboxTexture);
+    explicit SmoothRenderer(int windowWidth, int windowHeight, std::shared_ptr<Camera> camera, GLuint skyboxTexture);
 
     void Render(GLuint particlesVAO, int particlesNumber);
 
@@ -39,7 +39,7 @@ private:
 private:
     int m_windowWidth;
     int m_windowHeight;
-    Camera* m_camera = nullptr;
+    std::shared_ptr<Camera> m_camera = nullptr;
     GLuint m_skyboxTexture;
 
     int m_smoothingIterations;

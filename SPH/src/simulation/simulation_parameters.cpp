@@ -25,7 +25,7 @@ SimulationParameters& SimulationParameters::GetInstance()
     instance.vorticityEpsilon = 0.0002f;
     instance.substepsNumber = 4;
     instance.change = true;
-    instance.simulationDomain = SimulationDomain::Medium;
+    SetDomainSize(SimulationDomainSize::Small);
     instance.m_command = SimulationCommand::Unknown;
 
     return instance;
@@ -76,4 +76,66 @@ void SimulationParameters::SetCommand(SimulationCommand command)
 SimulationCommand SimulationParameters::GetCommand()
 {
     return GetInstance().m_command;
+}
+
+void SimulationParameters::SetDomainSize(SimulationDomainSize domain)
+{
+    GetInstance().m_domainSize = domain;
+    AdjustDomainToSize();
+}
+
+SimulationDomainSize SimulationParameters::GetDomainSize()
+{
+    return GetInstance().m_domainSize;
+}
+
+float3 SimulationParameters::GetUpperBoundary()
+{
+    return GetInstance().m_domain.upperBoundary;
+}
+
+float3 SimulationParameters::GetLowerBoundary()
+{
+    return GetInstance().m_domain.lowerBoundary;
+}
+
+SimulationDomain SimulationParameters::GetDomain()
+{
+    return GetInstance().m_domain;
+}
+
+void SimulationParameters::AdjustDomainToSize()
+{
+    auto& instance = GetInstance();
+    float2 upperXY = make_float2(1.0f, 1.0f);
+    float2 lowerXY = make_float2(-1.0f, -1.0f);
+    float upperZ = 4.0f;
+    float lowerZ = 0.0f;
+
+    switch (instance.m_domainSize)
+    {
+        case SimulationDomainSize::Small:
+        {
+            /* empty */
+        }
+        break;
+        case SimulationDomainSize::Medium:
+        {
+            upperXY *= 1.5f;
+            lowerXY *= 1.5f;
+        }
+        break;
+        case SimulationDomainSize::Large:
+        {
+            upperXY *= 2.0f;
+            lowerXY *= 2.0f;
+        }
+        break;
+    }
+
+    instance.m_domain =
+    {
+        make_float3(upperXY.x, upperXY.y, upperZ),
+        make_float3(lowerXY.x, lowerXY.y, lowerZ)
+    };
 }

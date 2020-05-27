@@ -6,10 +6,13 @@
 
 ParticleSystem::ParticleSystem()
 {
-    m_upperBoundary = make_float3(1.f, 1.f, 4.f);
-    
-    m_lowerBoundary = make_float3(-1.f, -1.f, 0.f);
+    //m_upperBoundary = make_float3(1.f, 1.f, 4.f);
+    //m_lowerBoundary = make_float3(-1.f, -1.f, 0.f);
+
     //m_lowerBoundary = make_float3(0.f, 0.f, 0.f);
+
+    m_upperBoundary = SimulationParameters::GetUpperBoundary();
+    m_lowerBoundary = SimulationParameters::GetLowerBoundary();
 
     m_simulator = new PositionBasedFluidSimulator(m_upperBoundary, m_lowerBoundary);
 

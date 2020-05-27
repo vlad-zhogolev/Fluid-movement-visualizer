@@ -79,7 +79,7 @@ int main()
         ++g_frameCount;
         double currentTime = glfwGetTime();
 
-		renderer.setLim(particleystem.GetUpperLimit(), particleystem.GetLowerLimit());
+		renderer.SetBoundaries(particleystem.GetUpperLimit(), particleystem.GetLowerLimit());
         renderer.render(
             particleystem.GetPositionsForRenderingHandle(),
             particleystem.GetIndicesHandle(),

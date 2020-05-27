@@ -69,40 +69,59 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     auto nextFrameButton = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_NEXT);
     nextFrameButton->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
     nextFrameButton->setFlags(nanogui::Button::NormalButton);
-    nextFrameButton->setCallback([this]() { 
-        m_input->nextFrame = true;
-        m_simulationParams->SetCommand(SimulationCommand::StepOneFrame);
-    });
-    
+
     auto testRunOrStopButton = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_PLAY);
     testRunOrStopButton->setFlags(nanogui::Button::ToggleButton);
     testRunOrStopButton->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
-    testRunOrStopButton->setChangeCallback([this, testRunOrStopButton](bool isPressed) {
-        if (isPressed)
-        {
-            testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_STOP);
-            m_input->running = true;
-            m_simulationParams->SetCommand(SimulationCommand::Run);
-        }
-        else
-        {
-            testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
-            m_input->running = false;
-            m_simulationParams->SetCommand(SimulationCommand::Pause);
-        }
-    });
-
+    
     auto restartButton = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CCW);
     restartButton->setFlags(nanogui::Button::NormalButton);
-    restartButton->setCallback([this]() {
-        m_simulationParams->SetCommand(SimulationCommand::Restart);
-    });
 
     auto domainSelector = new nanogui::Widget(m_nanoguiWindow);
     domainSelector->setLayout(
         new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 2, 8));
     m_formHelper->addWidget("Domain", domainSelector);
     auto domainComboBox = new nanogui::ComboBox(domainSelector, { "Small", "Medium", "Large" });
+
+    nextFrameButton->setCallback([this, domainComboBox]() {
+        //m_input->nextFrame = true;
+        domainComboBox->setEnabled(false);
+        m_simulationParams->SetCommand(SimulationCommand::StepOneFrame);
+    });
+    testRunOrStopButton->setChangeCallback([this, testRunOrStopButton, domainComboBox](bool isPressed) {
+        if (isPressed)
+        {
+            testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_STOP);
+            //m_input->running = true;
+            domainComboBox->setEnabled(false);
+            m_simulationParams->SetCommand(SimulationCommand::Run);
+        }
+        else
+        {
+            testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
+            //m_input->running = false;
+            m_simulationParams->SetCommand(SimulationCommand::Pause);
+        }
+    });
+    restartButton->setCallback([this, testRunOrStopButton, domainComboBox]() {
+        m_simulationParams->SetCommand(SimulationCommand::Restart);
+
+        // Enable start button
+        testRunOrStopButton->setPushed(false);
+        testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
+
+        domainComboBox->setEnabled(true);
+    });
+    domainComboBox->setCallback([this](int index) {
+        SimulationDomainSize size;
+        if (index == 0)
+            size = SimulationDomainSize::Small;
+        else if (index == 1)
+            size = SimulationDomainSize::Medium;
+        else if (index == 2)
+            size = SimulationDomainSize::Large;
+        m_simulationParams->SetDomainSize(size);
+    });
 
     // m_scrollPanel = new nanogui::VScrollPanel(m_nanoguiWindow);
     // m_scrollPanel->setFixedSize(nanogui::Vector2i{ 200,200 });
@@ -274,10 +293,10 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 	__binding();
 
     float aspect = (float) width_ / height_;
-	m_camera = new Camera(cam_pos, cam_focus, aspect);
-	m_box_shader = new Shader(Path("shaders/boundary.vert"), Path("shaders/boundary.frag"));
-	m_particle_shader = new Shader(Path("shaders/particle.vert"), Path("shaders/particle.frag"));
-    m_sky_shader = new Shader(Path("shaders/skybox.vert"), Path("shaders/skybox.frag"));
+	m_camera = std::make_shared<Camera>(cam_pos, cam_focus, aspect);
+	m_box_shader = std::make_unique<Shader>(Path("shaders/boundary.vert"), Path("shaders/boundary.frag"));
+	m_particle_shader = std::make_unique<Shader>(Path("shaders/particle.vert"), Path("shaders/particle.frag"));
+    m_sky_shader = std::make_unique<Shader>(Path("shaders/skybox.vert"), Path("shaders/skybox.frag"));
 
 	// char *sky_faces[] = { 
 	// 	"skybox/right.jpg",		
@@ -490,8 +509,8 @@ void Renderer::__render() {
         m_smoothRenderer->Render(d_vao, m_nparticle);
     }
 
-	//if (m_box_shader->loaded())
-    if (false)
+	if (m_box_shader->loaded())
+    //if (false)
     {
 		m_box_shader->use();
 		m_camera->use(Shader::now());
@@ -501,21 +520,16 @@ void Renderer::__render() {
 	}
 }
 
-Renderer::~Renderer()
-{
-	if (m_camera) delete m_camera;
-	if (m_box_shader) delete m_box_shader;
-	if (m_particle_shader) delete m_particle_shader;
-	/* TODO: m_window, input */
-	if (m_input) delete m_input;
-	// _pclose(m_ffmpeg);
-}
+Renderer::~Renderer() {}
 
 void Renderer::render(unsigned int pos, unsigned int iid, int nparticle)
 {
 	d_iid = iid;
 	d_pos = pos;
 	m_nparticle = nparticle;
+
+    m_upperBoundary = m_simulationParams->GetUpperBoundary();
+    m_lowerBoundary = m_simulationParams->GetLowerBoundary();
 
 	glBindVertexArray(d_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, d_pos);
@@ -525,9 +539,12 @@ void Renderer::render(unsigned int pos, unsigned int iid, int nparticle)
 	glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, 0, (void*)0);
 	glEnableVertexAttribArray(1);
 
-	float x1 = fmin(m_ulim.x, m_llim.x), x2 = fmax(m_ulim.x, m_llim.x),
-		y1 = fmin(m_ulim.y, m_llim.y), y2 = fmax(m_ulim.y, m_llim.y),
-		z1 = fmin(m_ulim.z, m_llim.z), z2 = fmax(m_ulim.z, m_llim.z);
+    float x1 = fmin(m_upperBoundary.x, m_lowerBoundary.x);
+    float x2 = fmax(m_upperBoundary.x, m_lowerBoundary.x);
+    float y1 = fmin(m_upperBoundary.y, m_lowerBoundary.y);
+    float y2 = fmax(m_upperBoundary.y, m_lowerBoundary.y);
+    float z1 = fmin(m_upperBoundary.z, m_lowerBoundary.z);
+    float z2 = fmax(m_upperBoundary.z, m_lowerBoundary.z);
 
 	glm::vec3 lines[][2] = {
 		{ glm::vec3(x1, y1, z1), glm::vec3(x2, y1, z1) },
@@ -543,15 +560,14 @@ void Renderer::render(unsigned int pos, unsigned int iid, int nparticle)
 		{ glm::vec3(x1, y1, z1), glm::vec3(x1, y1, z2) },
 		{ glm::vec3(x1, y2, z1), glm::vec3(x1, y2, z2) },
 		{ glm::vec3(x2, y1, z1), glm::vec3(x2, y1, z2) },
-		{ glm::vec3(x2, y2, z1), glm::vec3(x2, y2, z2) } };
+		{ glm::vec3(x2, y2, z1), glm::vec3(x2, y2, z2) } 
+    };
 
 	glBindBuffer(GL_ARRAY_BUFFER, d_bbox_vbo);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(lines), lines);
 
 	m_formHelper->refresh();
     m_scrollFormHelper->refresh();
-
-
 
     if (!glfwWindowShouldClose(m_glfwWindow.get())) {
 		glfwPollEvents();
@@ -594,8 +610,8 @@ static unsigned int loadCubemap(char **faces) {
 	return textureID;
 }
 
-void Renderer::setLim(const float3 & ulim, const float3 & llim)
+void Renderer::SetBoundaries(const float3 & upperBoundary, const float3 & lowerBoundary)
 {
-	m_llim = llim;
-	m_ulim = ulim;
+    m_upperBoundary = upperBoundary;
+	m_lowerBoundary = lowerBoundary;
 }

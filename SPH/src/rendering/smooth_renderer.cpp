@@ -52,7 +52,7 @@ void renderScreenQuad()
 
 namespace rendering {
 
-SmoothRenderer::SmoothRenderer(int windowWidth, int windowHeight, Camera* camera, GLuint skyboxTexture)
+SmoothRenderer::SmoothRenderer(int windowWidth, int windowHeight, std::shared_ptr<Camera> camera, GLuint skyboxTexture)
     : m_windowWidth(windowWidth)
     , m_windowHeight(windowHeight)
     , m_camera(camera)
