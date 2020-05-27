@@ -34,7 +34,6 @@ void FindCellStartEnd(
     unsigned int* cellEnds,
     int particlesNumber);
 
-//template <typename Func1, typename Func2>
 __global__
 void CalculateLambda(
     float* lambdas,

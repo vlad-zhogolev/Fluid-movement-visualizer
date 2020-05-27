@@ -116,6 +116,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="includes\rendering\rendering_parameters.h" />
     <ClInclude Include="includes\rendering\scroll_form_helper.h" />
     <ClInclude Include="includes\rendering\smooth_renderer.h" />
+    <ClInclude Include="includes\simulation\updaters.cuh" />
     <CudaCompile Include="includes\simulation\pbf_smoothing_kernels.cuh">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </CudaCompile>

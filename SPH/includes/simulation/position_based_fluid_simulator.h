@@ -21,14 +21,6 @@ public:
         cudaGraphicsResource* indicesResource,
         int particlesNumber);
 
-    void Step(
-        unsigned int positions,
-        unsigned int newPositions,
-        unsigned int velocities,
-        unsigned int newVelocities,
-        unsigned int indices,
-        int particlesNumber);
-
     void UpdateParameters();
 
 private:
@@ -75,8 +67,6 @@ private:
 
     Poly6Kernel m_poly6Kernel = Poly6Kernel(1.f);
     SpikyGradientKernel m_spikyGradientKernel = SpikyGradientKernel(1.f);
-
-
 
     int m_blockSize = 512;
 };
