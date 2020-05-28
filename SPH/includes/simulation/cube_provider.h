@@ -5,12 +5,17 @@
 
 class CubeProvider : IParticlesProvider
 {
+
+    using PositionsVector = std::vector<float3>;
+    using VelocitiesVector = std::vector<float3>;
+
 public:
-    CubeProvider(const glm::vec3& position, float size, const float3& upperBoundary, const float3& lowerBoundary);
+    CubeProvider(const float3& position, float size, const float3& upperBoundary, const float3& lowerBoundary);
 
     // IParticlesProvider
+    void SetTargets(GLuint positions, GLuint velocities) override;
     void Provide(int& particlesNumber) override;
-    bool SetPosition(const glm::vec3& position) override;
+    bool SetPosition(const float3& position) override;
     bool SetSize(int particlesNumber) override;
     bool SetDensity(float density) override;
     bool IsInsideBoundaries(const float3& upperBoundary, const float3& lowerBoundary) override;
@@ -20,14 +25,18 @@ private:
     inline int GetParticlesNumber() { return m_positions.size(); }
     void ReallocateIfNeeded(int particlesNumber);
 
-    bool IsInsideBoundaries(float center, float edgeLength, const float3& upperBoundary, const float3& lowerBoundary);
+    bool IsInsideBoundaries(float3 center, float edgeLength, const float3& upperBoundary, const float3& lowerBoundary);
+    float CalculateEdgeLength(float sizeInParticles);
 
 private:
-    glm::vec3 m_cubeCenter;
+    float3 m_cubeCenter;
     int m_sizeInParticles;
     float m_edgeLength;
     float m_density;
 
-    std::vector<float3> m_positions;
-    std::vector<float3> m_velocities;
+    GLuint m_positionsBuffer;
+    GLuint m_velocitiesBuffer;
+
+    PositionsVector m_positions;
+    VelocitiesVector m_velocities;
 };

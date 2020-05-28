@@ -1,5 +1,8 @@
 #include <simulation/simulation_parameters.h>
 #include <iostream>
+#include <math_constants.h>
+
+const float SimulationParameters::PARTICLE_MASS = 0.125f;
 
 SimulationParameters& SimulationParameters::GetInstance()
 {
@@ -28,6 +31,7 @@ SimulationParameters& SimulationParameters::GetInstance()
     instance.fluidStartPosition = make_float3(0.0f, 0.0f, 2.5f);
     SetDomainSize(SimulationDomainSize::Small);
     instance.m_command = SimulationCommand::Unknown;
+    instance.m_state = SimulationState::NotStarted;
 
     return instance;
 }
@@ -103,6 +107,24 @@ float3 SimulationParameters::GetLowerBoundary()
 SimulationDomain SimulationParameters::GetDomain()
 {
     return GetInstance().m_domain;
+}
+
+float SimulationParameters::GetParticleRadius()
+{
+    auto& instance = GetInstance();
+    float particleVolume = PARTICLE_MASS / instance.restDensity;
+    float radius = std::powf((0.75f / CUDART_PI) * particleVolume, 1.0f / 3.0f);
+    return radius;
+}
+
+SimulationState SimulationParameters::GetState()
+{
+    return GetInstance().m_state;
+}
+
+void SimulationParameters::SetState(SimulationState state)
+{
+    GetInstance().m_state = state;
 }
 
 void SimulationParameters::AdjustDomainToSize()

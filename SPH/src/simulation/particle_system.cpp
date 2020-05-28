@@ -17,7 +17,8 @@ ParticleSystem::ParticleSystem()
     m_simulator = new PositionBasedFluidSimulator(m_upperBoundary, m_lowerBoundary);
 
     // Initialize particles
-    float dd = 1.f / 20;
+    //float dd = 1.f / 20;
+    float dd = 2 * SimulationParameters::GetParticleRadius();
     float d1 = dd * 30, d2 = dd * 30, d3 = dd * 30;
     const int particlesInDimension = 30;
     const float upperBoundary = 0.75f;
@@ -78,12 +79,19 @@ void ParticleSystem::PerformSimulationStep()
         InitializeParticles();
         input.frameCount = 0;
         m_isSecondParticlesUsedForRendering = false;
+        m_simulationParams->SetCommand(SimulationCommand::Unknown);
+        m_simulationParams->SetState(SimulationState::NotStarted);
         return;
     }
     if (command != SimulationCommand::StepOneFrame &&
         command != SimulationCommand::Run)
     {
         return;
+    }
+    else if (m_simulationParams->GetState() == SimulationState::NotStarted)
+    {
+        // TODO: check that source is inside the box
+        m_simulationParams->SetState(SimulationState::Started);
     }
     if (command == SimulationCommand::StepOneFrame)
     {

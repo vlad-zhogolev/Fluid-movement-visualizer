@@ -35,6 +35,8 @@ class SimulationParameters
 {
 public:
 
+    static const float PARTICLE_MASS;
+
     // Particle system
     int substepsNumber;
     float restDensity;

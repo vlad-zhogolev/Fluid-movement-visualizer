@@ -33,7 +33,7 @@ int ParticlesCube::initialize(unsigned int pos, unsigned int vel, unsigned int i
 			z = sz;
 			for (int k = 0; k < m_ns.z; k++, z += m_d.z, m_count++) {
 				float r1 = 1.f * rand() / RAND_MAX, r2 = 1.f * rand() / RAND_MAX, r3 = 1.f * rand() / RAND_MAX;
-				m_pos[m_count] = make_float3(x, y, z) + 0.1f * make_float3(sx * r1, sy * r2, sz * r3);
+                m_pos[m_count] = make_float3(x, y, z);// +0.1f * make_float3(sx * r1, sy * r2, sz * r3);
 				m_vel[m_count] = make_float3(0.f, 0.f, 0.f);
 				m_iid[m_count] = m_count;
 			}
