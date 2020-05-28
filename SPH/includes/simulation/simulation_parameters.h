@@ -25,6 +25,12 @@ enum class SimulationCommand
     Restart
 };
 
+enum class SimulationState
+{
+    NotStarted,
+    Started
+};
+
 class SimulationParameters
 {
 public:
@@ -60,6 +66,11 @@ public:
     static float3 GetLowerBoundary();
     static SimulationDomain GetDomain();
 
+    static float GetParticleRadius();
+
+    static SimulationState GetState();
+    static void SetState(SimulationState state);
+
 private:
     static void AdjustDomainToSize();
 
@@ -67,8 +78,7 @@ private:
     SimulationDomain m_domain;
     SimulationDomainSize m_domainSize;
     SimulationCommand m_command;
-
-
+    SimulationState m_state;
 
     float m_upperBoundary;
     float m_lowerBoundary;

@@ -29,4 +29,3 @@ private:
 
 	void __realloc(int);
 };
-
