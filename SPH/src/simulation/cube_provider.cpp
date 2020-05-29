@@ -79,7 +79,7 @@ int CubeProvider::GetParticlesNumber()
     return m_sizeInParticles * m_sizeInParticles * m_sizeInParticles;
 }
 
-bool CubeProvider::SetPosition(const float3& position)
+bool CubeProvider::TrySetPosition(const float3& position)
 {
     if (!IsInsideBoundaries(position, m_edgeLength,
             SimulationParameters::GetUpperBoundary(), SimulationParameters::GetLowerBoundary()))
@@ -87,11 +87,16 @@ bool CubeProvider::SetPosition(const float3& position)
         return false;
     }
 
+    SetPosition(position);
+}
+
+bool CubeProvider::SetPosition(const float3& position)
+{
     m_cubeCenter = position;
     return true;
 }
 
-bool CubeProvider::SetSize(int particlesNumber)
+bool CubeProvider::TrySetSize(int particlesNumber)
 {
     float edgeLength = CalculateEdgeLength(particlesNumber);
     if (!IsInsideBoundaries(m_cubeCenter, edgeLength,

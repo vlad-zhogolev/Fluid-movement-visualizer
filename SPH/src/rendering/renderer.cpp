@@ -104,6 +104,7 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
         return m_simulationParams->fluidStartPosition.x;
     };
     auto startPositionX = m_formHelper->addVariable<float>("Start position, x", xSetter, xGetter);
+    startPositionX->setSpinnable(true);
 
     auto ySetter = [this](const float& value) {
         m_simulationParams->SetStartY(value);
@@ -112,6 +113,7 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
         return m_simulationParams->fluidStartPosition.y;
     };
     auto startPositionY = m_formHelper->addVariable<float>("Start position, y", ySetter, yGetter);
+    startPositionY->setSpinnable(true);
 
     auto zSetter = [this](const float& value) {
         m_simulationParams->SetStartZ(value);
@@ -120,6 +122,7 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
         return m_simulationParams->fluidStartPosition.z;
     };
     auto startPositionZ = m_formHelper->addVariable<float>("Start position, z", zSetter, zGetter);
+    startPositionZ->setSpinnable(true);
 
     auto fluidSizeSetter = [this](const int& value) {
         m_simulationParams->SetFluidSize(value);
@@ -414,6 +417,7 @@ void Renderer::SetStartSettingsEnabled(bool isEnabled)
     for (auto widget : m_switchOffRestart)
     {
         widget->setEnabled(isEnabled);
+        
     }
 }
 

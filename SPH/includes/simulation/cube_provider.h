@@ -16,8 +16,9 @@ public:
     void SetTargets(GLuint positions, GLuint velocities) override;
     void Provide() override;
     int GetParticlesNumber() override;
+    bool TrySetPosition(const float3& position) override;
     bool SetPosition(const float3& position) override;
-    bool SetSize(int particlesNumber) override;
+    bool TrySetSize(int particlesNumber) override;
     bool SetDensity(float density) override;
     bool IsInsideBoundaries(const float3& upperBoundary, const float3& lowerBoundary) override;
 

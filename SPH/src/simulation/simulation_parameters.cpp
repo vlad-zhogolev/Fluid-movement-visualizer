@@ -16,6 +16,8 @@ SimulationParameters& SimulationParameters::GetInstance()
     }
     isInitialized = true;
 
+    
+
     instance.g = 9.8f;
     instance.kernelRadius = 0.1f;
     instance.deltaTime = 0.016f;
@@ -31,10 +33,11 @@ SimulationParameters& SimulationParameters::GetInstance()
     instance.change = true;
     instance.fluidStartPosition = make_float3(0.0f, 0.0f, 2.5f);
     instance.sizeInParticles = 30;
-    SetDomainSize(SimulationDomainSize::Small);
+
+    instance.m_domainSize = SimulationDomainSize::Small;
+    AdjustDomainToSize();
     instance.m_command = SimulationCommand::Unknown;
     instance.m_state = SimulationState::NotStarted;
-
     instance.m_particlesProvider = std::make_shared<CubeProvider>(make_float3(0.0f, 0.0f, 2.5f), 30);
 
     return instance;
@@ -89,8 +92,19 @@ SimulationCommand SimulationParameters::GetCommand()
 
 void SimulationParameters::SetDomainSize(SimulationDomainSize domain)
 {
-    GetInstance().m_domainSize = domain;
+    auto& instance = GetInstance();
+    instance.m_domainSize = domain;
     AdjustDomainToSize();
+
+    float3 up = instance.GetUpperBoundary();
+    float3 low = instance.GetLowerBoundary();
+
+    if (!instance.GetParticlesProvider().IsInsideBoundaries(up, low))
+    {
+        instance.fluidStartPosition = make_float3(0.0f, 0.0f, 2.5f);
+        instance.GetParticlesProvider().SetPosition(instance.fluidStartPosition);
+        instance.GetParticlesProvider().Provide();
+    }
 }
 
 SimulationDomainSize SimulationParameters::GetDomainSize()
@@ -140,7 +154,7 @@ IParticlesProvider& SimulationParameters::GetParticlesProvider()
 
 bool SimulationParameters::SetStartPosition(float3 position)
 {
-    if (!m_particlesProvider->SetPosition(position))
+    if (!m_particlesProvider->TrySetPosition(position))
     {
         return false;
     }
@@ -174,7 +188,7 @@ bool SimulationParameters::SetStartZ(float z)
 
 void SimulationParameters::SetFluidSize(int size)
 {
-    if (!m_particlesProvider->SetSize(size))
+    if (!m_particlesProvider->TrySetSize(size))
     {
         return;
     }
@@ -186,7 +200,7 @@ void SimulationParameters::SetFluidSize(int size)
 
 void SimulationParameters::UpdateStartPosition()
 {
-    m_particlesProvider->SetPosition(fluidStartPosition);
+    m_particlesProvider->TrySetPosition(fluidStartPosition);
 }
 
 void SimulationParameters::AdjustDomainToSize()
