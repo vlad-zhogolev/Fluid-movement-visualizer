@@ -1,6 +1,6 @@
 #pragma once
 
-#include <simulation/i_particles_provider.h>
+#include <simulation/providers/i_particles_provider.h>
 #include <vector>
 
 class CubeProvider : public IParticlesProvider
@@ -10,7 +10,7 @@ class CubeProvider : public IParticlesProvider
     using VelocitiesVector = std::vector<float3>;
 
 public:
-    CubeProvider(const float3& position, int sizeInParticles);
+    explicit CubeProvider(const float3& position, int sizeInParticles);
 
     // IParticlesProvider
     void SetTargets(GLuint positions, GLuint velocities) override;
@@ -22,7 +22,7 @@ public:
     bool SetDensity(float density) override;
     bool IsInsideBoundaries(const float3& upperBoundary, const float3& lowerBoundary) override;
 
-private:
+protected:
     inline float GetHalfEdge() const { return 0.5f * m_edgeLength; }
     //inline int GetParticlesNumber() { return m_positions.size(); }
     void ReallocateIfNeeded(int particlesNumber);
@@ -30,7 +30,7 @@ private:
     bool IsInsideBoundaries(float3 center, float edgeLength, const float3& upperBoundary, const float3& lowerBoundary);
     float CalculateEdgeLength(float sizeInParticles);
 
-private:
+protected:
     float3 m_cubeCenter;
     int m_sizeInParticles;
     float m_edgeLength;

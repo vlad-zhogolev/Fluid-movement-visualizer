@@ -1,7 +1,8 @@
 #include <simulation/simulation_parameters.h>
 #include <iostream>
 #include <math_constants.h>
-#include <simulation/cube_provider.h>
+#include <simulation/providers/cube_provider.h>
+#include <simulation/providers/sphere_provider.h>
 
 const float SimulationParameters::PARTICLE_MASS = 0.125f;
 
@@ -38,7 +39,7 @@ SimulationParameters& SimulationParameters::GetInstance()
     AdjustDomainToSize();
     instance.m_command = SimulationCommand::Unknown;
     instance.m_state = SimulationState::NotStarted;
-    instance.m_particlesProvider = std::make_shared<CubeProvider>(make_float3(0.0f, 0.0f, 2.5f), 30);
+    instance.m_particlesProvider = std::make_shared<SphereProvider>(make_float3(0.0f, 0.0f, 2.5f), 30);
 
     return instance;
 }

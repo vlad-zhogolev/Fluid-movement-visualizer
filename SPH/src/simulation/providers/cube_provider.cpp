@@ -1,6 +1,6 @@
 #pragma once
 
-#include <simulation/cube_provider.h>
+#include <simulation/providers/cube_provider.h>
 #include <simulation/simulation_parameters.h>
 #include <helper.h>
 #include <stdexcept>
@@ -27,7 +27,8 @@ void CubeProvider::SetTargets(GLuint positions, GLuint velocities)
 }
 
 void CubeProvider::Provide()
-{    if (m_positionsBuffer == 0)
+{   
+    if (m_positionsBuffer == 0)
     {
         std::cout << "buffer is not set";
         return;
@@ -55,9 +56,9 @@ void CubeProvider::Provide()
             for (float k = 0; k < m_sizeInParticles; ++k)
             {
                 float z = cubeLowerBoundary.z + step * k;
-                float r1 = 1.f * rand() / RAND_MAX, r2 = 1.f * rand() / RAND_MAX, r3 = 1.f * rand() / RAND_MAX;
+                //float r1 = 1.f * rand() / RAND_MAX, r2 = 1.f * rand() / RAND_MAX, r3 = 1.f * rand() / RAND_MAX;
                 ++particleIndex;
-                m_positions.push_back(make_float3(x, y, z) + 0.1 * make_float3(r1, r2, r3));
+                m_positions.push_back(make_float3(x, y, z));// +0.1 * make_float3(r1, r2, r3));
                 m_velocities.emplace_back(make_float3(0.0f, 0.0f, 0.0f));
             }
         }

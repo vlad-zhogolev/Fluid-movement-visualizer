@@ -117,8 +117,9 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="includes\rendering\rendering_parameters.h" />
     <ClInclude Include="includes\rendering\scroll_form_helper.h" />
     <ClInclude Include="includes\rendering\smooth_renderer.h" />
-    <ClInclude Include="includes\simulation\cube_provider.h" />
-    <ClInclude Include="includes\simulation\i_particles_provider.h" />
+    <ClInclude Include="includes\simulation\providers\cube_provider.h" />
+    <ClInclude Include="includes\simulation\providers\i_particles_provider.h" />
+    <ClInclude Include="includes\simulation\providers\sphere_provider.h" />
     <ClInclude Include="includes\simulation\updaters.cuh" />
     <CudaCompile Include="includes\simulation\pbf_smoothing_kernels.cuh">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -146,7 +147,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClCompile Include="src\rendering\camera.cpp" />
     <ClCompile Include="src\rendering\rendering_parameters.cpp" />
     <ClCompile Include="src\rendering\smooth_renderer.cpp" />
-    <ClCompile Include="src\simulation\cube_provider.cpp">
+    <ClCompile Include="src\simulation\providers\cube_provider.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -159,6 +160,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClCompile Include="src\rendering\renderer.cpp" />
     <ClCompile Include="src\rendering\shader.cpp" />
     <ClCompile Include="src\simulation\position_based_fluid_simulator.cpp" />
+    <ClCompile Include="src\simulation\providers\sphere_provider.cpp" />
     <ClCompile Include="src\static_vertices.cpp" />
   </ItemGroup>
   <ItemGroup>

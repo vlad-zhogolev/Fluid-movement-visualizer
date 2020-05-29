@@ -21,7 +21,8 @@
     <ClCompile Include="src\simulation\particles_cube.cpp" />
     <ClCompile Include="src\rendering\smooth_renderer.cpp" />
     <ClCompile Include="src\rendering\rendering_parameters.cpp" />
-    <ClCompile Include="src\simulation\cube_provider.cpp" />
+    <ClCompile Include="src\simulation\providers\cube_provider.cpp" />
+    <ClCompile Include="src\simulation\providers\sphere_provider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\nanovg\src\fontstash.h" />
@@ -41,8 +42,9 @@
     <ClInclude Include="includes\rendering\rendering_parameters.h" />
     <ClInclude Include="includes\simulation\converters.cuh" />
     <ClInclude Include="includes\simulation\updaters.cuh" />
-    <ClInclude Include="includes\simulation\i_particles_provider.h" />
-    <ClInclude Include="includes\simulation\cube_provider.h" />
+    <ClInclude Include="includes\simulation\providers\i_particles_provider.h" />
+    <ClInclude Include="includes\simulation\providers\cube_provider.h" />
+    <ClInclude Include="includes\simulation\providers\sphere_provider.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\boundary.frag" />

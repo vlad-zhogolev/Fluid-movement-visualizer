@@ -1,7 +1,7 @@
 #pragma once
 
 #include <helper_math.h>
-#include <simulation/i_particles_provider.h>
+#include <simulation/providers/i_particles_provider.h>
 #include <memory>
 
 struct SimulationDomain
