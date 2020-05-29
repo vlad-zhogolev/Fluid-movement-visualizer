@@ -18,15 +18,16 @@ ParticleSystem::ParticleSystem()
 
     // Initialize particles
     //float dd = 1.f / 20;
-    float dd = 2 * SimulationParameters::GetParticleRadius();
-    float d1 = dd * 30, d2 = dd * 30, d3 = dd * 30;
-    const int particlesInDimension = 30;
-    const float upperBoundary = 0.75f;
-    m_source = new ParticlesCube(
-        make_float3(upperBoundary, upperBoundary, 3.8f), // upper boundary
-        make_float3(upperBoundary - d1, upperBoundary - d2, 3.8f - d3), // lower boundary
-        make_int3(particlesInDimension)); // particles number by dimensions
-    m_particlesNumber = particlesInDimension * particlesInDimension * particlesInDimension;
+
+    // float dd = 2 * SimulationParameters::GetParticleRadius();
+    // float d1 = dd * 30, d2 = dd * 30, d3 = dd * 30;
+    // const int particlesInDimension = 30;
+    // const float upperBoundary = 0.75f;
+    // m_source = new ParticlesCube(
+    //     make_float3(upperBoundary, upperBoundary, 3.8f), // upper boundary
+    //     make_float3(upperBoundary - d1, upperBoundary - d2, 3.8f - d3), // lower boundary
+    //     make_int3(particlesInDimension)); // particles number by dimensions
+    // m_particlesNumber = particlesInDimension * particlesInDimension * particlesInDimension;
 
     // Particle positions and velocities
     glGenBuffers(1, &m_positions1);
@@ -63,7 +64,11 @@ ParticleSystem::ParticleSystem()
 
 void ParticleSystem::InitializeParticles() 
 {
-    m_source->initialize(m_positions1, m_velocities1, m_particleIndices, MAX_PARTICLE_NUM);
+    //m_source->initialize(m_positions1, m_velocities1, m_particleIndices, MAX_PARTICLE_NUM);
+    auto& provider = SimulationParameters::GetParticlesProvider();
+    provider.SetTargets(m_positions1, m_velocities1);
+    provider.Provide();
+    m_particlesNumber = provider.GetParticlesNumber();
 }
 
 void ParticleSystem::PerformSimulationStep() 
@@ -74,6 +79,7 @@ void ParticleSystem::PerformSimulationStep()
     //    return;
     //}
     auto command = m_simulationParams->GetCommand();
+    m_particlesNumber = m_simulationParams->GetParticlesProvider().GetParticlesNumber();
     if (command == SimulationCommand::Restart)
     {
         InitializeParticles();

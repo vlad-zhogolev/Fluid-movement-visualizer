@@ -3,26 +3,27 @@
 #include <simulation/i_particles_provider.h>
 #include <vector>
 
-class CubeProvider : IParticlesProvider
+class CubeProvider : public IParticlesProvider
 {
 
     using PositionsVector = std::vector<float3>;
     using VelocitiesVector = std::vector<float3>;
 
 public:
-    CubeProvider(const float3& position, float size, const float3& upperBoundary, const float3& lowerBoundary);
+    CubeProvider(const float3& position, int sizeInParticles);
 
     // IParticlesProvider
     void SetTargets(GLuint positions, GLuint velocities) override;
-    void Provide(int& particlesNumber) override;
+    void Provide() override;
+    int GetParticlesNumber() override;
     bool SetPosition(const float3& position) override;
     bool SetSize(int particlesNumber) override;
     bool SetDensity(float density) override;
     bool IsInsideBoundaries(const float3& upperBoundary, const float3& lowerBoundary) override;
 
 private:
-    inline float GetHalfEdge() const { return m_edgeLength / 2.0f; }
-    inline int GetParticlesNumber() { return m_positions.size(); }
+    inline float GetHalfEdge() const { return 0.5f * m_edgeLength; }
+    //inline int GetParticlesNumber() { return m_positions.size(); }
     void ReallocateIfNeeded(int particlesNumber);
 
     bool IsInsideBoundaries(float3 center, float edgeLength, const float3& upperBoundary, const float3& lowerBoundary);

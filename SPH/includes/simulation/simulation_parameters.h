@@ -1,6 +1,8 @@
 #pragma once
 
 #include <helper_math.h>
+#include <simulation/i_particles_provider.h>
+#include <memory>
 
 struct SimulationDomain
 {
@@ -53,7 +55,7 @@ public:
 
     bool change;
     float3 fluidStartPosition;
-    float size;
+    int sizeInParticles;
     
     static SimulationParameters& GetInstance();
     static SimulationParameters* GetInstancePtr();
@@ -73,14 +75,28 @@ public:
     static SimulationState GetState();
     static void SetState(SimulationState state);
 
+    static IParticlesProvider& GetParticlesProvider();
+
+    bool SetStartPosition(float3 position);
+    bool SetStartX(float x);
+    bool SetStartY(float y);
+    bool SetStartZ(float z);
+
+    inline int GetFluidSize() const { return sizeInParticles; }
+    void SetFluidSize(int size);
+
 private:
     static void AdjustDomainToSize();
+
+    void UpdateStartPosition();
 
 private:
     SimulationDomain m_domain;
     SimulationDomainSize m_domainSize;
     SimulationCommand m_command;
     SimulationState m_state;
+
+    std::shared_ptr<IParticlesProvider> m_particlesProvider;
 
     float m_upperBoundary;
     float m_lowerBoundary;

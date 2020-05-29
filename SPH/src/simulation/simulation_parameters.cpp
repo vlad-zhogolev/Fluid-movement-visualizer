@@ -1,6 +1,7 @@
 #include <simulation/simulation_parameters.h>
 #include <iostream>
 #include <math_constants.h>
+#include <simulation/cube_provider.h>
 
 const float SimulationParameters::PARTICLE_MASS = 0.125f;
 
@@ -29,9 +30,12 @@ SimulationParameters& SimulationParameters::GetInstance()
     instance.substepsNumber = 4;
     instance.change = true;
     instance.fluidStartPosition = make_float3(0.0f, 0.0f, 2.5f);
+    instance.sizeInParticles = 30;
     SetDomainSize(SimulationDomainSize::Small);
     instance.m_command = SimulationCommand::Unknown;
     instance.m_state = SimulationState::NotStarted;
+
+    instance.m_particlesProvider = std::make_shared<CubeProvider>(make_float3(0.0f, 0.0f, 2.5f), 30);
 
     return instance;
 }
@@ -125,6 +129,64 @@ SimulationState SimulationParameters::GetState()
 void SimulationParameters::SetState(SimulationState state)
 {
     GetInstance().m_state = state;
+}
+
+IParticlesProvider& SimulationParameters::GetParticlesProvider()
+{
+    auto& instance = GetInstance();
+    IParticlesProvider& provider = *(instance.m_particlesProvider);
+    return provider;
+}
+
+bool SimulationParameters::SetStartPosition(float3 position)
+{
+    if (!m_particlesProvider->SetPosition(position))
+    {
+        return false;
+    }
+
+    fluidStartPosition = position;
+    m_particlesProvider->Provide();
+    return true;
+}
+
+
+bool SimulationParameters::SetStartX(float x)
+{
+    float3 position = fluidStartPosition;
+    position.x = x;
+    return SetStartPosition(position);
+}
+
+bool SimulationParameters::SetStartY(float y)
+{
+    float3 position = fluidStartPosition;
+    position.y = y;
+    return SetStartPosition(position);
+}
+
+bool SimulationParameters::SetStartZ(float z)
+{
+    float3 position = fluidStartPosition;
+    position.z = z;
+    return SetStartPosition(position);
+}
+
+void SimulationParameters::SetFluidSize(int size)
+{
+    if (!m_particlesProvider->SetSize(size))
+    {
+        return;
+    }
+
+    sizeInParticles = size;
+    m_particlesProvider->Provide();
+}
+
+
+void SimulationParameters::UpdateStartPosition()
+{
+    m_particlesProvider->SetPosition(fluidStartPosition);
 }
 
 void SimulationParameters::AdjustDomainToSize()

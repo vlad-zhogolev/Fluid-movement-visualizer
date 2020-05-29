@@ -43,6 +43,9 @@ private:
 
     void Init();
 	void init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus);
+
+    void SetStartSettingsEnabled(bool isEnabled);
+
 	void __binding();
 	void __render();
 
@@ -82,6 +85,8 @@ private:
 	nanogui::Window* m_nanoguiWindow = nullptr;
     nanogui::Widget* m_widget = nullptr;
 	std::function<void()> m_nextFrameBtnCb;
+
+    std::vector<nanogui::ref<nanogui::Widget>> m_switchOffRestart;
 
 	int frameCount = 0;
     

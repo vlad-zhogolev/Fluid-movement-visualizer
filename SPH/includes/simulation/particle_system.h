@@ -13,6 +13,7 @@ public:
 
     void InitializeParticles();
     void PerformSimulationStep();
+    void UpdateParticles();
 
     GLuint GetPositionsForRenderingHandle() const;
     GLuint GetIndicesHandle() const { return m_particleIndices; }

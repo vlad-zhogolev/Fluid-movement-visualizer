@@ -83,35 +83,6 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     m_formHelper->addWidget("Domain", domainSelector);
     auto domainComboBox = new nanogui::ComboBox(domainSelector, { "Small", "Medium", "Large", "Stretched" });
 
-    nextFrameButton->setCallback([this, domainComboBox]() {
-        //m_input->nextFrame = true;
-        domainComboBox->setEnabled(false);
-        m_simulationParams->SetCommand(SimulationCommand::StepOneFrame);
-    });
-    testRunOrStopButton->setChangeCallback([this, testRunOrStopButton, domainComboBox](bool isPressed) {
-        if (isPressed)
-        {
-            testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_STOP);
-            //m_input->running = true;
-            domainComboBox->setEnabled(false);
-            m_simulationParams->SetCommand(SimulationCommand::Run);
-        }
-        else
-        {
-            testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
-            //m_input->running = false;
-            m_simulationParams->SetCommand(SimulationCommand::Pause);
-        }
-    });
-    restartButton->setCallback([this, testRunOrStopButton, domainComboBox]() {
-        m_simulationParams->SetCommand(SimulationCommand::Restart);
-
-        // Enable start button
-        testRunOrStopButton->setPushed(false);
-        testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
-
-        domainComboBox->setEnabled(true);
-    });
     domainComboBox->setCallback([this](int index) {
         SimulationDomainSize size;
         if (index == 0)
@@ -126,10 +97,103 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
         m_simulationParams->SetDomainSize(size);
     });
     
-    auto starPositionX = m_formHelper->addVariable("Start position, x", simulationParameters.fluidStartPosition.x);
-    auto starPositionY = m_formHelper->addVariable("Start position, y", simulationParameters.fluidStartPosition.y);
-    auto starPositionZ = m_formHelper->addVariable("Start position, z", simulationParameters.fluidStartPosition.z);
-    auto fluidSize = m_formHelper->addVariable("Fluid size", simulationParameters.size);
+    auto xSetter = [this](const float& value) {
+        m_simulationParams->SetStartX(value);
+    };
+    auto xGetter = [this]() -> float {
+        return m_simulationParams->fluidStartPosition.x;
+    };
+    auto startPositionX = m_formHelper->addVariable<float>("Start position, x", xSetter, xGetter);
+
+    auto ySetter = [this](const float& value) {
+        m_simulationParams->SetStartY(value);
+    };
+    auto yGetter = [this]() -> float {
+        return m_simulationParams->fluidStartPosition.y;
+    };
+    auto startPositionY = m_formHelper->addVariable<float>("Start position, y", ySetter, yGetter);
+
+    auto zSetter = [this](const float& value) {
+        m_simulationParams->SetStartZ(value);
+    };
+    auto zGetter = [this]() -> float {
+        return m_simulationParams->fluidStartPosition.z;
+    };
+    auto startPositionZ = m_formHelper->addVariable<float>("Start position, z", zSetter, zGetter);
+
+    auto fluidSizeSetter = [this](const int& value) {
+        m_simulationParams->SetFluidSize(value);
+    };
+    auto fluidSizeGetter = [this]() -> int {
+        return m_simulationParams->GetFluidSize();
+    };
+    auto fluidSizeVariable = m_formHelper->addVariable<int>("Fluid size", fluidSizeSetter, fluidSizeGetter);
+    fluidSizeVariable->setMinMaxValues(1, 50);
+
+    m_switchOffRestart = {
+        startPositionX,
+        startPositionY,
+        startPositionZ,
+        fluidSizeVariable,
+        domainComboBox
+    };
+
+    nextFrameButton->setCallback([this, domainComboBox]() {
+        //m_input->nextFrame = true;
+        domainComboBox->setEnabled(false);
+        m_simulationParams->SetCommand(SimulationCommand::StepOneFrame);
+    });
+    testRunOrStopButton->setChangeCallback(
+        [this, 
+        testRunOrStopButton, 
+        startPositionX, 
+        startPositionY,
+        startPositionZ,
+        fluidSizeVariable, 
+        domainComboBox]
+        (bool isPressed)
+    {
+        if (isPressed)
+        {
+            testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_STOP);
+            //m_input->running = true;
+            SetStartSettingsEnabled(false);
+            //domainComboBox->setEnabled(false);
+            //startPositionX->setEnabled(false);
+            //startPositionY->setEnabled(false);
+            //startPositionZ->setEnabled(false);
+            //fluidSizeVariable->setEnabled(false);
+            m_simulationParams->SetCommand(SimulationCommand::Run);
+        }
+        else
+        {
+            testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
+            //m_input->running = false;
+            m_simulationParams->SetCommand(SimulationCommand::Pause);
+        }
+    });
+    restartButton->setCallback(
+        [this,
+        testRunOrStopButton,
+        startPositionX,
+        startPositionY,
+        startPositionZ,
+        fluidSizeVariable,
+        domainComboBox]()
+    {
+        m_simulationParams->SetCommand(SimulationCommand::Restart);
+
+        // Enable start button
+        testRunOrStopButton->setPushed(false);
+        testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
+
+        SetStartSettingsEnabled(true);
+        //startPositionX->setEnabled(true);
+        //startPositionY->setEnabled(true);
+        //startPositionZ->setEnabled(true);
+        //fluidSizeVariable->setEnabled(true);
+        //domainComboBox->setEnabled(true);
+    });
 
     // m_scrollPanel = new nanogui::VScrollPanel(m_nanoguiWindow);
     // m_scrollPanel->setFixedSize(nanogui::Vector2i{ 200,200 });
@@ -344,6 +408,15 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 
     m_smoothRenderer = std::make_unique<rendering::SmoothRenderer>(m_width, m_height, m_camera, m_skyboxTexture);
 }
+
+void Renderer::SetStartSettingsEnabled(bool isEnabled)
+{
+    for (auto widget : m_switchOffRestart)
+    {
+        widget->setEnabled(isEnabled);
+    }
+}
+
 
 void Renderer::__window_size_callback(GLFWwindow* window, int width, int height)
 {

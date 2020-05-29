@@ -6,7 +6,8 @@
 struct IParticlesProvider
 {
     virtual void SetTargets(GLuint positions, GLuint velocities) = 0;
-    virtual void Provide(int& particlesNumber) = 0;
+    virtual void Provide() = 0;
+    virtual int GetParticlesNumber() = 0;
     virtual bool SetPosition(const float3& position) = 0;
     virtual bool SetSize(int particlesNumber) = 0;
     virtual bool SetDensity(float density) = 0;
