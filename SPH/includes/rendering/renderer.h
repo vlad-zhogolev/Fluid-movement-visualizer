@@ -87,6 +87,7 @@ private:
 	std::function<void()> m_nextFrameBtnCb;
 
     std::vector<nanogui::ref<nanogui::Widget>> m_switchOffRestart;
+    std::vector<nanogui::ref<nanogui::TextBox>> m_positionVariables;
 
 	int frameCount = 0;
     
