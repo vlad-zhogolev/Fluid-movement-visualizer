@@ -77,6 +77,22 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     auto restartButton = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CCW);
     restartButton->setFlags(nanogui::Button::NormalButton);
 
+    auto particleSourceSelector = new nanogui::Widget(m_nanoguiWindow);
+    particleSourceSelector->setLayout(
+        new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 2, 8));
+    m_formHelper->addWidget("Source", particleSourceSelector);
+    auto particleSourceComboBox = new nanogui::ComboBox(particleSourceSelector, { "Cube", "Sphere" });
+
+    particleSourceComboBox->setCallback([this](int index) {
+        ParticleSource sourceType;
+        if (index == 0)
+            sourceType = ParticleSource::Cube;
+        else if (index == 1)
+            sourceType = ParticleSource::Sphere;
+
+        m_simulationParams->SetParticlesSource(sourceType);
+    });
+
     auto domainSelector = new nanogui::Widget(m_nanoguiWindow);
     domainSelector->setLayout(
         new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 2, 8));

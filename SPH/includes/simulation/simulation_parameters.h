@@ -33,6 +33,12 @@ enum class SimulationState
     Started
 };
 
+enum class ParticleSource
+{
+    Cube,
+    Sphere
+};
+
 class SimulationParameters
 {
 public:
@@ -85,6 +91,8 @@ public:
     inline int GetFluidSize() const { return sizeInParticles; }
     void SetFluidSize(int size);
 
+    void SetParticlesSource(ParticleSource source);
+
 private:
     static void AdjustDomainToSize();
 
@@ -95,6 +103,7 @@ private:
     SimulationDomainSize m_domainSize;
     SimulationCommand m_command;
     SimulationState m_state;
+    ParticleSource m_source;
 
     std::shared_ptr<IParticlesProvider> m_particlesProvider;
 

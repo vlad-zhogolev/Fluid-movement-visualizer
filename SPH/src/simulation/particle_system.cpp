@@ -78,6 +78,12 @@ void ParticleSystem::PerformSimulationStep()
     //{
     //    return;
     //}
+
+    if (SimulationParameters::GetState() == SimulationState::NotStarted)
+    {
+        auto& provider = SimulationParameters::GetParticlesProvider();
+        provider.SetTargets(m_positions1, m_velocities1);
+    }
     auto command = m_simulationParams->GetCommand();
     m_particlesNumber = m_simulationParams->GetParticlesProvider().GetParticlesNumber();
     if (command == SimulationCommand::Restart)

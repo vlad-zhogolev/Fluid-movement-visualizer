@@ -39,6 +39,8 @@ SimulationParameters& SimulationParameters::GetInstance()
     AdjustDomainToSize();
     instance.m_command = SimulationCommand::Unknown;
     instance.m_state = SimulationState::NotStarted;
+
+    instance.m_source = ParticleSource::Cube;
     instance.m_particlesProvider = std::make_shared<SphereProvider>(make_float3(0.0f, 0.0f, 2.5f), 30);
 
     return instance;
@@ -196,6 +198,27 @@ void SimulationParameters::SetFluidSize(int size)
 
     sizeInParticles = size;
     m_particlesProvider->Provide();
+}
+
+void SimulationParameters::SetParticlesSource(ParticleSource source)
+{
+    m_source = source;
+    float3 position = m_particlesProvider->GetPosition();
+    int sizeInParticles = m_particlesProvider->GetSize();
+    switch (source)
+    {
+        case ParticleSource::Cube:
+        {
+            m_particlesProvider = std::make_shared<CubeProvider>(position, sizeInParticles);
+        }
+        break;
+        case ParticleSource::Sphere:
+        {
+            m_particlesProvider = std::make_shared<SphereProvider>(position, sizeInParticles);
+        }
+        break;
+    }
+    SetCommand(SimulationCommand::Restart);
 }
 
 
