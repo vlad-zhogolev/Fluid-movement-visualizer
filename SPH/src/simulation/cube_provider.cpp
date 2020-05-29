@@ -65,12 +65,12 @@ void CubeProvider::Provide()
 
     glBindBuffer(GL_ARRAY_BUFFER, m_positionsBuffer);
     //glInvalidateBufferData(m_positionsBuffer);
-    glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLE_NUM * sizeof(float3), nullptr, GL_STATIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLE_NUM * sizeof(float3), nullptr, GL_STATIC_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, particlesNumber * sizeof(typename PositionsVector::value_type), m_positions.data());
 
     glBindBuffer(GL_ARRAY_BUFFER, m_velocitiesBuffer);
     //glInvalidateBufferData(m_velocitiesBuffer);
-    glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLE_NUM * sizeof(float3), nullptr, GL_STATIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLE_NUM * sizeof(float3), nullptr, GL_STATIC_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, particlesNumber * sizeof(typename VelocitiesVector::value_type), m_velocities.data());
 }
 
