@@ -20,6 +20,7 @@ public:
     bool SetPosition(const float3& position) override;
     inline float3 GetPosition() const override { return m_cubeCenter; }
     bool TrySetSize(int particlesNumber) override;
+    bool SetSize(int particlesNumber) override;
     inline int GetSize() const override { return m_sizeInParticles; }
     bool SetDensity(float density) override;
     bool IsInsideBoundaries(const float3& upperBoundary, const float3& lowerBoundary) override;

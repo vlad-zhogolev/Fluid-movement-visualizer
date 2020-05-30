@@ -111,6 +111,13 @@ bool CubeProvider::TrySetSize(int particlesNumber)
     return true;
 }
 
+bool CubeProvider::SetSize(int particlesNumber)
+{
+    m_sizeInParticles = particlesNumber;
+    m_edgeLength = CalculateEdgeLength(particlesNumber);
+    return true;
+}
+
 bool CubeProvider::SetDensity(float density)
 {
     if (!IsInsideBoundaries(m_cubeCenter, CalculateEdgeLength(m_sizeInParticles),

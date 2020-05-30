@@ -12,6 +12,7 @@ struct IParticlesProvider
     virtual bool SetPosition(const float3& position) = 0;
     virtual float3 GetPosition() const = 0;
     virtual bool TrySetSize(int particlesNumber) = 0;
+    virtual bool SetSize(int particlesNumber) = 0;
     virtual int GetSize() const = 0;
     virtual bool SetDensity(float density) = 0;
     virtual bool IsInsideBoundaries(const float3& upperBoundary, const float3& lowerBoundary) = 0;

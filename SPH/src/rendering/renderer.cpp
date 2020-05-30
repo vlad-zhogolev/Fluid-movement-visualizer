@@ -148,6 +148,7 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     };
     auto fluidSizeVariable = m_formHelper->addVariable<int>("Fluid size", fluidSizeSetter, fluidSizeGetter);
     fluidSizeVariable->setMinMaxValues(1, 50);
+    fluidSizeVariable->setSpinnable(true);
 
     m_positionVariables = {
         startPositionX,
@@ -161,7 +162,8 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
         startPositionY,
         startPositionZ,
         fluidSizeVariable,
-        domainComboBox
+        domainComboBox,
+        particleSourceComboBox
     };
 
     nextFrameButton->setCallback([this, domainComboBox]() {

@@ -149,7 +149,8 @@ vec4 CalculateColor()
 
 void main()
 {
-	float linearDepth = texture(depthTexture, ScreenCoordinates).x;
+	//float linearDepth = texture(depthTexture, ScreenCoordinates).x;
+    float linearDepth = DiscardIfDepthGreaterThan(DepthThreshold);
 	float projectedDepth = ProjectDepth(-linearDepth);
     gl_FragDepth = ConvertCoorinateDeviceToScreen(projectedDepth);
 

@@ -1,5 +1,6 @@
 #include <simulation/simulation_parameters.h>
 #include <iostream>
+#include <algorithm>
 #include <math_constants.h>
 #include <simulation/providers/cube_provider.h>
 #include <simulation/providers/sphere_provider.h>
@@ -41,7 +42,7 @@ SimulationParameters& SimulationParameters::GetInstance()
     instance.m_state = SimulationState::NotStarted;
 
     instance.m_source = ParticleSource::Cube;
-    instance.m_particlesProvider = std::make_shared<SphereProvider>(make_float3(0.0f, 0.0f, 2.5f), 30);
+    instance.m_particlesProvider = std::make_shared<CubeProvider>(make_float3(0.0f, 0.0f, 2.5f), 30);
 
     return instance;
 }
@@ -102,10 +103,20 @@ void SimulationParameters::SetDomainSize(SimulationDomainSize domain)
     float3 up = instance.GetUpperBoundary();
     float3 low = instance.GetLowerBoundary();
 
-    if (!instance.GetParticlesProvider().IsInsideBoundaries(up, low))
+    auto& provider = instance.GetParticlesProvider();
+    if (!provider.IsInsideBoundaries(up, low))
     {
         instance.fluidStartPosition = make_float3(0.0f, 0.0f, 2.5f);
         instance.GetParticlesProvider().SetPosition(instance.fluidStartPosition);
+
+        if (!provider.IsInsideBoundaries(up, low))
+        {
+            float diameter = 2 * GetParticleRadius();
+            int3 size = make_int3((up - low) / diameter);
+            instance.sizeInParticles = std::min({ size.x, size.y, size.z });
+            provider.SetSize(instance.sizeInParticles);
+        }
+
         instance.GetParticlesProvider().Provide();
     }
 }
