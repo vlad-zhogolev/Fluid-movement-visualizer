@@ -21,7 +21,7 @@ public:
 
         mScroll = new nanogui::VScrollPanel(mWindow);
         //mScroll->setFixedSize({ 200, 300 });
-         mScroll->setFixedHeight(360);
+        mScroll->setFixedHeight(330);
         // mScroll->setWidth(200);
         mScroll->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 2, 8));
         mWrapper = new nanogui::Widget(mScroll);
@@ -34,7 +34,7 @@ public:
         mWindow->setPosition(pos);
         mWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 2, 8));
         //mWindow->setFixedSize({ 200, 200 });
-        mWindow->setFixedHeight(400);
+        mWindow->setFixedHeight(370);
         mWindow->setVisible(true);
         return mWindow;
     }

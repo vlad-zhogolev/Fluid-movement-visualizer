@@ -51,7 +51,10 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     const int initialCoordinate = 5;
 	m_nanoguiWindow = m_formHelper->addWindow(
         Eigen::Vector2i(initialCoordinate, initialCoordinate), 
-        "Simulation controls and parameters");   
+        "Simulation controls and parameters");  
+
+    //TODO: fix it. Temporarily set fixed width.
+    m_nanoguiWindow->setFixedWidth(274);
 
     m_formHelper->addGroup("Simulation indicators");
     m_formHelper->setFixedSize({ 80, 20 });
@@ -334,6 +337,12 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     //     }
     // });
 
+    m_scrollFormHelper->addGroup("Gravity acceleration");
+
+    m_scrollFormHelper->addVariable("Gravity, x", simulationParameters.gravity.x);
+    m_scrollFormHelper->addVariable("Gravity, y", simulationParameters.gravity.y);
+    m_scrollFormHelper->addVariable("Gravity, z", simulationParameters.gravity.z);
+
     m_scrollFormHelper->addGroup("Fluid parameters");
 
     m_scrollFormHelper->addVariable("Change", simulationParameters.change);
@@ -345,18 +354,13 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     auto& getDensityCallback = [this]() -> float { 
         return m_simulationParams->GetDensity(); 
     };
-    m_scrollFormHelper->addVariable<float>("Rest density", setRestDensityCallback, getDensityCallback)->setSpinnable(true);
-
-    m_scrollFormHelper->addVariable("Gravity, x", simulationParameters.gravity.x);
-    m_scrollFormHelper->addVariable("Gravity, y", simulationParameters.gravity.y);
-    m_scrollFormHelper->addVariable("Gravity, z", simulationParameters.gravity.z);
-
+    m_scrollFormHelper->addVariable<float>("Rest density", setRestDensityCallback, getDensityCallback);
     m_scrollFormHelper->addVariable("Kernel radius", simulationParameters.kernelRadius);
     m_scrollFormHelper->addVariable("Delta time", simulationParameters.deltaTime);
     m_scrollFormHelper->addVariable("Lambda epsilon", simulationParameters.relaxationParameter);
-    m_scrollFormHelper->addVariable("deltaQ", simulationParameters.deltaQ);
-    m_scrollFormHelper->addVariable("correctionCoefficient", simulationParameters.correctionCoefficient);
-    m_scrollFormHelper->addVariable("correctionPower", simulationParameters.correctionPower);
+    m_scrollFormHelper->addVariable("DeltaQ", simulationParameters.deltaQ);
+    m_scrollFormHelper->addVariable("CorrectionCoefficient", simulationParameters.correctionCoefficient);
+    m_scrollFormHelper->addVariable("CorrectionPower", simulationParameters.correctionPower);
     m_scrollFormHelper->addVariable("XSPH coef", simulationParameters.c_XSPH);
     m_scrollFormHelper->addVariable("Viscosity iterations", simulationParameters.viscosityIterations);
     m_scrollFormHelper->addVariable("Vorticity epsilon", simulationParameters.vorticityEpsilon);
@@ -396,9 +400,11 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     auto* attenuationBlue = m_scrollFormHelper->addVariable("Attenuation, blue", renderingParameters.attenuationCoefficients.b);
     attenuationBlue->setMinMaxValues(
         RenderingParameters::ATTENUATION_COEFFICIENT_MIN, RenderingParameters::ATTENUATION_COEFFICIENT_MAX);
+
     m_nanoguiScreen->performLayout();
 	m_nanoguiScreen->setVisible(true);
 	
+
     m_scrollWindow->setPosition({ 5, 2 * initialCoordinate + m_nanoguiWindow->height() });
 
 	__binding();
@@ -633,8 +639,7 @@ void Renderer::__render() {
         m_smoothRenderer->Render(d_vao, m_nparticle);
     }
 
-	if (m_boundaryShader->loaded())
-    //if (false)
+	if (m_boundaryShader->loaded() && m_simulationParams->change)
     {
 		m_boundaryShader->use();
 		m_camera->use(Shader::now());
@@ -663,12 +668,21 @@ void Renderer::render(unsigned int pos, unsigned int iid, int nparticle)
 	glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, 0, (void*)0);
 	glEnableVertexAttribArray(1);
 
-    float x1 = fmin(m_upperBoundary.x, m_lowerBoundary.x);
-    float x2 = fmax(m_upperBoundary.x, m_lowerBoundary.x);
-    float y1 = fmin(m_upperBoundary.y, m_lowerBoundary.y);
-    float y2 = fmax(m_upperBoundary.y, m_lowerBoundary.y);
-    float z1 = fmin(m_upperBoundary.z, m_lowerBoundary.z);
-    float z2 = fmax(m_upperBoundary.z, m_lowerBoundary.z);
+    float particleRadius = m_simulationParams->GetParticleRadius();
+    float3 up = m_upperBoundary + particleRadius;
+    float3 low = m_lowerBoundary - particleRadius;
+    float x1 = fmin(up.x, low.x);
+    float x2 = fmax(up.x, low.x);
+    float y1 = fmin(up.y, low.y);
+    float y2 = fmax(up.y, low.y);
+    float z1 = fmin(up.z, low.z);
+    float z2 = fmax(up.z, low.z);
+    //float x1 = fmin(m_upperBoundary.x, m_lowerBoundary.x);
+    //float x2 = fmax(m_upperBoundary.x, m_lowerBoundary.x);
+    //float y1 = fmin(m_upperBoundary.y, m_lowerBoundary.y);
+    //float y2 = fmax(m_upperBoundary.y, m_lowerBoundary.y);
+    //float z1 = fmin(m_upperBoundary.z, m_lowerBoundary.z);
+    //float z2 = fmax(m_upperBoundary.z, m_lowerBoundary.z);
 
 	glm::vec3 lines[][2] = {
 		{ glm::vec3(x1, y1, z1), glm::vec3(x2, y1, z1) },

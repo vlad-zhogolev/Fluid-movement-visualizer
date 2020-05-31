@@ -18,7 +18,7 @@
     <ProjectGuid>{1A9E3DD4-EECA-4670-9A24-AA00263E7E27}</ProjectGuid>
     <RootNamespace>fluids</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
-    <ProjectName>SPH</ProjectName>
+    <ProjectName>Fluid Movement Visualizer</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">

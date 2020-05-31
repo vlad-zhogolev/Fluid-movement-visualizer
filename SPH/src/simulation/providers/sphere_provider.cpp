@@ -17,13 +17,13 @@ void SphereProvider::Provide()
     m_positions.clear();
     m_velocities.clear();
 
-    std::random_device randomDevice;
-    std::mt19937 generator(randomDevice());
-    std::uniform_real_distribution<> distribution(0.0f, 0.05f);
-
     float sphereRadius = GetHalfEdge();
     float3 cubeLowerBoundary = m_cubeCenter - sphereRadius;
     float diameter = 2.0f * SimulationParameters::GetParticleRadius();
+
+    std::random_device randomDevice;
+    std::mt19937 generator(randomDevice());
+    std::uniform_real_distribution<> distribution(0.0f, 0.4f * diameter);
 
     float3 position = cubeLowerBoundary;
     for (float i = 0; i < m_sizeInParticles; ++i)

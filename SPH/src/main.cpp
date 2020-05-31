@@ -9,7 +9,7 @@ namespace {
 
 constexpr int WindowWidth = 800;
 constexpr int WindowHeight = 600;
-constexpr char* WindowTitle = "VKR";
+constexpr char* WindowTitle = "Fluid movement visualizer";
 
 unsigned int g_frameCount = 0;
 double g_previousTime = 0;

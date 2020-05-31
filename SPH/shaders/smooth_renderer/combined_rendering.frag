@@ -140,7 +140,8 @@ vec4 CalculateColor()
     //vec3 fluidColor = vec3(15,94,156) / 256.f;
     //vec3 attenuation = max(exp(-vec3(0.05f) * thickness), 0.2f);
     float thickness = texture(thicknessTexture, ScreenCoordinates).x;
-    vec3 attenuation = max(exp(-attenuationCoefficients * thickness), 0.2f);
+    //vec3 attenuation = max(exp(-attenuationCoefficients * thickness), 0.3f);
+    vec3 attenuation = exp(-attenuationCoefficients * thickness);
     refractedColor = mix(fluidColor, refractedColor, attenuation);
     
     float reflectedPart = FreshnelFunction(f_0, dot(normal, directionToView));
