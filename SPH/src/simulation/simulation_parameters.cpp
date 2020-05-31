@@ -18,9 +18,7 @@ SimulationParameters& SimulationParameters::GetInstance()
     }
     isInitialized = true;
 
-    
-
-    instance.g = 9.8f;
+    instance.gravity = make_float3(0.0f, 0.0f, -9.8f);
     instance.kernelRadius = 0.1f;
     instance.deltaTime = 0.016f;
     instance.startDensity = 1000.f;

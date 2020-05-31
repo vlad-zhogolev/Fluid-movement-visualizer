@@ -41,7 +41,7 @@ private:
     float* m_dDensities;
     float3* m_dCurl;
 
-    float m_gravity;
+    float3 m_gravity;
     float m_h;
     float m_deltaTime;
     float m_pho0;

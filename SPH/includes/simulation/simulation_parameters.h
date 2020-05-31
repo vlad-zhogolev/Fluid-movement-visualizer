@@ -49,7 +49,7 @@ public:
     int substepsNumber;
     float startDensity;
     float restDensity;
-    float g;
+    float3 gravity;
     float kernelRadius;
     float deltaTime;
     float relaxationParameter;
