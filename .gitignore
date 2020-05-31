@@ -263,3 +263,4 @@ __pycache__/
 # Project specific files and folders
 /common
 /SPH/skybox
+/SPH/installer/build
