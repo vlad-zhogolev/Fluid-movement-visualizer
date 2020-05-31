@@ -5,6 +5,8 @@
 #include <helper.h>
 #include <stdexcept>
 #include <iostream>
+#include <algorithm>
+#include <random>
 
 
 CubeProvider::CubeProvider(const float3& position, int sizeInParticles)
@@ -34,45 +36,37 @@ void CubeProvider::Provide()
         return;
     }
 
-    float radius = SimulationParameters::GetParticleRadius();
-    float step = 2.0f * radius;
-    float halfEdgeLength = GetHalfEdge();
-    int particleIndex = 0;
-
-    int particlesNumber = m_sizeInParticles * m_sizeInParticles * m_sizeInParticles;
-    ReallocateIfNeeded(particlesNumber);
-    float3 cubeLowerBoundary = m_cubeCenter - halfEdgeLength;
-    float3 cubeUpperBoundary = m_cubeCenter + halfEdgeLength;
-
     m_positions.clear();
     m_velocities.clear();
 
+    std::random_device randomDevice;
+    std::mt19937 generator(randomDevice());
+    std::uniform_real_distribution<> distribution(0.0f, 0.05f);
+
+    float halfEdgeLength = GetHalfEdge();
+    float3 cubeLowerBoundary = m_cubeCenter - halfEdgeLength;
+    float diameter = 2.0f * SimulationParameters::GetParticleRadius();
+
+    float3 position = cubeLowerBoundary;
     for (float i = 0; i < m_sizeInParticles; ++i)
     {
-        float x = cubeLowerBoundary.x + step * i;
+        position.x += diameter;
         for (float j = 0; j < m_sizeInParticles; ++j)
         {
-            float y = cubeLowerBoundary.y + step * j;
+            position.y += diameter;
             for (float k = 0; k < m_sizeInParticles; ++k)
             {
-                float z = cubeLowerBoundary.z + step * k;
-                //float r1 = 1.f * rand() / RAND_MAX, r2 = 1.f * rand() / RAND_MAX, r3 = 1.f * rand() / RAND_MAX;
-                ++particleIndex;
-                m_positions.push_back(make_float3(x, y, z));// +0.1 * make_float3(r1, r2, r3));
-                m_velocities.emplace_back(make_float3(0.0f, 0.0f, 0.0f));
+                position.z += diameter;
+                float3 offset = make_float3(distribution(generator), distribution(generator), distribution(generator));
+                m_positions.push_back(position + offset);
             }
+            position.z = cubeLowerBoundary.z;
         }
+        position.y = cubeLowerBoundary.y;
     }
+    m_velocities.assign(m_positions.size(), float3{ 0.0f, 0.0f, 0.0f });
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_positionsBuffer);
-    //glInvalidateBufferData(m_positionsBuffer);
-    //glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLE_NUM * sizeof(float3), nullptr, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, particlesNumber * sizeof(typename PositionsVector::value_type), m_positions.data());
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_velocitiesBuffer);
-    //glInvalidateBufferData(m_velocitiesBuffer);
-    //glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLE_NUM * sizeof(float3), nullptr, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, particlesNumber * sizeof(typename VelocitiesVector::value_type), m_velocities.data());
+    UpdateTargetBuffersData();
 }
 
 int CubeProvider::GetParticlesNumber()
@@ -118,14 +112,16 @@ bool CubeProvider::SetSize(int particlesNumber)
     return true;
 }
 
-bool CubeProvider::SetDensity(float density)
+bool CubeProvider::TrySetDensity(float density)
 {
-    if (!IsInsideBoundaries(m_cubeCenter, CalculateEdgeLength(m_sizeInParticles),
+    float edgeLength = CalculateEdgeLength(m_sizeInParticles, density);
+    if (!IsInsideBoundaries(m_cubeCenter, edgeLength,
         SimulationParameters::GetUpperBoundary(), SimulationParameters::GetLowerBoundary()))
     {
         return false;
     }
 
+    m_edgeLength = edgeLength;
     m_density = density;
     return true;
 }
@@ -156,9 +152,29 @@ bool CubeProvider::IsInsideBoundaries(float3 center, float edgeLength, const flo
     return result;
 }
 
-float CubeProvider::CalculateEdgeLength(float sizeInParticles)
+float CubeProvider::CalculateEdgeLength(float sizeInParticles) const
 {
     float particleDiameter = 2 * SimulationParameters::GetParticleRadius();
     float edgeLength = sizeInParticles * particleDiameter;
     return edgeLength;
+}
+
+float CubeProvider::CalculateEdgeLength(float sizeInParticles, float density) const
+{
+    auto& instance = SimulationParameters::GetInstance();
+    float particleDiameter = 2 * instance.GetParticleRadius(density);
+    float edgeLength = sizeInParticles * particleDiameter;
+    return edgeLength;
+}
+
+void CubeProvider::UpdateTargetBuffersData()
+{
+    int particlesNumber = GetParticlesNumber();
+    glBindBuffer(GL_ARRAY_BUFFER, m_positionsBuffer);
+    //glInvalidateBufferData(m_positionsBuffer);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, particlesNumber * sizeof(typename PositionsVector::value_type), m_positions.data());
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_velocitiesBuffer);
+    //glInvalidateBufferData(m_velocitiesBuffer);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, particlesNumber * sizeof(typename VelocitiesVector::value_type), m_velocities.data());
 }

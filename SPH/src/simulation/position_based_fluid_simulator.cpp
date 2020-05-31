@@ -10,17 +10,24 @@ PositionBasedFluidSimulator::PositionBasedFluidSimulator(float3 upperBoundary, f
 {
     UpdateParameters();
 
-    checkCudaErrors(cudaMalloc(&m_dCellIds, sizeof(unsigned int)   * MAX_PARTICLE_NUM));
-    checkCudaErrors(cudaMalloc(&m_dCellStarts, sizeof(unsigned int)   * MAX_PARTICLE_NUM));
-    checkCudaErrors(cudaMalloc(&m_dCellEnds, sizeof(unsigned int)   * MAX_PARTICLE_NUM));
+    // Particles data
     checkCudaErrors(cudaMalloc(&m_dLambdas, sizeof(float)          * MAX_PARTICLE_NUM));
     checkCudaErrors(cudaMalloc(&m_dDensities, sizeof(float)          * MAX_PARTICLE_NUM));
     checkCudaErrors(cudaMalloc(&m_dTemporaryPositions, sizeof(float3)         * MAX_PARTICLE_NUM));
     checkCudaErrors(cudaMalloc(&m_dCurl, sizeof(float3)         * MAX_PARTICLE_NUM));
+    checkCudaErrors(cudaMalloc(&m_dCellIds, sizeof(unsigned int)   * MAX_PARTICLE_NUM));
 
     // TODO: check how much memory is needed here
-    cudaMemset(m_dCellStarts, 0, sizeof(unsigned int) * MAX_PARTICLE_NUM);
-    cudaMemset(m_dCellEnds, 0, sizeof(unsigned int) * MAX_PARTICLE_NUM);
+    // Grid data
+    int size = 2000000;
+    // checkCudaErrors(cudaMalloc(&m_dCellStarts, sizeof(unsigned int)   * MAX_PARTICLE_NUM));
+    // checkCudaErrors(cudaMalloc(&m_dCellEnds, sizeof(unsigned int)   * MAX_PARTICLE_NUM));
+    // cudaMemset(m_dCellStarts, 0, sizeof(unsigned int) * MAX_PARTICLE_NUM);
+    // cudaMemset(m_dCellEnds, 0, sizeof(unsigned int) * MAX_PARTICLE_NUM);
+    checkCudaErrors(cudaMalloc(&m_dCellStarts, sizeof(unsigned int)   * size));
+    checkCudaErrors(cudaMalloc(&m_dCellEnds, sizeof(unsigned int)   * size));
+    cudaMemset(m_dCellStarts, 0, sizeof(unsigned int) * size);
+    cudaMemset(m_dCellEnds, 0, sizeof(unsigned int) * size);
 }
 
 void PositionBasedFluidSimulator::Step(

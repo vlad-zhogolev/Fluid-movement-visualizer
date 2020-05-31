@@ -338,7 +338,16 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 
     m_scrollFormHelper->addVariable("Change", simulationParameters.change);
     m_scrollFormHelper->addVariable("Substeps number", simulationParameters.substepsNumber)->setSpinnable(true);
-    m_scrollFormHelper->addVariable("Rest density", simulationParameters.restDensity)->setSpinnable(true);
+
+    auto& setRestDensityCallback = [this](const float& value) {
+        m_simulationParams->SetDensity(value);
+    };
+    auto& getDensityCallback = [this]() -> float { 
+        return m_simulationParams->GetDensity(); 
+    };
+    m_scrollFormHelper->addVariable<float>("Rest density", setRestDensityCallback, getDensityCallback)->setSpinnable(true);
+
+
     m_scrollFormHelper->addVariable("Gravity acceleration", simulationParameters.g)->setSpinnable(true);
     m_scrollFormHelper->addVariable("Kernel radius", simulationParameters.kernelRadius)->setSpinnable(true);
     m_scrollFormHelper->addVariable("Delta time", simulationParameters.deltaTime)->setSpinnable(true);

@@ -22,7 +22,7 @@ public:
     bool TrySetSize(int particlesNumber) override;
     bool SetSize(int particlesNumber) override;
     inline int GetSize() const override { return m_sizeInParticles; }
-    bool SetDensity(float density) override;
+    bool TrySetDensity(float density) override;
     bool IsInsideBoundaries(const float3& upperBoundary, const float3& lowerBoundary) override;
 
 protected:
@@ -31,7 +31,9 @@ protected:
     void ReallocateIfNeeded(int particlesNumber);
 
     bool IsInsideBoundaries(float3 center, float edgeLength, const float3& upperBoundary, const float3& lowerBoundary);
-    float CalculateEdgeLength(float sizeInParticles);
+    float CalculateEdgeLength(float sizeInParticles) const;
+    float CalculateEdgeLength(float sizeInParticles, float density) const;
+    void UpdateTargetBuffersData();
 
 protected:
     float3 m_cubeCenter;

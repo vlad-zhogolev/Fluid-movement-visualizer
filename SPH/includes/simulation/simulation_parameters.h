@@ -47,6 +47,7 @@ public:
 
     // Particle system
     int substepsNumber;
+    float startDensity;
     float restDensity;
     float g;
     float kernelRadius;
@@ -77,6 +78,7 @@ public:
     static SimulationDomain GetDomain();
 
     static float GetParticleRadius();
+    float GetParticleRadius(float density) const;
 
     static SimulationState GetState();
     static void SetState(SimulationState state);
@@ -92,6 +94,9 @@ public:
     void SetFluidSize(int size);
 
     void SetParticlesSource(ParticleSource source);
+
+    void SetDensity(float density);
+    inline float GetDensity() const { return GetInstance().restDensity; }
 
 private:
     static void AdjustDomainToSize();

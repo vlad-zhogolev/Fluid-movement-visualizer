@@ -23,6 +23,7 @@ SimulationParameters& SimulationParameters::GetInstance()
     instance.g = 9.8f;
     instance.kernelRadius = 0.1f;
     instance.deltaTime = 0.016f;
+    instance.startDensity = 1000.f;
     instance.restDensity = 1000.f;
     instance.relaxationParameter = 1000.f;
     instance.deltaQ = 0.3 * instance.kernelRadius;
@@ -73,9 +74,25 @@ void SimulationParameters::SetCommand(SimulationCommand command)
             }
         }
         break;
+        case SimulationCommand::Restart:
+        {
+            auto& provider = instance.GetParticlesProvider();
+            float3 up = instance.GetUpperBoundary();
+            float3 low = instance.GetLowerBoundary();
+            if (!provider.TrySetDensity(instance.restDensity))
+            {
+                instance.restDensity = instance.startDensity;
+            }
+            else
+            {
+                //instance.startDensity = instance.restDensity;
+                instance.SetState(SimulationState::NotStarted);
+                instance.SetDensity(instance.restDensity);
+            }
+        }
+        break;
         case SimulationCommand::Unknown:
         case SimulationCommand::Pause:
-        case SimulationCommand::Restart:
         {
             /* empty */
         }
@@ -144,7 +161,12 @@ SimulationDomain SimulationParameters::GetDomain()
 float SimulationParameters::GetParticleRadius()
 {
     auto& instance = GetInstance();
-    float particleVolume = PARTICLE_MASS / instance.restDensity;
+    return instance.GetParticleRadius(instance.restDensity);
+}
+
+float SimulationParameters::GetParticleRadius(float density) const
+{
+    float particleVolume = PARTICLE_MASS / density;
     float radius = std::powf((0.75f / CUDART_PI) * particleVolume, 1.0f / 3.0f);
     return radius;
 }
@@ -232,6 +254,34 @@ void SimulationParameters::SetParticlesSource(ParticleSource source)
     SetCommand(SimulationCommand::Restart);
 }
 
+void SimulationParameters::SetDensity(float density)
+{
+    auto& instance = GetInstance();
+    switch (instance.m_state)
+    {
+        case SimulationState::NotStarted:
+        {
+            auto& provider = instance.GetParticlesProvider();
+
+            //float tmp = instance.restDensity;
+            //instance.restDensity = density;
+            if (!provider.TrySetDensity(density))
+            {
+                return;
+            }
+
+            instance.startDensity = density;
+            instance.restDensity = density;
+            provider.Provide();
+        }
+        break;
+        case SimulationState::Started:
+        {
+            instance.restDensity = density;
+        }
+        break;
+    }
+}
 
 void SimulationParameters::UpdateStartPosition()
 {
