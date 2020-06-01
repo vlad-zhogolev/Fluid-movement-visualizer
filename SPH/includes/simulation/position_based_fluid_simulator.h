@@ -3,6 +3,7 @@
 #include <helper.h>
 #include <simulation/simulation_parameters.h>
 #include <simulation/pbf_smoothing_kernels.cuh>
+#include <simulation/converters.cuh>
 #include <helper_cuda.h>
 
 class PositionBasedFluidSimulator
@@ -64,8 +65,11 @@ private:
     float3 m_lowerBoundary;
     int3 m_gridDimension;
 
-    Poly6Kernel m_poly6Kernel = Poly6Kernel(1.f);
-    SpikyGradientKernel m_spikyGradientKernel = SpikyGradientKernel(1.f);
+    Poly6Kernel m_poly6Kernel = Poly6Kernel(m_h);
+    SpikyGradientKernel m_spikyGradientKernel = SpikyGradientKernel(m_h);
+    PositionToCellIdConverter m_positionToCellIdConverter = PositionToCellIdConverter(m_lowerBoundary, m_gridDimension, m_h);
+    PositionToCellCoorinatesConverter m_positionToCellCoorinatesConverter = PositionToCellCoorinatesConverter(m_lowerBoundary, m_gridDimension, m_h);
+    CellCoordinatesToCellIdConverter m_cellCoordinatesToCellIdConverter = CellCoordinatesToCellIdConverter(m_gridDimension);
 
     int m_blockSize = 512;
 };

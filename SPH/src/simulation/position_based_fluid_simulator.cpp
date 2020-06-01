@@ -103,4 +103,14 @@ void PositionBasedFluidSimulator::UpdateSmoothingKernels()
 {
     m_poly6Kernel = Poly6Kernel(m_h);
     m_spikyGradientKernel = SpikyGradientKernel(m_h);
+
+    float3 diff = m_upperBoundary - m_lowerBoundary;
+    m_gridDimension = make_int3(
+        static_cast<int>(ceilf(diff.x / m_h)),
+        static_cast<int>(ceilf(diff.y / m_h)),
+        static_cast<int>(ceilf(diff.z / m_h)));
+
+    m_positionToCellIdConverter = PositionToCellIdConverter(m_lowerBoundary, m_gridDimension, m_h);
+    m_positionToCellCoorinatesConverter = PositionToCellCoorinatesConverter(m_lowerBoundary, m_gridDimension, m_h);
+    m_cellCoordinatesToCellIdConverter = CellCoordinatesToCellIdConverter(m_gridDimension);
 }
