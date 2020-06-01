@@ -115,7 +115,11 @@ void PositionBasedFluidSimulator::CorrectPosition()
     }
     if (writeToNewPositions)
     {
-        std::swap(m_dTemporaryPositions, m_dNewPositions);
+        // Can't just swap because m_dTemporaryPositions is not mapped OpenGL resource and m_dNewPositions is.
+        thrust::device_ptr<float3> tmpPositions(m_dTemporaryPositions);
+        thrust::device_ptr<float3> newPositions(m_dNewPositions);
+        thrust::copy_n(tmpPositions, m_particlesNumber, newPositions);
+        //std::swap(m_dTemporaryPositions, m_dNewPositions);
     }
     // thrust::transform(
     //     thrust::make_zip_iterator(thrust::make_tuple(m_dNewPositions, m_dTemporaryPositions)),
@@ -129,14 +133,14 @@ void PositionBasedFluidSimulator::CorrectPosition()
 void PositionBasedFluidSimulator::UpdateVelocity()
 {
     /* Warn: assume m_dPositions updates to m_dNewPositions after CorrectPosition() */
-    thrust::device_ptr<float3> d_pos(m_dPositions);
-    thrust::device_ptr<float3> d_npos(m_dNewPositions);
-    thrust::device_ptr<float3> d_vel(m_dVelocities);
+    thrust::device_ptr<float3> positions(m_dPositions);
+    thrust::device_ptr<float3> newPositions(m_dNewPositions);
+    thrust::device_ptr<float3> velocities(m_dVelocities);
 
     thrust::transform(
-        thrust::make_zip_iterator(thrust::make_tuple(d_pos, d_npos)),
-        thrust::make_zip_iterator(thrust::make_tuple(d_pos + m_particlesNumber, d_npos + m_particlesNumber)),
-        d_vel,
+        thrust::make_zip_iterator(thrust::make_tuple(positions, newPositions)),
+        thrust::make_zip_iterator(thrust::make_tuple(positions + m_particlesNumber, newPositions + m_particlesNumber)),
+        velocities,
         VelocityUpdater(m_deltaTime));
 
     cudaDeviceSynchronize();
