@@ -345,7 +345,7 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 
     m_scrollFormHelper->addGroup("Fluid parameters");
 
-    m_scrollFormHelper->addVariable("Change", simulationParameters.change);
+    //m_scrollFormHelper->addVariable("Change", simulationParameters.change);
     m_scrollFormHelper->addVariable("Substeps number", simulationParameters.substepsNumber)->setSpinnable(true);
 
     auto& setRestDensityCallback = [this](const float& value) {
@@ -359,11 +359,11 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     m_scrollFormHelper->addVariable("Delta time", simulationParameters.deltaTime);
     m_scrollFormHelper->addVariable("Lambda epsilon", simulationParameters.relaxationParameter);
     m_scrollFormHelper->addVariable("DeltaQ", simulationParameters.deltaQ);
-    m_scrollFormHelper->addVariable("CorrectionCoefficient", simulationParameters.correctionCoefficient);
-    m_scrollFormHelper->addVariable("CorrectionPower", simulationParameters.correctionPower);
-    m_scrollFormHelper->addVariable("XSPH coef", simulationParameters.c_XSPH);
+    m_scrollFormHelper->addVariable("Correction coefficient", simulationParameters.correctionCoefficient);
+    m_scrollFormHelper->addVariable("Correction power", simulationParameters.correctionPower);
+    m_scrollFormHelper->addVariable("XSPH coefficient", simulationParameters.c_XSPH);
     m_scrollFormHelper->addVariable("Viscosity iterations", simulationParameters.viscosityIterations);
-    m_scrollFormHelper->addVariable("Vorticity epsilon", simulationParameters.vorticityEpsilon);
+    m_scrollFormHelper->addVariable("Vorticity coefficient", simulationParameters.vorticityEpsilon);
 
     m_scrollFormHelper->addGroup("Rendering parameters");
     auto* smoothingIterations = m_scrollFormHelper->addVariable(

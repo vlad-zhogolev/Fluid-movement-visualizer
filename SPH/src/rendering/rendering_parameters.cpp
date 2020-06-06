@@ -19,7 +19,8 @@ RenderingParameters& RenderingParameters::GetInstance()
     instance.smoothStepsNumber = 3;
     instance.fluidRefractionIndex = 1.333f;
     instance.particleRadius = 0.04f;
-    instance.fluidColor = glm::normalize(glm::vec3(15, 94, 156));
+    //instance.fluidColor = glm::normalize(glm::vec3(15, 94, 156));
+    instance.fluidColor = glm::normalize(glm::vec3(0.08, 0.71, 0.85));
     instance.attenuationCoefficients = glm::vec3(0.22f, 0.18f, 0.2f);
 
     return instance;
