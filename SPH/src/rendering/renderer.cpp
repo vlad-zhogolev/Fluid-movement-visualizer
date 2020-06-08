@@ -170,10 +170,10 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
     };
 
     nextFrameButton->setCallback([this, domainComboBox]() {
-        //m_input->nextFrame = true;
         domainComboBox->setEnabled(false);
         m_simulationParams->SetCommand(SimulationCommand::StepOneFrame);
     });
+
     testRunOrStopButton->setChangeCallback(
         [this, 
         testRunOrStopButton, 
@@ -187,22 +187,16 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
         if (isPressed)
         {
             testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_STOP);
-            //m_input->running = true;
             SetStartSettingsEnabled(false);
-            //domainComboBox->setEnabled(false);
-            //startPositionX->setEnabled(false);
-            //startPositionY->setEnabled(false);
-            //startPositionZ->setEnabled(false);
-            //fluidSizeVariable->setEnabled(false);
             m_simulationParams->SetCommand(SimulationCommand::Run);
         }
         else
         {
             testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
-            //m_input->running = false;
             m_simulationParams->SetCommand(SimulationCommand::Pause);
         }
     });
+
     restartButton->setCallback(
         [this,
         testRunOrStopButton,
@@ -219,123 +213,12 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
         testRunOrStopButton->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
 
         SetStartSettingsEnabled(true);
-        //startPositionX->setEnabled(true);
-        //startPositionY->setEnabled(true);
-        //startPositionZ->setEnabled(true);
-        //fluidSizeVariable->setEnabled(true);
-        //domainComboBox->setEnabled(true);
     });
-
-    // m_scrollPanel = new nanogui::VScrollPanel(m_nanoguiWindow);
-    // m_scrollPanel->setFixedSize(nanogui::Vector2i{ 200,200 });
-    // m_formHelper->addWidget("", m_scrollPanel);
-
-    // {
-    // int width = 30, height = 30;
-    // nanogui::Window *window = new nanogui::Window(m_nanoguiScreen, "All Icons");
-    // window->setPosition({ 0, 0 });
-    // window->setFixedSize({ 200, 200 });
-    // window->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 2, 8));
-    // 
-    // //nanogui::AdvancedGridLayout* mLayout = new nanogui::AdvancedGridLayout({ 10, 0, 10, 0 }, {});
-    // //mLayout->setMargin(10);
-    // //mLayout->setColStretch(2, 1);
-    // //window->setLayout(mLayout);
-    // 
-    // 
-    // // attach a vertical scroll panel
-    // auto vscroll = new nanogui::VScrollPanel(window);
-    // vscroll->setFixedSize({ 200, 200 });
-    // 
-    // // vscroll should only have *ONE* child. this is what `wrapper` is for
-    // auto wrapper = new nanogui::Widget(vscroll);
-    // wrapper->setFixedSize({ 200, 200 });
-    // //wrapper->setLayout(new nanogui::GridLayout());// defaults: 2 columns
-    // auto* wrapperLayout = new nanogui::AdvancedGridLayout({ 10, 0, 10, 0 });
-    // wrapperLayout->setMargin(10);
-    // wrapperLayout->setColStretch(2, 1);
-    // wrapper->setLayout(wrapperLayout);
-    // }
-
-    // wrapperLayout->appendRow(0);
-    // auto *label = new nanogui::Label(wrapper, "A label");
-    // wrapperLayout->setAnchor(label, nanogui::AdvancedGridLayout::Anchor(0, 0, 1, 1, nanogui::Alignment::Middle, nanogui::Alignment::Middle));
-
-
-    // auto testButton = new nanogui::Button(wrapper);     
-    // testButton->setIconPosition(nanogui::Button::IconPosition::Left);
-    // testButton->setFixedWidth(width);
-
-    // m_widget = new nanogui::Widget(m_scrollPanel.get());
-    // m_widget->setFixedSize({ 30, 30 });
-    // m_widget->setLayout(new nanogui::GridLayout(nanogui::Orientation::Horizontal, 1));// defaults: 2 columns
-    // 
-    //nanogui::Button* testButton = nullptr;
-    //for (int i = 0; i < 20; ++i)
-    //{
-    //    testButton = new nanogui::Button(wrapper);
-    //    testButton->setIconPosition(nanogui::Button::IconPosition::Left);
-    //    testButton->setFixedWidth(m_nanoguiWindow->size()[0] / 2);
-    //}
-
-    // m_formHelper->addGroup("Fluid parameters");
-    // m_formHelper->addVariable("Change", params.change);
-	// m_formHelper->addVariable("Substeps number", params.substepsNumber)->setSpinnable(true);
-	// m_formHelper->addVariable("Rest density", params.restDensity)->setSpinnable(true);
-	// m_formHelper->addVariable("Gravity acceleration", params.g)->setSpinnable(true);
-	// m_formHelper->addVariable("Kernel radius", params.kernelRadius)->setSpinnable(true);
-	// m_formHelper->addVariable("Delta time", params.deltaTime)->setSpinnable(true);
-	// m_formHelper->addVariable("Lambda epsilon", params.relaxationParameter)->setSpinnable(true);
-	// m_formHelper->addVariable("deltaQ", params.deltaQ)->setSpinnable(true);
-	// m_formHelper->addVariable("correctionCoefficient", params.correctionCoefficient)->setSpinnable(true);
-	// m_formHelper->addVariable("correctionPower", params.correctionPower)->setSpinnable(true);
-	// m_formHelper->addVariable("XSPH coef", params.c_XSPH)->setSpinnable(true);
-    // m_formHelper->addVariable("Viscosity iterations", params.viscosityIterations)->setSpinnable(true);
-    // m_formHelper->addVariable("Vorticity epsilon", params.vorticityEpsilon)->setSpinnable(true);
-    // m_formHelper->addVariable("Boundary movement speed", params.boundaryMovementSpeed)->setSpinnable(true);
-	// m_formHelper->addVariable("Highlight #", m_input->hlIndex)->setSpinnable(true);
-
 
     m_scrollFormHelper = new nanogui::ScrollFormHelper(m_nanoguiScreen);
     auto scrollWindowInitialCoordinates = Eigen::Vector2i(0, 0);
     m_scrollWindow = m_scrollFormHelper->addWindow(
         scrollWindowInitialCoordinates, "Simulation and rendering parameters");
-    // for (int i = 0; i < 15; ++i)
-    // {
-    //     m_scrollFormHelper->addVariable("Change", params.change);
-    // }
-
-    // m_scrollFormHelper->addGroup("Simulation indicators");
-    // m_scrollFormHelper->addVariable("FPS", params.fps)->setEditable(false);
-    // m_scrollFormHelper->addVariable("Current frame number", m_input->frameCount)->setEditable(false);
-
-    // m_scrollFormHelper->addGroup("Simulation controls");
-    // auto simulationControl = new nanogui::Widget(m_scrollFormHelper->wrapper());
-    // m_scrollFormHelper->addWidget("", simulationControl);
-    // simulationControl->setLayout(
-    //     new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 2, 8));
-    // 
-    // const int controlButtonSize = 30;
-    // auto nextFrameButtonScroll = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_NEXT);
-    // nextFrameButtonScroll->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
-    // nextFrameButtonScroll->setFlags(nanogui::Button::NormalButton);
-    // nextFrameButtonScroll->setCallback([this]() { m_input->nextFrame = true; });
-    // 
-    // auto testRunOrStopButtonScroll = new nanogui::Button(simulationControl, "", ENTYPO_ICON_CONTROLLER_PLAY);
-    // testRunOrStopButtonScroll->setFlags(nanogui::Button::ToggleButton);
-    // testRunOrStopButtonScroll->setFixedSize(nanogui::Vector2i(controlButtonSize, controlButtonSize));
-    // testRunOrStopButtonScroll->setChangeCallback([this, testRunOrStopButtonScroll](bool isPressed) {
-    //     if (isPressed)
-    //     {
-    //         testRunOrStopButtonScroll->setIcon(ENTYPO_ICON_CONTROLLER_STOP);
-    //         m_input->running = true;
-    //     }
-    //     else
-    //     {
-    //         testRunOrStopButtonScroll->setIcon(ENTYPO_ICON_CONTROLLER_PLAY);
-    //         m_input->running = false;
-    //     }
-    // });
 
     m_scrollFormHelper->addGroup("Gravity acceleration");
 
@@ -415,15 +298,8 @@ void Renderer::init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus)
 	m_particlesShader = std::make_unique<Shader>(Path("shaders/particle.vert"), Path("shaders/particle.frag"));
     m_skyboxShader = std::make_unique<Shader>(Path("shaders/skybox.vert"), Path("shaders/skybox.frag"));
 
-	// char *sky_faces[] = { 
-	// 	"skybox/right.jpg",		
-	// 	"skybox/left.jpg",		
-	// 	"skybox/front.jpg",		
-	// 	"skybox/back.jpg",		
-	// 	"skybox/top.jpg",		
-	// 	"skybox/bottom.jpg"		
-	// };
-    char *sky_faces[] = {
+    char *sky_faces[] =
+    {
         "skybox/checkerboard/checkerboard.jpg",
         "skybox/checkerboard/checkerboard.jpg",
         "skybox/checkerboard/checkerboard.jpg",

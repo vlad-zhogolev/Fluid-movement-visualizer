@@ -1,11 +1,8 @@
 #include <input.h>
 #include <GLFW\glfw3.h>
 
-const float Input::SCREEN_ROTATE_RATE = 0.005f;
-const float Input::SCREEN_PAN_RATE = 0.002f;
-const float Input::SCREEN_SCROLL_RATE = 0.1f;
-
-Input::Input() {
+Input::Input() 
+{
 	reset();
 }
 
@@ -17,11 +14,13 @@ Input& Input::getInstance()
 
 glm::vec2 Input::updateMousePos(glm::vec2 new_mouse)
 {
-	if (!last_mouse_valid) {
+	if (!last_mouse_valid)
+	{
 		last_mouse_valid = true;
 		last_mouse = mouse = new_mouse;
 	}
-	else {
+	else
+	{
 		last_mouse = mouse;
 		mouse = new_mouse;
 	}
@@ -29,11 +28,13 @@ glm::vec2 Input::updateMousePos(glm::vec2 new_mouse)
 	return mouse - last_mouse;
 }
 
-glm::vec2 Input::getMouseDiff() {
+glm::vec2 Input::getMouseDiff() 
+{
 	return mouse - last_mouse;
 }
 
-void Input::reset() {
+void Input::reset()
+{
 	last_mouse_valid = false;
 	lastFrame = false;
 	running = false;

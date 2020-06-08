@@ -6,9 +6,13 @@
 #include <glm/gtx/common.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
-Camera::Camera()
-{
-}
+const float Camera::SCREEN_ROTATE_RATE = 0.005f;
+const float Camera::SCREEN_PAN_RATE = 0.002f;
+const float Camera::SCREEN_SCROLL_RATE = 0.1f;
+
+Camera::Camera() {}
+
+Camera::~Camera() {}
 
 Camera::Camera(const glm::vec3 & pos, const glm::vec3 &focus, float aspect)
 {
@@ -28,15 +32,11 @@ Camera::Camera(const glm::vec3 & pos, const glm::vec3 front, const glm::vec3 up,
 	roty = glm::normalize(glm::cross(front, rotx));
 }
 
-
-Camera::~Camera()
-{
-}
-
 void Camera::use(const Shader & shader, bool translate_invariant) const
 {
 	glm::mat4 view = glm::lookAt(pos, pos + front, up);
-	if (translate_invariant) {
+	if (translate_invariant)
+	{
 		view = glm::mat4(glm::mat3(view));
 	}
 	glm::mat4 pers = glm::perspective(glm::radians(fov), aspect, 0.1f, 100.f);
@@ -57,29 +57,32 @@ void Camera::rotate(const glm::vec2 dxy) {
 
 	glm::vec3 center = pos + front;
 	/* For horizontal panning, rotate camera within plane perpendicular to `up' direction */
-	if (dxy.x != 0) {
+	if (dxy.x != 0)
+	 {
 		const glm::vec3 &axis = rotx;
 		/* for now, manually update pos, front and up in renderer */
-		front = glm::rotate(front, -dxy.x * Input::SCREEN_ROTATE_RATE, axis);
-		up = glm::rotate(up, -dxy.x * Input::SCREEN_ROTATE_RATE, axis);
+		front = glm::rotate(front, -dxy.x * Camera::SCREEN_ROTATE_RATE, axis);
+		up = glm::rotate(up, -dxy.x * Camera::SCREEN_ROTATE_RATE, axis);
 		pos = center - front;
 
-		roty = glm::rotate(roty, -dxy.x * Input::SCREEN_ROTATE_RATE, axis);
+		roty = glm::rotate(roty, -dxy.x * Camera::SCREEN_ROTATE_RATE, axis);
 	}
 	/* For verticle panning, rotate camera within plane perpendicular to cross(up, front) direction */
-	if (dxy.y != 0) {
-		const glm::vec3 &axis = roty;
+	if (dxy.y != 0) 
+	{
+		const glm::vec3& axis = roty;
 
-		front = glm::rotate(front, -dxy.y * Input::SCREEN_ROTATE_RATE, axis);
-		up = glm::rotate(up, -dxy.y * Input::SCREEN_ROTATE_RATE, axis);
+		front = glm::rotate(front, -dxy.y * Camera::SCREEN_ROTATE_RATE, axis);
+		up = glm::rotate(up, -dxy.y * Camera::SCREEN_ROTATE_RATE, axis);
 		pos = center - front;
 	}
 
 }
 
-void Camera::pan(const glm::vec2 dxy) {
+void Camera::pan(const glm::vec2 dxy)
+{
 	glm::vec3 cam_d = dxy.x * -glm::normalize(glm::cross(front, up)) + dxy.y * glm::normalize(up);
-	pos += Input::SCREEN_PAN_RATE * cam_d * glm::length(front);
+	pos += Camera::SCREEN_PAN_RATE * cam_d * glm::length(front);
 }
 
 void Camera::zoom(float dy)
@@ -87,13 +90,13 @@ void Camera::zoom(float dy)
 	const float min_d = 0.1f, max_d = 10.f;
 	if (dy > 0) {
 		if (front.length() < min_d) return;
-		pos += front * Input::SCREEN_SCROLL_RATE;
-		front -= front * Input::SCREEN_SCROLL_RATE;
+		pos += front * Camera::SCREEN_SCROLL_RATE;
+		front -= front * Camera::SCREEN_SCROLL_RATE;
 	}
 	else {
 		if (front.length() > max_d) return;
-		pos -= front * Input::SCREEN_SCROLL_RATE;
-		front += front * Input::SCREEN_SCROLL_RATE;
+		pos -= front * Camera::SCREEN_SCROLL_RATE;
+		front += front * Camera::SCREEN_SCROLL_RATE;
 	}
 }
 
