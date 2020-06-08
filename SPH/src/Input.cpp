@@ -1,5 +1,5 @@
 #include <input.h>
-#include <GLFW\glfw3.h>
+#include <GLFW/glfw3.h>
 
 Input::Input() 
 {
@@ -10,6 +10,11 @@ Input& Input::getInstance()
 {
     static Input inputSingletone;
 	return inputSingletone;
+}
+
+Input* Input::GetInstancePtr()
+{
+	return &getInstance();
 }
 
 glm::vec2 Input::updateMousePos(glm::vec2 new_mouse)

@@ -5,15 +5,11 @@
 
 struct Input
 {
-
-    static const float SCREEN_ROTATE_RATE;
-    static const float SCREEN_PAN_RATE;
-    static const float SCREEN_SCROLL_RATE;
-
     enum Pressed { UP, DOWN };
 
     Input();
     static Input& getInstance();
+    static Input* GetInstancePtr();
 
     Pressed left_mouse, right_mouse, mid_mouse;
     glm::vec2 last_mouse, mouse;

@@ -4,12 +4,12 @@
 #include <rendering/shader.h>
 #include <rendering/smooth_renderer.h>
 #include <rendering/scroll_form_helper.h>
+#include <rendering/rendering_parameters.h>
 #include <input.h>
 #include <helper.h>
-#include <simulation/simulation_parameters.h>>
+#include <simulation/simulation_parameters.h>
 #include <GLFW/glfw3.h>
 #include <nanogui/nanogui.h>
-
 
 #include <functional>
 #include <memory>
@@ -18,51 +18,35 @@ class Renderer
 {
 public:
 
-    Renderer(std::unique_ptr<GLFWwindow> glfwWindow)
-        : m_glfwWindow(std::move(glfwWindow))
-        , m_input(&Input::getInstance())
-    {
-        glfwSetWindowSizeLimits(m_glfwWindow.get(), 800, 600, GLFW_DONT_CARE, GLFW_DONT_CARE);
-        Init();
-    }
-
-	Renderer(
-		const glm::vec3 &cam_pos, 
-		const glm::vec3 &cam_focus, 
-		float3 ulim, float3 llim, 
-		std::function<void()> nextCb) 
-		: m_upperBoundary(ulim), m_lowerBoundary(llim), m_nextFrameBtnCb(nextCb) { init(cam_pos, cam_focus); };
+    Renderer(std::unique_ptr<GLFWwindow> glfwWindow);
 	~Renderer();
 
-	void render(unsigned int pos, unsigned int iid, int m_nparticle);
+	void Render(unsigned int pos, unsigned int iid, int m_nparticle);
 	void SetBoundaries(const float3 &ulim, const float3 &llim);
-
-	Input *m_input;
 
 private:
 
     void Init();
-	void init(const glm::vec3 &cam_pos, const glm::vec3 &cam_focus);
-
+    
     void SetStartSettingsEnabled(bool isEnabled);
 
-	void __binding();
-	void __render();
+	void BindGLFWCallbacks();
+	void RenderImpl();
 
-	void __window_size_callback(GLFWwindow* window, int width, int height);
-	void __mouse_move_callback(GLFWwindow* window, double xpos, double ypos);
-	void __mouse_button_callback(GLFWwindow* w, int button, int action, int mods);
-	void __mouse_scroll_callback(GLFWwindow* w, float dx, float dy);
-	void __key_callback(GLFWwindow *w, int key, int scancode, int action, int mods);
-	void __char_callback(GLFWwindow *w, unsigned int codepoint);
+	void WindowSizeCallback(GLFWwindow* window, int width, int height);
+	void MouseMoveCallback(GLFWwindow* window, double xpos, double ypos);
+	void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+	void MouseScrollCallback(GLFWwindow* window, float dx, float dy);
+	void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+	void CharCallback(GLFWwindow* window, unsigned int codepoint);
 
     int m_width;
     int m_height;
 	int m_nparticle;
 	
-    unsigned int d_vao;
-    unsigned int d_bbox_vao;
-    unsigned int d_bbox_vbo;
+    unsigned int m_particlesVAO;
+    unsigned int m_boundariesVAO;
+    unsigned int m_boundariesVBO;
     unsigned int d_pos;
     unsigned int d_iid;
     float3 m_lowerBoundary;
@@ -79,12 +63,10 @@ private:
 	// NanoGUI
     // No need to manage these pointers, because nanogui does this.
 	nanogui::Screen* m_nanoguiScreen = nullptr;
-	nanogui::FormHelper* m_formHelper = nullptr;
+	nanogui::FormHelper* m_controlsFormHelper = nullptr;
+    nanogui::ref<nanogui::Window> m_controlsWindow;
     nanogui::ScrollFormHelper* m_scrollFormHelper = nullptr;
     nanogui::ref<nanogui::Window> m_scrollWindow;
-	nanogui::Window* m_nanoguiWindow = nullptr;
-    nanogui::Widget* m_widget = nullptr;
-	std::function<void()> m_nextFrameBtnCb;
 
     std::vector<nanogui::ref<nanogui::Widget>> m_switchOffRestart;
     std::vector<nanogui::ref<nanogui::TextBox>> m_positionVariables;
@@ -97,6 +79,8 @@ private:
     unsigned int m_skyboxVBO;
 
     std::unique_ptr<rendering::SmoothRenderer> m_smoothRenderer = nullptr;
+    Input* m_input = Input::GetInstancePtr();
+    RenderingParameters* m_renderingParams = RenderingParameters::GetInstancePtr();
     SimulationParameters* m_simulationParams = SimulationParameters::GetInstancePtr();
 };
 

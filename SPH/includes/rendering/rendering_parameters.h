@@ -22,4 +22,5 @@ public:
     glm::vec3 attenuationCoefficients;
 
     static RenderingParameters& GetInstance();
+    static RenderingParameters* GetInstancePtr();
 };

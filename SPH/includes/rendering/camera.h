@@ -52,8 +52,8 @@ private:
     glm::vec3 up;
     glm::vec3 front;
 
-
-    glm::vec3 rotx, roty;
+    glm::vec3 rotx;
+    glm::vec3 roty;
 
     float fov;
     float aspect;

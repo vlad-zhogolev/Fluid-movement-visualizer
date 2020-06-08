@@ -80,7 +80,7 @@ int main()
         double currentTime = glfwGetTime();
 
 		renderer.SetBoundaries(particleystem.GetUpperLimit(), particleystem.GetLowerLimit());
-        renderer.render(
+        renderer.Render(
             particleystem.GetPositionsForRenderingHandle(),
             particleystem.GetIndicesHandle(),
             particleystem.GetParticleNumber());

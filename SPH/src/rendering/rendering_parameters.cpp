@@ -25,3 +25,8 @@ RenderingParameters& RenderingParameters::GetInstance()
 
     return instance;
 }
+
+RenderingParameters* RenderingParameters::GetInstancePtr()
+{
+    return &GetInstance();
+}
