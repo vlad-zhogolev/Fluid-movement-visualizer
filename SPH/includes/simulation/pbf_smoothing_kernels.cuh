@@ -39,7 +39,7 @@ public:
     float3 operator()(float3 vector) const
     {
         float vectorLength = length(vector);
-        if (vectorLength < KERNEL_EPS || vectorLength >= m_kernelRadius)
+        if (vectorLength < KERNEL_EPSILON || vectorLength >= m_kernelRadius)
         {
             return float3{};
         }

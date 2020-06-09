@@ -31,27 +31,27 @@ ParticleSystem::ParticleSystem()
     // Particle positions and velocities
     glGenBuffers(1, &m_positions1);
     glBindBuffer(GL_ARRAY_BUFFER, m_positions1);
-    glBufferData(GL_ARRAY_BUFFER,  MAX_PARTICLE_NUM * sizeof(float3), nullptr, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER,  MAX_PARTICLES_NUM * sizeof(float3), nullptr, GL_STATIC_DRAW);
     checkGLErr();
 
     glGenBuffers(1, &m_positions2);
     glBindBuffer(GL_ARRAY_BUFFER, m_positions2);
-    glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLE_NUM * sizeof(float3), nullptr, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLES_NUM * sizeof(float3), nullptr, GL_STATIC_DRAW);
     checkGLErr();
 
     glGenBuffers(1, &m_velocities1);
     glBindBuffer(GL_ARRAY_BUFFER, m_velocities1);
-    glBufferData(GL_ARRAY_BUFFER,  MAX_PARTICLE_NUM * sizeof(float3), nullptr, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER,  MAX_PARTICLES_NUM * sizeof(float3), nullptr, GL_STATIC_DRAW);
     checkGLErr();
 
     glGenBuffers(1, &m_velocities2);
     glBindBuffer(GL_ARRAY_BUFFER, m_velocities2);
-    glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLE_NUM * sizeof(float3), nullptr, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLES_NUM * sizeof(float3), nullptr, GL_STATIC_DRAW);
     checkGLErr();
 
     glGenBuffers(1, &m_particleIndices);
     glBindBuffer(GL_ARRAY_BUFFER, m_particleIndices);
-    glBufferData(GL_ARRAY_BUFFER,  MAX_PARTICLE_NUM * sizeof(unsigned int), nullptr, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER,  MAX_PARTICLES_NUM * sizeof(unsigned int), nullptr, GL_STATIC_DRAW);
     checkGLErr();
 
     checkCudaErrors(cudaGraphicsGLRegisterBuffer(&m_positionsResource1, m_positions1, cudaGraphicsMapFlagsNone));
@@ -63,7 +63,7 @@ ParticleSystem::ParticleSystem()
 
 void ParticleSystem::InitializeParticles() 
 {
-    //m_source->initialize(m_positions1, m_velocities1, m_particleIndices, MAX_PARTICLE_NUM);
+    //m_source->initialize(m_positions1, m_velocities1, m_particleIndices, MAX_PARTICLES_NUM);
     auto& provider = SimulationParameters::GetParticlesProvider();
     provider.SetTargets(m_positions1, m_velocities1);
     provider.Provide();

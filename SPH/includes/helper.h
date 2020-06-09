@@ -4,10 +4,10 @@
 #define M_PI 3.14159265359
 #define LIM_EPS 1e-3
 
-#define KERNEL_EPS 1e-4
+#define KERNEL_EPSILON 1e-4
 
-#define MAX_DP 0.1
-const int MAX_PARTICLE_NUM = 130000;
+#define MAX_DELTA_POSITION 0.1
+const int MAX_PARTICLES_NUM = 130000;
 
 __host__ __device__
 inline int ceilDiv(int a, int b)

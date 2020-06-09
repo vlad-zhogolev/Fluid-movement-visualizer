@@ -197,9 +197,9 @@ void CalculateNewPositions(
         }
     }
 
-    deltaPosition = clamp(deltaPosition * restDensityInverse, -MAX_DP, MAX_DP);
+    deltaPosition = clamp(deltaPosition * restDensityInverse, -MAX_DELTA_POSITION, MAX_DELTA_POSITION);
     newPositions[index] = clamp(positions[index] + deltaPosition, lowerBoundary + LIM_EPS, upperBoundary - LIM_EPS);
-    //deltaPositions[i] = clamp(deltaPosition, -MAX_DP, MAX_DP);
+    //deltaPositions[i] = clamp(deltaPosition, -MAX_DELTA_POSITION, MAX_DELTA_POSITION);
 }
 
 __global__
