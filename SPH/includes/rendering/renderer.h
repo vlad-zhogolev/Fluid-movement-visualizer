@@ -47,7 +47,7 @@ private:
     unsigned int m_particlesVAO;
     unsigned int m_boundariesVAO;
     unsigned int m_boundariesVBO;
-    unsigned int d_pos;
+    unsigned int m_particlesPositions;
     unsigned int d_iid;
     float3 m_lowerBoundary;
     float3 m_upperBoundary;

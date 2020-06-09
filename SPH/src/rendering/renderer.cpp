@@ -18,7 +18,6 @@ namespace {
 
 float SKYBOX_VERTICES[] =
 {
-    // positions          
     -1.0f,  1.0f, -1.0f,
     -1.0f, -1.0f, -1.0f,
     1.0f, -1.0f, -1.0f,
@@ -293,14 +292,18 @@ void Renderer::Init()
 
     m_scrollFormHelper->addGroup("Gravity acceleration");
 
-    m_scrollFormHelper->addVariable("Gravity, x", m_simulationParams->gravity.x);
-    m_scrollFormHelper->addVariable("Gravity, y", m_simulationParams->gravity.y);
-    m_scrollFormHelper->addVariable("Gravity, z", m_simulationParams->gravity.z);
+    auto* gravityX = m_scrollFormHelper->addVariable("Gravity, x", m_simulationParams->gravity.x);
+    gravityX->setMinMaxValues(SimulationParameters::GRAVITY_MIN, SimulationParameters::GRAVITY_MAX);
+    auto* gravityY = m_scrollFormHelper->addVariable("Gravity, y", m_simulationParams->gravity.y);
+    gravityY->setMinMaxValues(SimulationParameters::GRAVITY_MIN, SimulationParameters::GRAVITY_MAX);
+    auto* gravityZ = m_scrollFormHelper->addVariable("Gravity, z", m_simulationParams->gravity.z);
+    gravityZ->setMinMaxValues(SimulationParameters::GRAVITY_MIN, SimulationParameters::GRAVITY_MAX);
 
     m_scrollFormHelper->addGroup("Fluid parameters");
 
     //m_scrollFormHelper->addVariable("Change", m_simulationParams->change);
-    m_scrollFormHelper->addVariable("Substeps number", m_simulationParams->substepsNumber)->setSpinnable(true);
+    auto* substepsNumberVar = m_scrollFormHelper->addVariable("Substeps number", m_simulationParams->substepsNumber);
+    substepsNumberVar->setMinMaxValues(SimulationParameters::SUBSTEPS_NUMBER_MIN, SimulationParameters::SUBSTEPS_NUMBER_MAX);
 
     auto& setRestDensityCallback = [this](const float& value) {
         m_simulationParams->SetDensity(value);
@@ -308,16 +311,26 @@ void Renderer::Init()
     auto& getDensityCallback = [this]() -> float { 
         return m_simulationParams->GetDensity(); 
     };
-    m_scrollFormHelper->addVariable<float>("Rest density", setRestDensityCallback, getDensityCallback);
-    m_scrollFormHelper->addVariable("Kernel radius", m_simulationParams->kernelRadius);
-    m_scrollFormHelper->addVariable("Delta time", m_simulationParams->deltaTime);
-    m_scrollFormHelper->addVariable("Lambda epsilon", m_simulationParams->relaxationParameter);
-    m_scrollFormHelper->addVariable("DeltaQ", m_simulationParams->deltaQ);
-    m_scrollFormHelper->addVariable("Correction coefficient", m_simulationParams->correctionCoefficient);
-    m_scrollFormHelper->addVariable("Correction power", m_simulationParams->correctionPower);
-    m_scrollFormHelper->addVariable("XSPH coefficient", m_simulationParams->c_XSPH);
-    m_scrollFormHelper->addVariable("Viscosity iterations", m_simulationParams->viscosityIterations);
-    m_scrollFormHelper->addVariable("Vorticity coefficient", m_simulationParams->vorticityEpsilon);
+    auto* densityVar = m_scrollFormHelper->addVariable<float>("Rest density", setRestDensityCallback, getDensityCallback);
+    densityVar->setMinMaxValues(SimulationParameters::DENSITY_MIN, SimulationParameters::DENSITY_MAX);
+    auto* kernelRadiusVar = m_scrollFormHelper->addVariable("Kernel radius", m_simulationParams->kernelRadius);
+    kernelRadiusVar->setMinMaxValues(SimulationParameters::KERNEL_RADIUS_MIN, SimulationParameters::KERNEL_RADIUS_MAX);
+    auto* deltaTimeVar = m_scrollFormHelper->addVariable("Delta time", m_simulationParams->deltaTime);
+    deltaTimeVar->setMinMaxValues(SimulationParameters::DELTA_TIME_MIN, SimulationParameters::DELTA_TIME_MAX);
+    auto* lambdaEpsilonVar = m_scrollFormHelper->addVariable("Lambda epsilon", m_simulationParams->relaxationParameter);
+    lambdaEpsilonVar->setMinMaxValues(SimulationParameters::RELAXATION_PARAM_MIN, SimulationParameters::RELAXATION_PARAM_MAX);
+    auto* deltaQVar = m_scrollFormHelper->addVariable("DeltaQ", m_simulationParams->deltaQ);
+    deltaQVar->setMinMaxValues(SimulationParameters::DELTA_Q_MIN, SimulationParameters::DELTA_Q_MAX);
+    auto* correctionCoefVar = m_scrollFormHelper->addVariable("Correction coefficient", m_simulationParams->correctionCoefficient);
+    correctionCoefVar->setMinMaxValues(SimulationParameters::CORRECTION_COEF_MIN, SimulationParameters::CORRECTION_COEF_MAX);
+    auto* correctionPowerVar = m_scrollFormHelper->addVariable("Correction power", m_simulationParams->correctionPower);
+    correctionPowerVar->setMinMaxValues(SimulationParameters::CORRECTION_POWER_MIN, SimulationParameters::CORRECTION_POWER_MAX);
+    auto* xsphCoefVar = m_scrollFormHelper->addVariable("XSPH coefficient", m_simulationParams->c_XSPH);
+    xsphCoefVar->setMinMaxValues(SimulationParameters::XSPH_COEF_MIN, SimulationParameters::XSPH_COEF_MAX);
+    auto* viscosityIterationsVar = m_scrollFormHelper->addVariable("Viscosity iterations", m_simulationParams->viscosityIterations);
+    viscosityIterationsVar->setMinMaxValues(SimulationParameters::XSPH_ITERATIONS_MIN, SimulationParameters::XSPH_ITERATIONS_MAX);
+    auto* vorticityCoefVar = m_scrollFormHelper->addVariable("Vorticity coefficient", m_simulationParams->vorticityEpsilon);
+    vorticityCoefVar->setMinMaxValues(SimulationParameters::VORTICITY_MIN, SimulationParameters::VORTICITY_MAX);
 
     m_scrollFormHelper->addGroup("Rendering parameters");
     auto* smoothingIterations = m_scrollFormHelper->addVariable(
@@ -615,17 +628,17 @@ void Renderer::RenderImpl()
 
 Renderer::~Renderer() {}
 
-void Renderer::Render(unsigned int pos, unsigned int iid, int nparticle)
+void Renderer::Render(unsigned int positions, unsigned int iid, int nparticle)
 {
     d_iid = iid;
-    d_pos = pos;
+    m_particlesPositions = positions;
     m_nparticle = nparticle;
 
     m_upperBoundary = m_simulationParams->GetUpperBoundary();
     m_lowerBoundary = m_simulationParams->GetLowerBoundary();
 
     glBindVertexArray(m_particlesVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, d_pos);
+    glBindBuffer(GL_ARRAY_BUFFER, m_particlesPositions);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, d_iid);

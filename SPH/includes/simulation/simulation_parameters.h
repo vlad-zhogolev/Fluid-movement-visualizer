@@ -44,7 +44,31 @@ class SimulationParameters
 public:
 
     static const float PARTICLE_MASS;
-
+    static const float GRAVITY_MIN;
+    static const float GRAVITY_MAX;
+    static const int SUBSTEPS_NUMBER_MIN;
+    static const int SUBSTEPS_NUMBER_MAX;
+    static const float KERNEL_RADIUS_MIN;
+    static const float KERNEL_RADIUS_MAX;
+    static const float DENSITY_MIN;
+    static const float DENSITY_MAX;
+    static const float DELTA_TIME_MIN;
+    static const float DELTA_TIME_MAX;
+    static const float RELAXATION_PARAM_MIN;
+    static const float RELAXATION_PARAM_MAX;
+    static const float DELTA_Q_MIN;
+    static const float DELTA_Q_MAX;
+    static const float CORRECTION_COEF_MIN;
+    static const float CORRECTION_COEF_MAX;
+    static const float CORRECTION_POWER_MIN;
+    static const float CORRECTION_POWER_MAX;
+    static const float XSPH_COEF_MIN;
+    static const float XSPH_COEF_MAX;
+    static const int XSPH_ITERATIONS_MIN;
+    static const int XSPH_ITERATIONS_MAX;
+    static const float VORTICITY_MIN;
+    static const float VORTICITY_MAX;
+    
     // Particle system
     int substepsNumber;
     float startDensity;

@@ -6,6 +6,31 @@
 #include <simulation/providers/sphere_provider.h>
 
 const float SimulationParameters::PARTICLE_MASS = 0.125f;
+const float SimulationParameters::GRAVITY_MIN = -20.0f;
+const float SimulationParameters::GRAVITY_MAX = 20.0f;
+const int SimulationParameters::SUBSTEPS_NUMBER_MIN = 1;
+const int SimulationParameters::SUBSTEPS_NUMBER_MAX = 10;
+const float SimulationParameters::KERNEL_RADIUS_MIN = 0.05f;
+const float SimulationParameters::KERNEL_RADIUS_MAX = 1.0f;
+const float SimulationParameters::DENSITY_MIN = 50.0f;
+const float SimulationParameters::DENSITY_MAX = 10000.0f;
+const float SimulationParameters::DELTA_TIME_MIN = 0.0f;
+const float SimulationParameters::DELTA_TIME_MAX = 0.002f;
+const float SimulationParameters::RELAXATION_PARAM_MIN = 0.0f;
+const float SimulationParameters::RELAXATION_PARAM_MAX = 100000.0f;
+const float SimulationParameters::DELTA_Q_MIN = SimulationParameters::KERNEL_RADIUS_MIN * 0.1f;
+const float SimulationParameters::DELTA_Q_MAX = SimulationParameters::KERNEL_RADIUS_MAX * 0.3f;
+const float SimulationParameters::CORRECTION_COEF_MIN = 0.0f;
+const float SimulationParameters::CORRECTION_COEF_MAX = 0.1f;
+const float SimulationParameters::CORRECTION_POWER_MIN = 0.0f;
+const float SimulationParameters::CORRECTION_POWER_MAX = 10.0f;
+const float SimulationParameters::XSPH_COEF_MIN = 0.0f;
+const float SimulationParameters::XSPH_COEF_MAX = 10.0f;
+const int SimulationParameters::XSPH_ITERATIONS_MIN = 1;
+const int SimulationParameters::XSPH_ITERATIONS_MAX = 10;
+const float SimulationParameters::VORTICITY_MIN = 0.0f;
+const float SimulationParameters::VORTICITY_MAX = 1.0f;
+
 
 SimulationParameters& SimulationParameters::GetInstance()
 {
