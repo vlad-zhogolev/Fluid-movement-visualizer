@@ -72,7 +72,7 @@ void ParticleSystem::InitializeParticles()
 
 void ParticleSystem::PerformSimulationStep() 
 {
-    auto& input = Input::getInstance();
+    auto& input = Input::GetInstance();
     //if (!(input.running || input.nextFrame))
     //{
     //    return;
@@ -88,7 +88,6 @@ void ParticleSystem::PerformSimulationStep()
     if (command == SimulationCommand::Restart)
     {
         InitializeParticles();
-        input.frameCount = 0;
         m_isSecondParticlesUsedForRendering = false;
         m_simulationParams->SetCommand(SimulationCommand::Unknown);
         m_simulationParams->SetState(SimulationState::NotStarted);
@@ -108,15 +107,8 @@ void ParticleSystem::PerformSimulationStep()
     {
         m_simulationParams->SetCommand(SimulationCommand::Unknown);
     }
-
-    //if (input.frameCount > 180 && !input.nextFrame)
-    //{
-    //    return;
-    //}
-    //input.nextFrame = false;
     
     ++input.frameCount;
-
     m_simulator->UpdateParameters();
 
     if (m_isSecondParticlesUsedForRendering)

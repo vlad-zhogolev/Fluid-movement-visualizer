@@ -490,7 +490,7 @@ void Renderer::MouseMoveCallback(GLFWwindow* window, double xpos, double ypos)
 {
     if (m_nanoguiScreen->cursorPosCallbackEvent(xpos, ypos)) return;
 
-    m_input->updateMousePos(glm::vec2(xpos, ypos));
+    m_input->UpdateMousePosition(glm::vec2(xpos, ypos));
 
     // Camera rotation
     glm::vec2 mouseDiff = m_input->getMouseDiff();
@@ -513,10 +513,6 @@ void Renderer::KeyCallback(GLFWwindow *w, int key, int scancode, int action, int
     {
         m_controlsWindow->setVisible(!m_controlsWindow->visible());
         m_scrollWindow->setVisible(!m_scrollWindow->visible());
-    }
-    else if (key == GLFW_KEY_R && action == GLFW_RELEASE)
-    {
-        Input::getInstance().running = !Input::getInstance().running;
     }
     else if (key == GLFW_KEY_N && action == GLFW_RELEASE)
     {
@@ -607,7 +603,6 @@ void Renderer::RenderImpl()
         m_particlesShader->setUnif("color", glm::vec4(1.f, 0.f, 0.f, .1f));
         m_particlesShader->setUnif("pointRadius", SimulationParameters::GetInstance().kernelRadius);
         m_particlesShader->setUnif("pointScale", 500.f);
-        m_particlesShader->setUnif("hlIndex", m_input->hlIndex);
         glBindVertexArray(m_particlesVAO);
         glDrawArrays(GL_POINTS, 0, m_nparticle);
     }
