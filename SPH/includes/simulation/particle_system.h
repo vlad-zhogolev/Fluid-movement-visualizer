@@ -2,7 +2,6 @@
 
 #include <GLFW/glfw3.h>
 #include <simulation/position_based_fluid_simulator.h>
-#include <simulation/particles_cube.h>
 #include <rendering/renderer.h>
 
 class ParticleSystem
@@ -37,7 +36,6 @@ private:
     int m_particlesNumber;
     bool m_isSecondParticlesUsedForRendering = false;
 
-    ParticlesCube* m_source;
     PositionBasedFluidSimulator* m_simulator;
 
     float3 m_upperBoundary;

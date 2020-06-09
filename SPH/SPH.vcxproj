@@ -130,7 +130,6 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="includes\simulation\simulation_parameters.h" />
     <ClInclude Include="includes\helper.h" />
     <ClInclude Include="includes\input.h" />
-    <ClInclude Include="includes\simulation\particles_cube.h" />
     <ClInclude Include="includes\rendering\renderer.h" />
     <ClInclude Include="includes\rendering\shader.h" />
     <ClInclude Include="includes\simulation\particle_system.h" />
@@ -151,7 +150,6 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\simulation\particles_cube.cpp" />
     <ClCompile Include="src\simulation\particle_system.cpp" />
     <ClCompile Include="src\simulation\simulation_parameters.cpp" />
     <ClCompile Include="src\helper.cpp" />

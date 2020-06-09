@@ -1,5 +1,4 @@
 #include <simulation/particle_system.h>
-#include <simulation/particles_cube.h>
 #include <simulation/simulation_parameters.h>
 #include <glm/common.hpp>
 #include <cuda_gl_interop.h>
@@ -156,9 +155,5 @@ ParticleSystem::~ParticleSystem()
     if (m_simulator)
     {
         delete m_simulator;
-    }
-    if (m_source)
-    {
-        delete m_source;
     }
 }

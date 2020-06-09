@@ -18,7 +18,6 @@
     <ClCompile Include="src\simulation\position_based_fluid_simulator.cpp" />
     <ClCompile Include="src\simulation\particle_system.cpp" />
     <ClCompile Include="src\simulation\simulation_parameters.cpp" />
-    <ClCompile Include="src\simulation\particles_cube.cpp" />
     <ClCompile Include="src\rendering\smooth_renderer.cpp" />
     <ClCompile Include="src\rendering\rendering_parameters.cpp" />
     <ClCompile Include="src\simulation\providers\cube_provider.cpp" />
@@ -36,7 +35,6 @@
     <ClInclude Include="includes\simulation\position_based_fluid_simulator.h" />
     <ClInclude Include="includes\simulation\particle_system.h" />
     <ClInclude Include="includes\simulation\simulation_parameters.h" />
-    <ClInclude Include="includes\simulation\particles_cube.h" />
     <ClInclude Include="includes\rendering\smooth_renderer.h" />
     <ClInclude Include="includes\rendering\scroll_form_helper.h" />
     <ClInclude Include="includes\rendering\rendering_parameters.h" />
