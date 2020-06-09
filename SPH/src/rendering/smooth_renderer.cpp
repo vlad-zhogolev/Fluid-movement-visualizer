@@ -1,7 +1,7 @@
 #include <rendering/smooth_renderer.h>
 #include <rendering/camera.h>
 #include <rendering/rendering_parameters.h>
-#include <helper.h>
+#include <utils.h>
 #include <iostream>
 
 namespace {

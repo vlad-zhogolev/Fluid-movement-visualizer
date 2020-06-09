@@ -2,7 +2,7 @@
 
 #include <simulation/providers/cube_provider.h>
 #include <simulation/simulation_parameters.h>
-#include <helper.h>
+#include <utils.h>
 #include <stdexcept>
 #include <iostream>
 #include <algorithm>

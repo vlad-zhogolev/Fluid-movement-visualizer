@@ -1,6 +1,6 @@
 #pragma once
 
-#include <helper.h>
+#include <utils.h>
 #include <math_constants.h>
 
 struct Poly6Kernel

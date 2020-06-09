@@ -6,7 +6,7 @@
 #include <rendering/scroll_form_helper.h>
 #include <rendering/rendering_parameters.h>
 #include <input.h>
-#include <helper.h>
+#include <utils.h>
 #include <simulation/simulation_parameters.h>
 #include <GLFW/glfw3.h>
 #include <nanogui/nanogui.h>

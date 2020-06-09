@@ -1,6 +1,6 @@
 #pragma once
 
-#include <helper.h>
+#include <utils.h>
 #include <helper_math.h>
 #include <simulation/pbf_smoothing_kernels.cuh>
 #include <simulation/converters.cuh>

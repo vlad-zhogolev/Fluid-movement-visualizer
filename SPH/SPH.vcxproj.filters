@@ -8,12 +8,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\src\glad.c" />
-    <ClCompile Include="src\helper.cpp" />
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\rendering\renderer.cpp" />
     <ClCompile Include="src\rendering\shader.cpp" />
-    <ClCompile Include="src\static_vertices.cpp" />
     <ClCompile Include="src\rendering\camera.cpp" />
     <ClCompile Include="src\simulation\position_based_fluid_simulator.cpp" />
     <ClCompile Include="src\simulation\particle_system.cpp" />
@@ -22,13 +20,13 @@
     <ClCompile Include="src\rendering\rendering_parameters.cpp" />
     <ClCompile Include="src\simulation\providers\cube_provider.cpp" />
     <ClCompile Include="src\simulation\providers\sphere_provider.cpp" />
+    <ClCompile Include="src\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\nanovg\src\fontstash.h" />
     <ClInclude Include="..\common\nanovg\src\stb_image.h" />
     <ClInclude Include="..\common\nanovg\src\stb_truetype.h" />
     <ClInclude Include="includes\rendering\camera.h" />
-    <ClInclude Include="includes\helper.h" />
     <ClInclude Include="includes\input.h" />
     <ClInclude Include="includes\rendering\renderer.h" />
     <ClInclude Include="includes\rendering\shader.h" />
@@ -43,6 +41,7 @@
     <ClInclude Include="includes\simulation\providers\i_particles_provider.h" />
     <ClInclude Include="includes\simulation\providers\cube_provider.h" />
     <ClInclude Include="includes\simulation\providers\sphere_provider.h" />
+    <ClInclude Include="includes\utils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\boundary.frag" />

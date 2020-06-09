@@ -128,7 +128,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="includes\simulation\simulation_parameters.h" />
-    <ClInclude Include="includes\helper.h" />
+    <ClInclude Include="includes\utils.h" />
     <ClInclude Include="includes\input.h" />
     <ClInclude Include="includes\rendering\renderer.h" />
     <ClInclude Include="includes\rendering\shader.h" />
@@ -152,14 +152,13 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </ClCompile>
     <ClCompile Include="src\simulation\particle_system.cpp" />
     <ClCompile Include="src\simulation\simulation_parameters.cpp" />
-    <ClCompile Include="src\helper.cpp" />
+    <ClCompile Include="src\utils.cpp" />
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\rendering\renderer.cpp" />
     <ClCompile Include="src\rendering\shader.cpp" />
     <ClCompile Include="src\simulation\position_based_fluid_simulator.cpp" />
     <ClCompile Include="src\simulation\providers\sphere_provider.cpp" />
-    <ClCompile Include="src\static_vertices.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\boundary.frag" />

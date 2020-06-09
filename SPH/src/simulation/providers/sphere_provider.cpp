@@ -1,6 +1,6 @@
 #include <simulation/providers/sphere_provider.h>
 #include <simulation/simulation_parameters.h>
-#include <helper.h>
+#include <utils.h>
 
 #include <memory>
 #include <iostream>
