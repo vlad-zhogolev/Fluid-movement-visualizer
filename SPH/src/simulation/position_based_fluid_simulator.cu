@@ -80,7 +80,8 @@ void PositionBasedFluidSimulator::CorrectPosition()
             m_poly6Kernel,
             m_spikyGradientKernel);
 
-        m_coef_corr = -m_k_corr / powf(m_poly6Kernel(m_delta_q * m_delta_q), m_n_corr);
+        const float deltaQ = m_delta_q * m_h;
+        m_coef_corr = -m_k_corr / powf(m_poly6Kernel(deltaQ * deltaQ), m_n_corr);
 
         pbf::cuda::kernels::CalculateNewPositions<<<gridSize, m_blockSize>>>(
             writeToNewPositions ? m_dTemporaryPositions : m_dNewPositions,
