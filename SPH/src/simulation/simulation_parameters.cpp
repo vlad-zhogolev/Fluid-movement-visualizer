@@ -49,7 +49,7 @@ SimulationParameters& SimulationParameters::GetInstance()
     instance.startDensity = 1000.f;
     instance.restDensity = 1000.f;
     instance.relaxationParameter = 1000.f;
-    instance.deltaQ = 0.3 * instance.kernelRadius;
+    instance.deltaQ = DELTA_Q_MAX;
     instance.correctionCoefficient = 0.0001f;
     instance.correctionPower = 4;
     instance.c_XSPH = 0.1f;
