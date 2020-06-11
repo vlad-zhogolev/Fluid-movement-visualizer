@@ -34,7 +34,7 @@ float GetDepth(int x, int y)
     //return GetDepth(ivec2(x, y));
 }
 
-float BilateralFilterOther(int x, int y)
+float BilateralFilter(int x, int y)
 {
 	float sum = 0;
     float weightSum = 0;
@@ -63,41 +63,9 @@ float BilateralFilterOther(int x, int y)
 	return sum;
 }
 
-// TODO: think if can make this better (more efficient).
-// See: https://dsp.stackexchange.com/questions/36962/why-does-the-separable-filter-reduce-the-cost-of-computing-the-operator
-float BilateralFilter(int x, int y)
-{
-	float sum = 0;
-    float wsum = 0;
-    float depth = GetDepth(x, y);
-
-	for (int xOffset = -filterRadius; xOffset <= filterRadius; ++xOffset)
-    {
-		for (int yOffset = -filterRadius; yOffset <= filterRadius; ++yOffset)
-        {
-			float sample = GetDepth(x + xOffset, y + yOffset);
-            
-            // Separable filter is product of two 1D filters.
-            // See: http://www.cemyuksel.com/research/papers/narrowrangefilter.pdf
-			float w = exp(-(xOffset * xOffset + yOffset * yOffset) * blurScale * blurScale);
-
-			float r2 = (sample - depth) * blurDepthFalloff;
-			float g = exp(-r2 * r2);
-
-			sum += sample * w * g;
-			wsum += w * g;
-		}
-    }
-	if (wsum > 0) 
-    {
-        sum /= wsum;
-    }
-
-	return sum;
-}
 
 void main()
 {
-    float smoothedDepth = BilateralFilterOther(int(gl_FragCoord.x), int(gl_FragCoord.y));
+    float smoothedDepth = BilateralFilter(int(gl_FragCoord.x), int(gl_FragCoord.y));
     FragColor.x = smoothedDepth;
 }

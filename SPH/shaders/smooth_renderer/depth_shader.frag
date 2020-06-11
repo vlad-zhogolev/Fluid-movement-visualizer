@@ -20,6 +20,4 @@ void main()
 
     float linearDepth = viewPosition.z + viewSpaceSphereNormal.z * particleRadius;
     FragColor.r = -linearDepth;
-    // vec4 surfacePosition = vec4(viewPosition.xyz + viewSpaceSphereNormal * particleRadius, 1);
-    // FragColor.r = -surfacePosition.z;  // Store linear depth in texture
 }

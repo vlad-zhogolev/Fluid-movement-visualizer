@@ -7,7 +7,7 @@
 #define KERNEL_EPSILON 1e-4
 
 #define MAX_DELTA_POSITION 0.1
-const int MAX_PARTICLES_NUM = 130000;
+const int MAX_PARTICLES_NUM = 150000;
 
 __host__ __device__
 inline int ceilDiv(int a, int b)
