@@ -220,7 +220,7 @@ void Renderer::Init()
         return m_simulationParams->GetFluidSize();
     };
     auto fluidSizeVariable = m_controlsFormHelper->addVariable<int>("Fluid size", fluidSizeSetter, fluidSizeGetter);
-    fluidSizeVariable->setMinMaxValues(1, 50);
+    fluidSizeVariable->setMinMaxValues(SimulationParameters::FLUID_SIZE_MIN, SimulationParameters::FLUID_SIZE_MAX);
     fluidSizeVariable->setSpinnable(true);
 
     m_positionVariables = {
@@ -292,17 +292,43 @@ void Renderer::Init()
 
     m_scrollFormHelper->addGroup("Gravity acceleration");
 
-    auto* gravityX = m_scrollFormHelper->addVariable("Gravity, x", m_simulationParams->gravity.x);
+    auto gravityXSetter = [this](const float& value) {
+        m_simulationParams->SetGravityX(value);
+    };
+    auto gravityXGetter = [this]() -> float {
+        return m_simulationParams->GetGravityX();
+    };
+    auto* gravityX = m_scrollFormHelper->addVariable<float>("Gravity, x", gravityXSetter, gravityXGetter);
     gravityX->setMinMaxValues(SimulationParameters::GRAVITY_MIN, SimulationParameters::GRAVITY_MAX);
-    auto* gravityY = m_scrollFormHelper->addVariable("Gravity, y", m_simulationParams->gravity.y);
+
+    auto gravityYSetter = [this](const float& value) {
+        m_simulationParams->SetGravityY(value);
+    };
+    auto gravityYGetter = [this]() -> float {
+        return m_simulationParams->GetGravityY();
+    };
+    auto* gravityY = m_scrollFormHelper->addVariable<float>("Gravity, y", gravityYSetter, gravityYGetter);
     gravityY->setMinMaxValues(SimulationParameters::GRAVITY_MIN, SimulationParameters::GRAVITY_MAX);
-    auto* gravityZ = m_scrollFormHelper->addVariable("Gravity, z", m_simulationParams->gravity.z);
+
+    auto gravityZSetter = [this](const float& value) {
+        m_simulationParams->SetGravityZ(value);
+    };
+    auto gravityZGetter = [this]() -> float {
+        return m_simulationParams->GetGravityZ();
+    };
+    auto* gravityZ = m_scrollFormHelper->addVariable<float>("Gravity, z", gravityZSetter, gravityZGetter);
     gravityZ->setMinMaxValues(SimulationParameters::GRAVITY_MIN, SimulationParameters::GRAVITY_MAX);
 
     m_scrollFormHelper->addGroup("Fluid parameters");
 
     //m_scrollFormHelper->addVariable("Change", m_simulationParams->change);
-    auto* substepsNumberVar = m_scrollFormHelper->addVariable("Substeps number", m_simulationParams->substepsNumber);
+    auto& setSubstepsNumberCallback = [this](const int& value) {
+        m_simulationParams->SetSubstepsNumber(value);
+    };
+    auto& getSubstepsNumberCallback = [this]() -> int {
+        return m_simulationParams->GetDensity();
+    };
+    auto* substepsNumberVar = m_scrollFormHelper->addVariable<int>("Substeps number", setSubstepsNumberCallback, getSubstepsNumberCallback);
     substepsNumberVar->setMinMaxValues(SimulationParameters::SUBSTEPS_NUMBER_MIN, SimulationParameters::SUBSTEPS_NUMBER_MAX);
 
     auto& setRestDensityCallback = [this](const float& value) {
@@ -313,28 +339,98 @@ void Renderer::Init()
     };
     auto* densityVar = m_scrollFormHelper->addVariable<float>("Rest density", setRestDensityCallback, getDensityCallback);
     densityVar->setMinMaxValues(SimulationParameters::DENSITY_MIN, SimulationParameters::DENSITY_MAX);
-    auto* kernelRadiusVar = m_scrollFormHelper->addVariable("Kernel radius", m_simulationParams->kernelRadius);
+
+    auto& setKernelRadiusCallback = [this](const float& value) {
+        m_simulationParams->SetKernelRadius(value);
+    };
+    auto& getKernelRadiusCallback = [this]() -> float {
+        return m_simulationParams->GetKernelRadius();
+    };
+    auto* kernelRadiusVar = m_scrollFormHelper->addVariable<float>("Kernel radius", setKernelRadiusCallback, getKernelRadiusCallback);
     kernelRadiusVar->setMinMaxValues(SimulationParameters::KERNEL_RADIUS_MIN, SimulationParameters::KERNEL_RADIUS_MAX);
-    auto* deltaTimeVar = m_scrollFormHelper->addVariable("Delta time", m_simulationParams->deltaTime);
+
+    auto& setDeltaTimeCallback = [this](const float& value) {
+        m_simulationParams->SetDeltaTime(value);
+    };
+    auto& getDeltaTimeCallback = [this]() -> float {
+        return m_simulationParams->GetDeltaTime();
+    };
+    auto* deltaTimeVar = m_scrollFormHelper->addVariable<float>("Delta time", setDeltaTimeCallback, getDeltaTimeCallback);
     deltaTimeVar->setMinMaxValues(SimulationParameters::DELTA_TIME_MIN, SimulationParameters::DELTA_TIME_MAX);
+
+    auto& setLambdaEpsilonCallback = [this](const float& value) {
+        m_simulationParams->SetLambdaEpsilon(value);
+    };
+    auto& getLambdaEpsilonCallback = [this]() -> float {
+        return m_simulationParams->GetLambdaEpsilon();
+    };
     auto* lambdaEpsilonVar = m_scrollFormHelper->addVariable("Lambda epsilon", m_simulationParams->relaxationParameter);
     lambdaEpsilonVar->setMinMaxValues(SimulationParameters::RELAXATION_PARAM_MIN, SimulationParameters::RELAXATION_PARAM_MAX);
-    auto* deltaQVar = m_scrollFormHelper->addVariable("DeltaQ", m_simulationParams->deltaQ);
+
+    auto& setDeltaQCallback = [this](const float& value) {
+        m_simulationParams->SetDeltaQ(value);
+    };
+    auto& getDeltaQCallback = [this]() -> float {
+        return m_simulationParams->GetDeltaQ();
+    };
+    auto* deltaQVar = m_scrollFormHelper->addVariable<float>("DeltaQ", setDeltaQCallback, getDeltaQCallback);
     deltaQVar->setMinMaxValues(SimulationParameters::DELTA_Q_MIN, SimulationParameters::DELTA_Q_MAX);
-    auto* correctionCoefVar = m_scrollFormHelper->addVariable("Correction coefficient", m_simulationParams->correctionCoefficient);
+
+    auto& setCorrectionCoefCallback = [this](const float& value) {
+        m_simulationParams->SetCorrectionCoefficient(value);
+    };
+    auto& getCorrectionCoefCallback = [this]() -> float {
+        return m_simulationParams->GetCorrectionCoefficient();
+    };
+    auto* correctionCoefVar = m_scrollFormHelper->addVariable<float>("Correction coefficient", setCorrectionCoefCallback, getCorrectionCoefCallback);
     correctionCoefVar->setMinMaxValues(SimulationParameters::CORRECTION_COEF_MIN, SimulationParameters::CORRECTION_COEF_MAX);
-    auto* correctionPowerVar = m_scrollFormHelper->addVariable("Correction power", m_simulationParams->correctionPower);
+
+    auto& setCorrectionPowerCallback = [this](const float& value) {
+        m_simulationParams->SetCorrectionPower(value);
+    };
+    auto& getCorrectionPowerCallback = [this]() -> float {
+        return m_simulationParams->GetCorrectionPower();
+    };
+    auto* correctionPowerVar = m_scrollFormHelper->addVariable<float>("Correction power", setCorrectionPowerCallback, getCorrectionPowerCallback);
     correctionPowerVar->setMinMaxValues(SimulationParameters::CORRECTION_POWER_MIN, SimulationParameters::CORRECTION_POWER_MAX);
-    auto* xsphCoefVar = m_scrollFormHelper->addVariable("XSPH coefficient", m_simulationParams->c_XSPH);
+
+    auto& setXSPHCoefCallback = [this](const float& value) {
+        m_simulationParams->SetXSPHCoefficient(value);
+    };
+    auto& getXSPHCoefCallback = [this]() -> float {
+        return m_simulationParams->GetXSPHCoefficient();
+    };
+    auto* xsphCoefVar = m_scrollFormHelper->addVariable<float>("XSPH coefficient", setXSPHCoefCallback, getXSPHCoefCallback);
     xsphCoefVar->setMinMaxValues(SimulationParameters::XSPH_COEF_MIN, SimulationParameters::XSPH_COEF_MAX);
-    auto* viscosityIterationsVar = m_scrollFormHelper->addVariable("Viscosity iterations", m_simulationParams->viscosityIterations);
+
+    auto& setViscosityIterCallback = [this](const int& value) {
+        m_simulationParams->SetViscosityIter(value);
+    };
+    auto& getViscosityIterCallback = [this]() -> int {
+        return m_simulationParams->GetViscosityIter();
+    };
+    auto* viscosityIterationsVar = m_scrollFormHelper->addVariable<int>("Viscosity iterations", setViscosityIterCallback, getViscosityIterCallback);
     viscosityIterationsVar->setMinMaxValues(SimulationParameters::XSPH_ITERATIONS_MIN, SimulationParameters::XSPH_ITERATIONS_MAX);
-    auto* vorticityCoefVar = m_scrollFormHelper->addVariable("Vorticity coefficient", m_simulationParams->vorticityEpsilon);
+
+    auto& setVorticityCallback = [this](const float& value) {
+        m_simulationParams->SetVorticity(value);
+    };
+    auto& getVorticityCallback = [this]() -> float {
+        return m_simulationParams->GetVorticity();
+    };
+    auto* vorticityCoefVar = m_scrollFormHelper->addVariable<float>("Vorticity coefficient", setVorticityCallback, getVorticityCallback);
     vorticityCoefVar->setMinMaxValues(SimulationParameters::VORTICITY_MIN, SimulationParameters::VORTICITY_MAX);
 
     m_scrollFormHelper->addGroup("Rendering parameters");
-    auto* smoothingIterations = m_scrollFormHelper->addVariable(
-        "Smoothing iterations", m_renderingParams->smoothStepsNumber);
+
+    auto& setSmoothingIterCallback = [this](const int& value) {
+        m_renderingParams->SetSmoothingIter(value);
+    };
+    auto& getSmoothingIterCallback = [this]() -> int {
+        return m_renderingParams->GetSmoothingIter();
+    };
+    auto* smoothingIterations = m_scrollFormHelper->addVariable<int>(
+        "Smoothing iterations", setSmoothingIterCallback, getSmoothingIterCallback);
     smoothingIterations->setMinMaxValues(
         RenderingParameters::SMOOTH_STEPS_NUMBER_MIN, RenderingParameters::SMOOTH_STEPS_NUMBER_MAX);
     auto* fluidRefractionIndex = m_scrollFormHelper->addVariable(
@@ -357,13 +453,33 @@ void Renderer::Init()
             << std::endl;
     });
 
-    auto* attenuationRed = m_scrollFormHelper->addVariable("Attenuation, red", m_renderingParams->attenuationCoefficients.r);
+    auto& setAttenuationRed = [this](const float& value) {
+        m_renderingParams->SetAttenuationRed(value);
+    };
+    auto& getAttenuationRed = [this]() -> float {
+        return m_renderingParams->GetAttenuationRed();
+    };
+    auto* attenuationRed = m_scrollFormHelper->addVariable<float>("Attenuation, red", setAttenuationRed, getAttenuationRed);
     attenuationRed->setMinMaxValues(
         RenderingParameters::ATTENUATION_COEFFICIENT_MIN, RenderingParameters::ATTENUATION_COEFFICIENT_MAX);
-    auto* attenuationGreen = m_scrollFormHelper->addVariable("Attenuation, green", m_renderingParams->attenuationCoefficients.g);
+
+    auto& setAttenuationGreen = [this](const float& value) {
+        m_renderingParams->SetAttenuationGreen(value);
+    };
+    auto& getAttenuationGreen = [this]() -> float {
+        return m_renderingParams->GetAttenuationGreen();
+    };
+    auto* attenuationGreen = m_scrollFormHelper->addVariable<float>("Attenuation, green", setAttenuationGreen, getAttenuationGreen);
     attenuationGreen->setMinMaxValues(
         RenderingParameters::ATTENUATION_COEFFICIENT_MIN, RenderingParameters::ATTENUATION_COEFFICIENT_MAX);
-    auto* attenuationBlue = m_scrollFormHelper->addVariable("Attenuation, blue", m_renderingParams->attenuationCoefficients.b);
+
+    auto& setAttenuationBlue = [this](const float& value) {
+        m_renderingParams->SetAttenuationBlue(value);
+    };
+    auto& getAttenuationBlue = [this]() -> float {
+        return m_renderingParams->GetAttenuationBlue();
+    };
+    auto* attenuationBlue = m_scrollFormHelper->addVariable<float>("Attenuation, blue", setAttenuationBlue, getAttenuationBlue);
     attenuationBlue->setMinMaxValues(
         RenderingParameters::ATTENUATION_COEFFICIENT_MIN, RenderingParameters::ATTENUATION_COEFFICIENT_MAX);
 

@@ -6,6 +6,8 @@
 #include <simulation/providers/sphere_provider.h>
 
 const float SimulationParameters::PARTICLE_MASS = 0.125f;
+const int SimulationParameters::FLUID_SIZE_MIN = 1;
+const int SimulationParameters::FLUID_SIZE_MAX = 50;
 const float SimulationParameters::GRAVITY_MIN = -20.0f;
 const float SimulationParameters::GRAVITY_MAX = 20.0f;
 const int SimulationParameters::SUBSTEPS_NUMBER_MIN = 1;
@@ -247,6 +249,7 @@ bool SimulationParameters::SetStartZ(float z)
 
 void SimulationParameters::SetFluidSize(int size)
 {
+    size = clamp(size, FLUID_SIZE_MIN, FLUID_SIZE_MAX);
     if (!m_particlesProvider->TrySetSize(size))
     {
         return;
@@ -277,6 +280,31 @@ void SimulationParameters::SetParticlesSource(ParticleSource source)
     SetCommand(SimulationCommand::Restart);
 }
 
+void SimulationParameters::SetGravityX(float gravityX)
+{
+    gravity.x = clamp(gravityX, GRAVITY_MIN, GRAVITY_MAX);
+}
+
+void SimulationParameters::SetGravityY(float gravityY)
+{
+    gravity.y = clamp(gravityY, GRAVITY_MIN, GRAVITY_MAX);
+}
+
+void SimulationParameters::SetGravityZ(float gravityZ)
+{
+    gravity.z = clamp(gravityZ, GRAVITY_MIN, GRAVITY_MAX);
+}
+
+void SimulationParameters::SetSubstepsNumber(int number)
+{
+    substepsNumber = clamp(number, SUBSTEPS_NUMBER_MIN, SUBSTEPS_NUMBER_MAX);
+}
+
+void SimulationParameters::SetDeltaTime(float time)
+{
+    deltaTime = clamp(time, DELTA_TIME_MIN, DELTA_TIME_MAX);
+}
+
 void SimulationParameters::SetDensity(float density)
 {
     auto& instance = GetInstance();
@@ -304,6 +332,46 @@ void SimulationParameters::SetDensity(float density)
         }
         break;
     }
+}
+
+void SimulationParameters::SetKernelRadius(float radius)
+{
+    kernelRadius = clamp(radius, KERNEL_RADIUS_MIN, KERNEL_RADIUS_MAX);
+}
+
+void SimulationParameters::SetLambdaEpsilon(float value)
+{
+    relaxationParameter = clamp(value, RELAXATION_PARAM_MIN, RELAXATION_PARAM_MAX);
+}
+
+void SimulationParameters::SetDeltaQ(float value)
+{
+    deltaQ = clamp(value, DELTA_Q_MIN, DELTA_Q_MAX);
+}
+
+void SimulationParameters::SetCorrectionCoefficient(float value)
+{
+    correctionCoefficient = clamp(value, CORRECTION_COEF_MIN, CORRECTION_COEF_MAX);
+}
+
+void SimulationParameters::SetCorrectionPower(float value)
+{
+    correctionPower = clamp(value, CORRECTION_POWER_MIN, CORRECTION_POWER_MAX);
+}
+
+void SimulationParameters::SetXSPHCoefficient(float value)
+{
+    c_XSPH = clamp(value, XSPH_COEF_MIN, XSPH_COEF_MAX);
+}
+
+void SimulationParameters::SetViscosityIter(int value)
+{
+    viscosityIterations = clamp(value, XSPH_ITERATIONS_MIN, XSPH_ITERATIONS_MAX);
+}
+
+void SimulationParameters::SetVorticity(float value)
+{
+    vorticityEpsilon = clamp(value, VORTICITY_MIN, VORTICITY_MAX);
 }
 
 void SimulationParameters::UpdateStartPosition()
